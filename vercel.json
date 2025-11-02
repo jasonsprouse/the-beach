@@ -5,10 +5,6 @@
   "installCommand": "npm install",
   "rewrites": [
     {
-      "source": "/public/(.*)",
-      "destination": "/public/$1"
-    },
-    {
       "source": "/(.*)",
       "destination": "/api/index"
     }

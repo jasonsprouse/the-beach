@@ -1,8 +1,11 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../dist/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+// Import AppModule - in Vercel, this resolves to the built dist folder
+// Vercel's build process makes the dist folder available for serverless functions
+import { AppModule } from '../dist/app.module';
 
 let app: NestExpressApplication | null = null;
 
@@ -17,14 +20,19 @@ async function bootstrap() {
     });
 
     // Serve static files for Babylon.js XR frontend
-    app.useStaticAssets(join(__dirname, '..', 'public'));
+    // In Vercel's serverless environment, public folder is accessible at the project root
+    const publicPath = join(process.cwd(), 'public');
+    app.useStaticAssets(publicPath);
 
     await app.init();
   }
   return app;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse,
+) {
   const server = await bootstrap();
   return server.getHttpAdapter().getInstance()(req, res);
 }
