@@ -11,6 +11,8 @@
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License" />
 </p>
 
+> 💡 **New here?** Check out the [Quick Start Guide](QUICKSTART.md) to get up and running in 5 minutes!
+
 ## 🌴 About
 
 **The Beach** is a fully immersive virtual reality tropical paradise that runs in your web browser. Experience a beautiful beach environment with swaying palm trees, animated ocean waves, and multiplayer support - all powered by WebXR and Babylon.js. Whether you're using a VR headset or just exploring from your desktop, The Beach offers a relaxing escape to a tropical paradise.
