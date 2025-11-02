@@ -9,16 +9,16 @@ let app: NestExpressApplication | null = null;
 async function bootstrap() {
   if (!app) {
     app = await NestFactory.create<NestExpressApplication>(AppModule);
-    
+
     // Enable CORS for XR development
     app.enableCors({
       origin: true,
       credentials: true,
     });
-    
+
     // Serve static files for Babylon.js XR frontend
     app.useStaticAssets(join(__dirname, '..', 'public'));
-    
+
     await app.init();
   }
   return app;

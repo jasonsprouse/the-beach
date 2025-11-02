@@ -9,7 +9,7 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-  
+
   @Get('status')
   getStatus() {
     return {
@@ -18,9 +18,9 @@ export class AppController {
         '/': 'Server status',
         '/xr': 'XR Environment',
         '/xr/info': 'XR Information',
-        '/public/*': 'Static XR assets'
+        '/public/*': 'Static XR assets',
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
