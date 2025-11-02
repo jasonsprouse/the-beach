@@ -352,10 +352,12 @@ Style:
 
 | Device | Target FPS | Draw Calls | Triangles |
 |--------|------------|------------|-----------|
-| Quest 2 | 90 | < 100 | < 100k |
-| Quest 3 | 90-120 | < 150 | < 200k |
-| Desktop VR | 90 | < 200 | < 500k |
-| Desktop Non-VR | 60 | < 300 | < 1M |
+| Quest 2 | 90 | < 100 | < 100k (100,000) |
+| Quest 3 | 90-120 | < 150 | < 200k (200,000) |
+| Desktop VR | 90 | < 200 | < 500k (500,000) |
+| Desktop Non-VR | 60 | < 300 | < 1M (1,000,000) |
+
+*Note: 'k' = thousands, 'M' = millions*
 
 ### Optimization Techniques
 
@@ -363,7 +365,12 @@ Style:
 ```javascript
 // AI Prompt: "Show me how to use instancing in Babylon.js for 100 trees"
 
+// Note: This example uses a simple box for demonstration.
+// In production, you would load or create a proper tree model
 const treeMaster = BABYLON.MeshBuilder.CreateBox("tree", {size: 1}, scene);
+// Or load a real tree model: 
+// const treeMaster = await BABYLON.SceneLoader.ImportMeshAsync("", "models/", "tree.glb", scene);
+
 for (let i = 0; i < 100; i++) {
     const instance = treeMaster.createInstance(`tree${i}`);
     instance.position.x = Math.random() * 100 - 50;
@@ -375,11 +382,17 @@ for (let i = 0; i < 100; i++) {
 ```javascript
 // AI Prompt: "Implement LOD system for a complex 3D model in Babylon.js"
 
+// First, create or load meshes at different detail levels
+const highDetailMesh = await BABYLON.SceneLoader.ImportMeshAsync("", "models/", "tree_high.glb", scene);
+const mediumDetailMesh = await BABYLON.SceneLoader.ImportMeshAsync("", "models/", "tree_medium.glb", scene);
+const lowDetailMesh = await BABYLON.SceneLoader.ImportMeshAsync("", "models/", "tree_low.glb", scene);
+
+// Then set up LOD switching based on camera distance
 const lodMesh = new BABYLON.LODMesh("lodModel", scene);
-lodMesh.addLODLevel(20, highDetailMesh);
-lodMesh.addLODLevel(50, mediumDetailMesh);
-lodMesh.addLODLevel(100, lowDetailMesh);
-lodMesh.addLODLevel(200, null); // Culled beyond 200 units
+lodMesh.addLODLevel(20, highDetailMesh);    // Within 20 units: high detail
+lodMesh.addLODLevel(50, mediumDetailMesh);  // 20-50 units: medium detail
+lodMesh.addLODLevel(100, lowDetailMesh);    // 50-100 units: low detail
+lodMesh.addLODLevel(200, null);             // Beyond 200 units: culled (not rendered)
 ```
 
 #### Optimize Shadows

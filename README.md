@@ -41,8 +41,12 @@
 
 1. **Clone the repository**
    ```bash
+   # To use the app:
    git clone https://github.com/jasonsprouse/the-beach.git
    cd the-beach
+   
+   # To contribute, fork first then clone your fork:
+   # git clone https://github.com/YOUR_USERNAME/the-beach.git
    ```
 
 2. **Install dependencies**

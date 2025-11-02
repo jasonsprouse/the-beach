@@ -11,8 +11,12 @@ Get The Beach running in 5 minutes!
 
 ```bash
 # 1. Clone the repository
+# For using the app:
 git clone https://github.com/jasonsprouse/the-beach.git
 cd the-beach
+
+# For contributing, fork first then clone your fork:
+# git clone https://github.com/YOUR_USERNAME/the-beach.git
 
 # 2. Install dependencies
 npm install
