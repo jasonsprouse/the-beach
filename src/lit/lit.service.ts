@@ -18,11 +18,13 @@ export class LitService {
 
   /**
    * Verify authentication token (placeholder for future implementation)
+   * WARNING: This is a stub implementation for initial setup
+   * TODO: Implement actual PKP signature verification
    */
   verifyAuthToken(token: string): boolean {
-    // TODO: Implement token verification logic
-    // This would verify PKP signatures or session tokens
-    console.log('Verifying auth token:', token);
-    return true;
+    // This should verify PKP signatures or session tokens
+    // For now, this is disabled and will need proper implementation
+    console.warn('Token verification not implemented yet:', token);
+    throw new Error('Authentication verification not implemented');
   }
 }
