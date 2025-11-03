@@ -6,13 +6,13 @@ import { join } from 'path';
 export class XrController {
   @Get()
   getXrEnvironment(@Res() res: Response) {
-    return res.sendFile(join(process.cwd(), 'public', 'index.html'));
+    return res.sendFile(join(process.cwd(), 'public', 'xr-environment.html'));
   }
 
   @Get('demo')
   getXrDemo(@Res() res: Response) {
     // You can create different XR scenes/demos
-    return res.sendFile(join(process.cwd(), 'public', 'index.html'));
+    return res.sendFile(join(process.cwd(), 'public', 'xr-environment.html'));
   }
 
   @Get('info')
