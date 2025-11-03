@@ -34,27 +34,27 @@ const useLit = () => {
     });
   };
 
-  const registerWebAuthn = async () => {
-    if (!litAuthClient) {
-      await initializeLit();
-    }
-    const provider = litAuthClient.initProvider('webauthn');
-    const options = await provider.register();
-    const tx = await fetch('/lit/webauthn/verify-registration', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(options),
-    });
-    return tx.json();
-  };
-
   const authenticateWebAuthn = async () => {
     if (!litAuthClient) {
       await initializeLit();
     }
+
     const provider = litAuthClient.initProvider('webauthn');
+
+    // Register if not registered
+    const isRegistered = await provider.isRegistered();
+    if (!isRegistered) {
+      const options = await provider.register();
+      const tx = await fetch('/lit/webauthn/verify-registration', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(options),
+      });
+      await tx.json();
+    }
+
     const authMethod = await provider.authenticate();
     const pkp = await provider.getPkp();
     const sessionSigs = await litNodeClient.getSessionSigs({
@@ -120,7 +120,6 @@ const useLit = () => {
     initializeLit,
     signIn,
     signOut,
-    registerWebAuthn,
     authenticateWebAuthn,
   };
 };
