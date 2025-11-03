@@ -30,6 +30,53 @@ const useLit = () => {
     }
   };
 
+  const registerWebAuthn = async () => {
+    if (!litAuthClient) {
+      await initializeLit();
+    }
+    const provider = litAuthClient.initProvider('webauthn');
+    const options = await provider.register();
+    const tx = await fetch('/lit/webauthn/verify-registration', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(options),
+    });
+    return tx.json();
+  };
+
+  const authenticateWebAuthn = async () => {
+    if (!litAuthClient) {
+      await initializeLit();
+    }
+    const provider = litAuthClient.initProvider('webauthn');
+    const authMethod = await provider.authenticate();
+    const pkp = await provider.getPkp();
+    const sessionSigs = await litNodeClient.getSessionSigs({
+      pkpPublicKey: pkp.publicKey,
+      authMethod,
+      sessionSigsParams: {
+        chain: 'ethereum',
+        resourceAbilityRequests: [
+          {
+            resource: {
+              resource: `lit-action://*`,
+            },
+            ability: 'lit-action:execute-js',
+          },
+        ],
+      },
+    });
+
+    wagmi.updateState({
+      isAuthenticated: true,
+      pkp,
+      authMethod,
+      sessionSigs,
+    });
+  };
+
   const signIn = async (providerType) => {
     if (!litAuthClient) {
       await initializeLit();
@@ -69,6 +116,8 @@ const useLit = () => {
     initializeLit,
     signIn,
     signOut,
+    registerWebAuthn,
+    authenticateWebAuthn,
   };
 };
 

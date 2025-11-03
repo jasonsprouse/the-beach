@@ -196,6 +196,8 @@
                     <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <button data-provider="Google" class="auth-btn bg-white text-gray-700 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200">Login with Google</button>
                         <button data-provider="Discord" class="auth-btn bg-white text-gray-700 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200">Login with Discord</button>
+                        <button id="registerWebAuthn" class="bg-white text-gray-700 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200">Register with WebAuthn</button>
+                        <button id="loginWebAuthn" class="bg-white text-gray-700 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200">Login with WebAuthn</button>
                     </div>
                 `;
                 document.querySelectorAll('.auth-btn').forEach(btn => {
@@ -203,6 +205,12 @@
                         const provider = e.target.dataset.provider;
                         lit.signIn(provider);
                     });
+                });
+                document.getElementById('registerWebAuthn').addEventListener('click', () => {
+                    lit.registerWebAuthn();
+                });
+                document.getElementById('loginWebAuthn').addEventListener('click', () => {
+                    lit.authenticateWebAuthn();
                 });
             }
         };
