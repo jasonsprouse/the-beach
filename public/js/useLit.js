@@ -116,11 +116,16 @@ const useLit = () => {
     wagmi.resetState();
   };
 
+  const login = async () => {
+    await authenticateWebAuthn();
+  };
+
   return {
     initializeLit,
     signIn,
     signOut,
     authenticateWebAuthn,
+    login,
   };
 };
 
