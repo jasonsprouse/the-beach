@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { LitService } from '../lit/lit.service';
 
@@ -6,18 +11,20 @@ import { LitService } from '../lit/lit.service';
 export class AuthGuard implements CanActivate {
   constructor(private readonly litService: LitService) {}
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers.authorization;
     if (!authHeader) {
-      return false;
+      throw new UnauthorizedException('Authorization header not found');
     }
     const [bearer, token] = authHeader.split(' ');
     if (bearer !== 'Bearer' || !token) {
-      return false;
+      throw new UnauthorizedException('Invalid token format');
     }
-    return this.litService.verifyAuthToken(token);
+    const isValid = await this.litService.verifyAuthToken(token);
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    return true;
   }
 }

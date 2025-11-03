@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: INestApplication;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -16,10 +15,26 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it('/status (GET)', () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get('/status')
       .expect(200)
-      .expect('Hello World!');
+      .expect((res) => {
+        expect(res.body).toHaveProperty(
+          'message',
+          'Babylon.js XR Server is running!',
+        );
+      });
+  });
+
+  it('/xr (GET) - unauthorized', () => {
+    return request(app.getHttpServer()).get('/xr').expect(401);
+  });
+
+  it('/xr (GET) - authorized', () => {
+    return request(app.getHttpServer())
+      .get('/xr')
+      .set('Authorization', 'Bearer valid-token')
+      .expect(200);
   });
 });

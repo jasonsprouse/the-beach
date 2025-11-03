@@ -1,20 +1,9 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class LitService implements OnModuleInit {
-  private litNodeClient: LitNodeClient;
-
+export class LitService {
   constructor() {
-    console.log('Lit Protocol Service initializing...');
-  }
-
-  async onModuleInit() {
-    this.litNodeClient = new LitNodeClient({
-      litNetwork: (process.env.LIT_NETWORK || 'cayenne') as any,
-    });
-    await this.litNodeClient.connect();
-    console.log('Lit Protocol Service initialized and connected.');
+    console.log('Lit Protocol Service initialized');
   }
 
   /**
@@ -22,38 +11,20 @@ export class LitService implements OnModuleInit {
    */
   getConfig() {
     return {
-      litNetwork: process.env.LIT_NETWORK || 'cayenne',
+      litNetwork: process.env.LIT_NETWORK || 'datil-dev',
       debug: process.env.NODE_ENV !== 'production',
     };
   }
 
   /**
-   * Verify authentication token using a Lit Action
+   * Verify authentication token (placeholder for future implementation)
+   * WARNING: This is a stub implementation for initial setup
+   * TODO: Implement actual PKP signature verification
    */
-  async verifyAuthToken(token: string): Promise<boolean> {
-    if (!this.litNodeClient.ready) {
-      console.error('LitNodeClient not ready');
-      return false;
-    }
-    try {
-      const sessionSigs = JSON.parse(token);
-
-      const res = await this.litNodeClient.executeJs({
-        code: `(async () => {
-          const verified = await Lit.Actions.verifySessionSig({
-            sessionSig: sessionSigs,
-          });
-          Lit.Actions.setResponse({response: JSON.stringify({verified})});
-        })();`,
-        sessionSigs,
-      });
-
-      const { response } = res;
-      const result = JSON.parse(response as string);
-      return result.verified;
-    } catch (error) {
-      console.error('Error verifying auth token:', error);
-      return false;
-    }
+  verifyAuthToken(token: string): boolean {
+    // This should verify PKP signatures or session tokens
+    // For now, this is disabled and will need proper implementation
+    console.warn('Token verification not implemented yet:', token);
+    throw new Error('Authentication verification not implemented');
   }
 }
