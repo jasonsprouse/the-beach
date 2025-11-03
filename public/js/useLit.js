@@ -7,8 +7,16 @@ const useLit = () => {
   let litNodeClient = null;
 
   const initializeLit = async () => {
-    const configResponse = await fetch('/lit/config');
-    const config = await configResponse.json();
+    let config;
+    try {
+      const configResponse = await fetch('/lit/config');
+      if (!configResponse.ok) {
+        throw new Error(`Failed to fetch /lit/config: ${configResponse.status} ${configResponse.statusText}`);
+      }
+      config = await configResponse.json();
+    } catch (err) {
+      throw new Error(`Error fetching /lit/config: ${err.message}`);
+    }
 
     if (!window.LitJsSdk_litNodeClient) {
       throw new Error('Lit Node SDK not loaded');
