@@ -10,24 +10,28 @@ const useLit = () => {
     const configResponse = await fetch('/lit/config');
     const config = await configResponse.json();
 
-    if (window.LitJsSdk_litNodeClient) {
-      const LitNodeClient = window.LitJsSdk_litNodeClient.LitNodeClient;
-      litNodeClient = new LitNodeClient({
-        litNetwork: config.litNetwork || 'cayenne',
-        debug: config.debug || false,
-      });
-      await litNodeClient.connect();
+    if (!window.LitJsSdk_litNodeClient) {
+      throw new Error('Lit Node SDK not loaded');
     }
 
-    if (window.LitJsSdk_authClient) {
-      const LitAuthClient = window.LitJsSdk_authClient.LitAuthClient;
-      litAuthClient = new LitAuthClient({
-        litRelayConfig: {
-          relayApiKey: config.relayApiKey || 'dev-placeholder-key',
-        },
-        litNodeClient,
-      });
+    if (!window.LitJsSdk_authClient) {
+      throw new Error('Lit Auth SDK not loaded');
     }
+
+    const LitNodeClient = window.LitJsSdk_litNodeClient.LitNodeClient;
+    litNodeClient = new LitNodeClient({
+      litNetwork: config.litNetwork || 'cayenne',
+      debug: config.debug || false,
+    });
+    await litNodeClient.connect();
+
+    const LitAuthClient = window.LitJsSdk_authClient.LitAuthClient;
+    litAuthClient = new LitAuthClient({
+      litRelayConfig: {
+        relayApiKey: config.relayApiKey || 'dev-placeholder-key',
+      },
+      litNodeClient,
+    });
   };
 
   const registerWebAuthn = async () => {
