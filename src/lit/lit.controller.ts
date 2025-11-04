@@ -166,7 +166,7 @@ export class LitController {
   async generateAuthenticateOptions(
     @Body() body: { username?: string },
     @Session() session: UserSession,
-    ) {
+  ) {
     try {
       // Find authenticators for the given username
       const authenticators = session.authenticators?.filter(
