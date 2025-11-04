@@ -516,6 +516,14 @@ class BabylonXRScene {
         // Load Paradise Controls
         document.getElementById('loadParadise').addEventListener('click', async () => {
             if (!this.sceneLoaded) {
+                // Check authentication before loading
+                const wagmi = window.useWagmi();
+                if (!wagmi || !wagmi.state.isAuthenticated) {
+                    alert('Authentication required! Please return to the home page and login with WebAuthn to load paradise.');
+                    window.location.href = '/';
+                    return;
+                }
+                
                 // Load the scene for the first time
                 this.updateStatus("🏗️ Loading tropical paradise...");
                 document.getElementById('loadParadise').textContent = "Loading...";
