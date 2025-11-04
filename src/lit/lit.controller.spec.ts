@@ -40,10 +40,12 @@ describe('LitController', () => {
     it('should generate WebAuthn registration options with minimal data', async () => {
       const mockSession = {};
       const minimalBody = { username: 'testuser' };
+      const mockReq = { hostname: 'localhost', protocol: 'http', get: () => 'localhost' };
 
       const result = await controller.generateRegisterOptions(
         minimalBody,
         mockSession,
+        mockReq as any,
       );
 
       expect(result).toHaveProperty('challenge');
@@ -57,10 +59,12 @@ describe('LitController', () => {
     it('should generate WebAuthn registration options without username', async () => {
       const mockSession = {};
       const emptyBody = {};
+      const mockReq = { hostname: 'localhost', protocol: 'http', get: () => 'localhost' };
 
       const result = await controller.generateRegisterOptions(
         emptyBody,
         mockSession,
+        mockReq as any,
       );
 
       expect(result).toHaveProperty('challenge');
@@ -73,9 +77,10 @@ describe('LitController', () => {
     it('should reject username shorter than 3 characters', async () => {
       const mockSession = {};
       const invalidBody = { username: 'ab' };
+      const mockReq = { hostname: 'localhost', protocol: 'http', get: () => 'localhost' };
 
       await expect(
-        controller.generateRegisterOptions(invalidBody, mockSession),
+        controller.generateRegisterOptions(invalidBody, mockSession, mockReq as any),
       ).rejects.toThrow('Username must be at least 3 characters');
     });
   });
@@ -83,9 +88,10 @@ describe('LitController', () => {
   describe('generateAuthenticateOptions', () => {
     it('should throw error when no authenticators registered', async () => {
       const mockSession = {};
+      const mockReq = { hostname: 'localhost', protocol: 'http', get: () => 'localhost' };
 
       await expect(
-        controller.generateAuthenticateOptions({ username: 'testuser' }, mockSession),
+        controller.generateAuthenticateOptions({ username: 'testuser' }, mockSession, mockReq as any),
       ).rejects.toThrow();
     });
   });
