@@ -103,15 +103,23 @@ const useLit = () => {
     }
   };
 
-  const authenticateWebAuthn = async () => {
+  const authenticateWebAuthn = async (username) => {
     await initializeLit();
 
     try {
       // Get authentication options from backend
-      const optionsResponse = await fetch('/lit/webauthn/authenticate-options', {
-        credentials: 'include',
-      });
-      
+      const optionsResponse = await fetch(
+        '/lit/webauthn/authenticate-options',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ username }),
+        },
+      );
+
       if (!optionsResponse.ok) {
         const error = await optionsResponse.text();
         throw new Error(error || 'Failed to get authentication options. Please register first.');
@@ -183,6 +191,7 @@ const useLit = () => {
         pkp: { ethAddress: '0x' + Math.random().toString(16).substring(2, 42) },
         authMethod: { authMethodType: 'webauthn' },
         sessionSigs: mockSessionSigs,
+        username,
       });
       
       console.log('WebAuthn authentication successful');
@@ -203,6 +212,11 @@ const useLit = () => {
       const registerBtn = document.getElementById('modalRegisterBtn');
       const cancelBtn = document.getElementById('modalCancelBtn');
       const errorDiv = document.getElementById('modalError');
+      const title = modal.querySelector('h3');
+
+      // Configure for registration
+      title.textContent = 'Register with WebAuthn';
+      registerBtn.textContent = 'Register';
       
       // Clear previous state
       usernameInput.value = '';
@@ -215,12 +229,12 @@ const useLit = () => {
       
       const cleanup = () => {
         modal.classList.add('hidden');
-        registerBtn.removeEventListener('click', handleRegister);
+        registerBtn.removeEventListener('click', handleAction);
         cancelBtn.removeEventListener('click', handleCancel);
         usernameInput.removeEventListener('keypress', handleKeyPress);
       };
       
-      const handleRegister = () => {
+      const handleAction = () => {
         const username = usernameInput.value.trim();
         if (!username) {
           errorDiv.textContent = 'Username is required';
@@ -238,18 +252,77 @@ const useLit = () => {
       
       const handleCancel = () => {
         cleanup();
-        reject(new Error('Registration cancelled by user'));
+        reject(new Error('Action cancelled by user'));
       };
       
       const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
-          handleRegister();
+          handleAction();
         } else if (e.key === 'Escape') {
           handleCancel();
         }
       };
       
-      registerBtn.addEventListener('click', handleRegister);
+      registerBtn.addEventListener('click', handleAction);
+      cancelBtn.addEventListener('click', handleCancel);
+      usernameInput.addEventListener('keypress', handleKeyPress);
+    });
+  };
+
+  const showLoginModal = () => {
+    return new Promise((resolve, reject) => {
+      const modal = document.getElementById('webauthnModal');
+      const usernameInput = document.getElementById('username');
+      const loginBtn = document.getElementById('modalRegisterBtn'); // Re-using the button
+      const cancelBtn = document.getElementById('modalCancelBtn');
+      const errorDiv = document.getElementById('modalError');
+      const title = modal.querySelector('h3');
+
+      // Configure for login
+      title.textContent = 'Login with WebAuthn';
+      loginBtn.textContent = 'Login';
+
+      // Clear previous state
+      usernameInput.value = '';
+      errorDiv.classList.add('hidden');
+      errorDiv.textContent = '';
+
+      // Show modal
+      modal.classList.remove('hidden');
+      usernameInput.focus();
+
+      const cleanup = () => {
+        modal.classList.add('hidden');
+        loginBtn.removeEventListener('click', handleAction);
+        cancelBtn.removeEventListener('click', handleCancel);
+        usernameInput.removeEventListener('keypress', handleKeyPress);
+      };
+
+      const handleAction = () => {
+        const username = usernameInput.value.trim();
+        if (!username) {
+          errorDiv.textContent = 'Username is required';
+          errorDiv.classList.remove('hidden');
+          return;
+        }
+        cleanup();
+        resolve(username);
+      };
+
+      const handleCancel = () => {
+        cleanup();
+        reject(new Error('Action cancelled by user'));
+      };
+
+      const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+          handleAction();
+        } else if (e.key === 'Escape') {
+          handleCancel();
+        }
+      };
+
+      loginBtn.addEventListener('click', handleAction);
       cancelBtn.addEventListener('click', handleCancel);
       usernameInput.addEventListener('keypress', handleKeyPress);
     });
@@ -266,7 +339,13 @@ const useLit = () => {
   };
 
   const login = async () => {
-    await authenticateWebAuthn();
+    try {
+      const username = await showLoginModal();
+      await authenticateWebAuthn(username);
+    } catch (error) {
+      // User cancelled or error occurred
+      console.log('Login cancelled or failed:', error.message);
+    }
   };
 
   return {

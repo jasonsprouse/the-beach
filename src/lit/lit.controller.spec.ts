@@ -85,7 +85,7 @@ describe('LitController', () => {
       const mockSession = {};
 
       await expect(
-        controller.generateAuthenticateOptions(mockSession),
+        controller.generateAuthenticateOptions({ username: 'testuser' }, mockSession),
       ).rejects.toThrow();
     });
   });
