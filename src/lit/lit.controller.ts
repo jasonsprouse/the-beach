@@ -19,11 +19,13 @@ import {
 
 interface UserSession {
   currentChallenge?: string;
+  username?: string; // Temporarily store username during registration
   authenticators?: Array<{
     credentialID: string;
     credentialPublicKey: Uint8Array;
     counter: number;
     transports?: AuthenticatorTransportFuture[];
+    username?: string; // Associate username with authenticator
   }>;
 }
 
@@ -82,8 +84,9 @@ export class LitController {
         },
       });
 
-      // Store challenge in session for verification
+      // Store challenge and username in session for verification
       session.currentChallenge = options.challenge;
+      session.username = username;
 
       return options;
     } catch (error) {
@@ -122,17 +125,19 @@ export class LitController {
           session.authenticators = [];
         }
 
-        // Store the authenticator
+        // Store the authenticator with the username
         const { credential } = verification.registrationInfo;
         session.authenticators.push({
           credentialID: Buffer.from(credential.id).toString('base64url'),
           credentialPublicKey: credential.publicKey,
           counter: credential.counter,
           transports: body.response.transports,
+          username: session.username, // Associate username
         });
 
-        // Clear the challenge
+        // Clear the challenge and temporary username
         delete session.currentChallenge;
+        delete session.username;
 
         return {
           success: true,
@@ -157,16 +162,24 @@ export class LitController {
   /**
    * Generate WebAuthn authentication options
    */
-  @Get('webauthn/authenticate-options')
-  async generateAuthenticateOptions(@Session() session: UserSession) {
+  @Post('webauthn/authenticate-options')
+  async generateAuthenticateOptions(
+    @Body() body: { username?: string },
+    @Session() session: UserSession,
+    ) {
     try {
-      if (!session.authenticators || session.authenticators.length === 0) {
-        throw new BadRequestException('No authenticators registered');
+      // Find authenticators for the given username
+      const authenticators = session.authenticators?.filter(
+        (auth) => auth.username === body.username,
+      ) || [];
+
+      if (authenticators.length === 0) {
+        throw new BadRequestException('No authenticators registered for this username');
       }
 
       const options = await generateAuthenticationOptions({
         rpID: this.rpID,
-        allowCredentials: session.authenticators.map((auth) => ({
+        allowCredentials: authenticators.map((auth) => ({
           id: auth.credentialID,
           transports: auth.transports,
         })),
@@ -210,6 +223,9 @@ export class LitController {
       if (!authenticator) {
         throw new BadRequestException('Authenticator not found');
       }
+
+      // Get the username associated with the authenticator
+      const username = authenticator.username;
 
       const verification = await verifyAuthenticationResponse({
         response: body,

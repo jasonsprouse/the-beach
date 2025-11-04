@@ -205,7 +205,7 @@
             if (state.isAuthenticated) {
                 authContainer.innerHTML = `
                     <div class="flex flex-col items-center">
-                        <p class="text-lg text-indigo-200 mb-4">Welcome, ${state.pkp.ethAddress}</p>
+                        <p class="text-lg text-indigo-200 mb-4">Welcome, ${state.username || state.pkp.ethAddress}</p>
                         <button id="visitParadise" class="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200">🌴 Visit Paradise</button>
                         <button id="signOut" class="mt-4 text-indigo-200">Sign Out</button>
                     </div>
