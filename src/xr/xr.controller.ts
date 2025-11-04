@@ -1,12 +1,27 @@
-import { Controller, Get, Res } from '@nestjs/common';
+import { Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { join } from 'path';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('xr')
 export class XrController {
   @Get()
   getXrEnvironment(@Res() res: Response) {
+    // Allow guest access to the XR environment page
+    // Users can view and interact with basic features (soundcloud audio)
     return res.sendFile(join(process.cwd(), 'public', 'xr-environment.html'));
+  }
+
+  @Post('load-paradise')
+  @UseGuards(AuthGuard)
+  loadParadise() {
+    // This endpoint requires authentication via AuthGuard
+    // Only authenticated users can load the full paradise scene
+    return {
+      success: true,
+      message: 'Paradise loading authorized',
+      authenticated: true,
+    };
   }
 
   @Get('demo')

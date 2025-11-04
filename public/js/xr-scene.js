@@ -530,6 +530,26 @@ class BabylonXRScene {
                 document.getElementById('loadParadise').disabled = true;
                 
                 try {
+                    // Verify authentication with backend before loading
+                    const token = JSON.stringify(wagmi.state.sessionSigs);
+                    const authResponse = await fetch('/xr/load-paradise', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!authResponse.ok) {
+                        throw new Error('Authentication failed. Please login again.');
+                    }
+                    
+                    const authData = await authResponse.json();
+                    if (!authData.success) {
+                        throw new Error('Authorization denied');
+                    }
+                    
+                    // Now load the scene
                     await this.init();
                     document.getElementById('loadParadise').textContent = "Paradise Loaded ✅";
                     document.getElementById('loadParadise').disabled = true;

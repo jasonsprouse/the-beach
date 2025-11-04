@@ -9,7 +9,7 @@ export class MockLitService {
     };
   }
 
-  async verifyAuthToken(token: string): Promise<boolean> {
-    return token === 'valid-token';
+  verifyAuthToken(token: string): Promise<boolean> {
+    return Promise.resolve(token === 'valid-token');
   }
 }
