@@ -69,19 +69,9 @@
                     Experience a beautiful beach environment with swaying palm trees, animated ocean waves, 
                     and real-time multiplayer interactions powered by Lit Protocol authentication
                 </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                    <button 
-                        id="loginButton"
-                        class="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200">
-                        🔐 Login with Lit Protocol
-                    </button>
-                    <a 
-                        href="/xr" 
-                        class="bg-indigo-700 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200 border-2 border-white">
-                        🌴 Enter Paradise (Guest)
-                    </a>
+                <div id="authContainer">
+                    <!-- This will be dynamically updated based on auth state -->
                 </div>
-                <div id="authStatus" class="mt-6 text-indigo-100 font-medium"></div>
             </div>
         </div>
     </section>
@@ -166,101 +156,69 @@
         </div>
     </footer>
 
-    <!-- Lit Protocol Initialization Script -->
+    <!-- Scripts -->
+    <script src="/js/useWagmi.js"></script>
+    <script src="/js/useLit.js"></script>
     <script>
-        let litAuthClient = null;
-        let litNodeClient = null;
+        const wagmi = window.useWagmi();
+        const lit = window.useLit();
 
-        // Update auth status display
-        function updateAuthStatus(message, isError = false) {
-            const statusEl = document.getElementById('authStatus');
-            statusEl.textContent = message;
-            statusEl.className = `mt-6 font-medium ${isError ? 'text-red-300' : 'text-indigo-100'}`;
-        }
+        const authContainer = document.getElementById('authContainer');
 
-        // Initialize Lit Protocol
-        async function initializeLit() {
-            try {
-                updateAuthStatus('🔄 Initializing Lit Protocol...');
-                
-                // Fetch configuration from backend
-                const configResponse = await fetch('/lit/config');
-                const config = await configResponse.json();
-                
-                console.log('Lit Protocol config:', config);
-                
-                // Initialize Lit Node Client
-                if (window.LitJsSdk_litNodeClient) {
-                    const LitNodeClient = window.LitJsSdk_litNodeClient.LitNodeClient;
-                    litNodeClient = new LitNodeClient({
-                        litNetwork: config.litNetwork || 'datil-dev',
-                        debug: config.debug || false,
+        const render = (state) => {
+            if (state.isAuthenticated) {
+                authContainer.innerHTML = `
+                    <div class="flex flex-col items-center">
+                        <p class="text-lg text-indigo-200 mb-4">Welcome, ${state.pkp.ethAddress}</p>
+                        <button id="visitParadise" class="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200">🌴 Visit Paradise</button>
+                        <button id="signOut" class="mt-4 text-indigo-200">Sign Out</button>
+                    </div>
+                `;
+                document.getElementById('visitParadise').addEventListener('click', () => {
+                    const token = JSON.stringify(wagmi.state.sessionSigs);
+                    fetch('/xr', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }).then(res => {
+                        if (res.ok) {
+                            window.location.href = '/xr';
+                        } else {
+                            alert('Authentication failed');
+                        }
                     });
-                    
-                    await litNodeClient.connect();
-                    console.log('✅ Lit Node Client connected');
-                }
-                
-                // Initialize Lit Auth Client
-                if (window.LitJsSdk_authClient) {
-                    const LitAuthClient = window.LitJsSdk_authClient.LitAuthClient;
-                    // TODO: Replace with actual API key from environment/backend config
-                    // This is a placeholder for development only
-                    litAuthClient = new LitAuthClient({
-                        litRelayConfig: {
-                            relayApiKey: config.relayApiKey || 'dev-placeholder-key',
-                        },
-                    });
-                    console.log('✅ Lit Auth Client initialized');
-                }
-                
-                updateAuthStatus('✅ Lit Protocol Ready');
-                
-            } catch (error) {
-                console.error('Error initializing Lit Protocol:', error);
-                updateAuthStatus('⚠️ Lit Protocol initialization failed. Login may not work.', true);
+                });
+                document.getElementById('signOut').addEventListener('click', () => {
+                    lit.signOut();
+                });
+            } else {
+                authContainer.innerHTML = `
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                        <button
+                            id="loginButton"
+                            class="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200">
+                            🔐 Login with Lit Protocol
+                        </button>
+                        <a
+                            href="/xr"
+                            class="bg-indigo-700 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200 border-2 border-white">
+                            🌴 Enter Paradise (Guest)
+                        </a>
+                    </div>
+                `;
+                document.getElementById('loginButton').addEventListener('click', async () => {
+                    try {
+                        await lit.login();
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        alert('Login failed: ' + error.message);
+                    }
+                });
             }
-        }
+        };
 
-        // Handle login button click
-        document.getElementById('loginButton').addEventListener('click', async function() {
-            try {
-                updateAuthStatus('🔄 Authenticating...');
-                
-                if (!litAuthClient) {
-                    updateAuthStatus('⚠️ Lit Protocol not initialized. Please refresh the page.', true);
-                    return;
-                }
-                
-                // TODO: Implement actual authentication flow
-                // This would typically involve:
-                // 1. Selecting an auth method (Google, Discord, Wallet, etc.)
-                // 2. Initiating the auth flow
-                // 3. Getting PKP credentials
-                // 4. Storing session
-                
-                // For now, show a placeholder message
-                updateAuthStatus('🚧 Authentication flow coming soon! Click "Enter Paradise (Guest)" to continue.', false);
-                
-                // Example of what the auth flow would look like:
-                /*
-                const provider = litAuthClient.initProvider(ProviderType.Google);
-                await provider.signIn();
-                const pkpInfo = provider.getAuthMethod();
-                console.log('PKP Info:', pkpInfo);
-                
-                // Redirect to XR environment
-                window.location.href = '/xr';
-                */
-                
-            } catch (error) {
-                console.error('Authentication error:', error);
-                updateAuthStatus('❌ Authentication failed: ' + error.message, true);
-            }
-        });
-
-        // Initialize Lit Protocol when page loads
-        window.addEventListener('load', initializeLit);
+        wagmi.subscribe(render);
+        lit.initializeLit().then(() => render(wagmi.state));
     </script>
 </body>
 </html>
