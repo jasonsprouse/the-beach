@@ -37,6 +37,9 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/platform-socket.io": "^11.0.17",
     "@nestjs/websockets": "^11.0.17",
+    "@simplewebauthn/server": "^13.2.2",
+    "@types/express-session": "^1.18.2",
+    "express-session": "^1.18.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },

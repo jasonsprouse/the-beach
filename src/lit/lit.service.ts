@@ -1,9 +1,42 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
 
 @Injectable()
-export class LitService {
+export class LitService implements OnModuleInit {
+  private litNodeClient: LitNodeClient;
+  private isInitialized = false;
+
   constructor() {
     console.log('Lit Protocol Service initialized');
+  }
+
+  async onModuleInit() {
+    await this.initializeLitClients();
+  }
+
+  /**
+   * Initialize Lit Protocol clients on the backend
+   */
+  private async initializeLitClients() {
+    try {
+      const litNetwork = (process.env.LIT_NETWORK || 'datil-dev') as any;
+      const debug = process.env.NODE_ENV !== 'production';
+
+      // Initialize Lit Node Client
+      this.litNodeClient = new LitNodeClient({
+        litNetwork,
+        debug,
+      });
+
+      await this.litNodeClient.connect();
+      console.log('Lit Node Client connected successfully');
+
+      this.isInitialized = true;
+      console.log('Lit Protocol clients initialized successfully');
+    } catch (error) {
+      console.error('Error initializing Lit Protocol clients:', error);
+      throw error;
+    }
   }
 
   /**
@@ -13,7 +46,18 @@ export class LitService {
     return {
       litNetwork: process.env.LIT_NETWORK || 'datil-dev',
       debug: process.env.NODE_ENV !== 'production',
+      initialized: this.isInitialized,
     };
+  }
+
+  /**
+   * Get the Lit Node Client instance
+   */
+  getLitNodeClient(): LitNodeClient {
+    if (!this.isInitialized) {
+      throw new Error('Lit Protocol clients not initialized');
+    }
+    return this.litNodeClient;
   }
 
   /**

@@ -29,34 +29,33 @@ describe('LitController', () => {
 
       expect(config).toHaveProperty('litNetwork');
       expect(config).toHaveProperty('debug');
+      expect(config).toHaveProperty('initialized');
       expect(config.litNetwork).toBe('datil-dev');
       expect(config.debug).toBe(true);
+      expect(config.initialized).toBe(true);
     });
   });
 
-  describe('verifyWebAuthnRegistration', () => {
-    it('should return success for WebAuthn registration verification', () => {
-      const mockOptions = {
-        challenge: 'mock-challenge',
-        rp: {
-          name: 'The Beach',
-          id: 'localhost',
-        },
-        user: {
-          id: 'mock-user-id',
-          name: 'test@example.com',
-          displayName: 'Test User',
-        },
-        pubKeyCredParams: [],
-        timeout: 60000,
-        attestation: 'none' as const,
-      };
+  describe('generateRegisterOptions', () => {
+    it('should generate WebAuthn registration options', async () => {
+      const mockSession = {};
 
-      const result = controller.verifyWebAuthnRegistration(mockOptions);
+      const result = await controller.generateRegisterOptions(mockSession);
 
-      expect(result).toHaveProperty('success');
-      expect(result).toHaveProperty('message');
-      expect(result.success).toBe(true);
+      expect(result).toHaveProperty('challenge');
+      expect(result).toHaveProperty('rp');
+      expect(result).toHaveProperty('user');
+      expect(mockSession).toHaveProperty('currentChallenge');
+    });
+  });
+
+  describe('generateAuthenticateOptions', () => {
+    it('should throw error when no authenticators registered', async () => {
+      const mockSession = {};
+
+      await expect(
+        controller.generateAuthenticateOptions(mockSession),
+      ).rejects.toThrow();
     });
   });
 });

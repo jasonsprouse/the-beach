@@ -22,6 +22,7 @@ describe('MockLitService', () => {
       expect(config).toEqual({
         litNetwork: 'datil-dev',
         debug: true,
+        initialized: true,
       });
     });
   });
