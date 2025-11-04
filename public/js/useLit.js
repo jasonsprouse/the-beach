@@ -49,20 +49,38 @@ const useLit = () => {
 
     const provider = litAuthClient.initProvider('webauthn');
 
-    // Register if not registered
+    // Check if user is registered first
     const isRegistered = await provider.isRegistered();
     if (!isRegistered) {
-      const options = await provider.register();
-      const tx = await fetch('/lit/webauthn/verify-registration', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(options),
-      });
-      await tx.json();
+      // User must register before they can log in
+      try {
+        const options = await provider.register();
+        const response = await fetch('/lit/webauthn/verify-registration', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(options),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Registration verification failed');
+        }
+        
+        const result = await response.json();
+        if (!result.success) {
+          throw new Error('Registration failed: ' + (result.message || 'Unknown error'));
+        }
+        
+        // Registration successful, inform user and prompt to authenticate
+        alert('WebAuthn registration successful! Please authenticate to continue.');
+      } catch (error) {
+        console.error('WebAuthn registration error:', error);
+        throw new Error('You must complete WebAuthn registration before logging in. Error: ' + error.message);
+      }
     }
 
+    // Now authenticate with the registered credential
     const authMethod = await provider.authenticate();
     const pkp = await provider.getPkp();
     const sessionSigs = await litNodeClient.getSessionSigs({

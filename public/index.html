@@ -206,8 +206,13 @@
                         </a>
                     </div>
                 `;
-                document.getElementById('loginButton').addEventListener('click', () => {
-                    lit.login();
+                document.getElementById('loginButton').addEventListener('click', async () => {
+                    try {
+                        await lit.login();
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        alert('Login failed: ' + error.message);
+                    }
                 });
             }
         };
