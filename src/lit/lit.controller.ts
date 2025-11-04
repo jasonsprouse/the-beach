@@ -31,9 +31,15 @@ interface UserSession {
 export class LitController {
   private readonly rpName = 'The Beach';
   private readonly rpID =
-    process.env.RP_ID || (process.env.NODE_ENV === 'production' ? 'the-beach.vercel.app' : 'localhost');
+    process.env.RP_ID ||
+    (process.env.NODE_ENV === 'production'
+      ? 'the-beach.vercel.app'
+      : 'localhost');
   private readonly origin =
-    process.env.ORIGIN || (process.env.NODE_ENV === 'production' ? 'https://the-beach.vercel.app' : 'http://localhost:3000');
+    process.env.ORIGIN ||
+    (process.env.NODE_ENV === 'production'
+      ? 'https://the-beach.vercel.app'
+      : 'http://localhost:3000');
 
   constructor(private readonly litService: LitService) {}
 
@@ -45,19 +51,31 @@ export class LitController {
   /**
    * Generate WebAuthn registration options
    */
-  @Get('webauthn/register-options')
-  async generateRegisterOptions(@Session() session: UserSession) {
+  @Post('webauthn/register-options')
+  async generateRegisterOptions(
+    @Body() body: { username?: string },
+    @Session() session: UserSession,
+  ) {
     try {
+      // Use provided username or generate a default one
+      const username = body.username?.trim() || `user_${Date.now()}`;
+
+      // Basic validation
+      if (username.length < 3) {
+        throw new BadRequestException('Username must be at least 3 characters');
+      }
+
       const options = await generateRegistrationOptions({
         rpName: this.rpName,
         rpID: this.rpID,
-        userName: `user_${Date.now()}`,
-        userDisplayName: 'Beach User',
+        userName: username,
+        userDisplayName: username,
         // Prevent users from re-registering existing authenticators
-        excludeCredentials: session.authenticators?.map((auth) => ({
-          id: auth.credentialID,
-          transports: auth.transports,
-        })) || [],
+        excludeCredentials:
+          session.authenticators?.map((auth) => ({
+            id: auth.credentialID,
+            transports: auth.transports,
+          })) || [],
         authenticatorSelection: {
           residentKey: 'preferred',
           userVerification: 'preferred',
@@ -70,6 +88,10 @@ export class LitController {
       return options;
     } catch (error) {
       console.error('Error generating registration options:', error);
+      // Re-throw BadRequestException as is, wrap other errors
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new BadRequestException('Failed to generate registration options');
     }
   }
