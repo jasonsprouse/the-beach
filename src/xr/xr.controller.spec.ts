@@ -37,8 +37,8 @@ describe('XrController', () => {
       controller.getXrEnvironment(mockResponse);
 
       expect(mockSendFile).toHaveBeenCalled();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const callArg = mockSendFile.mock.calls[0][0] as string;
+      const calls = mockSendFile.mock.calls as Array<[string]>;
+      const callArg = calls[0][0];
       expect(callArg).toContain('public');
       expect(callArg).toContain('xr-environment.html');
     });

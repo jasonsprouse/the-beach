@@ -18,12 +18,22 @@ export class AuthGuard implements CanActivate {
     if (!authHeader || typeof authHeader !== 'string') {
       throw new UnauthorizedException('Authorization header not found');
     }
+
+    // Split and validate the Authorization header format
     const parts = authHeader.split(' ');
-    const bearer = parts[0];
-    const token = parts[1];
-    if (bearer !== 'Bearer' || !token) {
-      throw new UnauthorizedException('Invalid token format');
+    if (parts.length !== 2) {
+      throw new UnauthorizedException(
+        'Invalid token format - expected "Bearer <token>"',
+      );
     }
+
+    const [bearer, token] = parts;
+    if (bearer !== 'Bearer' || !token) {
+      throw new UnauthorizedException(
+        'Invalid token format - expected "Bearer <token>"',
+      );
+    }
+
     const isValid = await this.litService.verifyAuthToken(token);
     if (!isValid) {
       throw new UnauthorizedException('Invalid token');

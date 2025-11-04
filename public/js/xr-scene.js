@@ -541,12 +541,19 @@ class BabylonXRScene {
                     });
                     
                     if (!authResponse.ok) {
-                        throw new Error('Authentication failed. Please login again.');
+                        const status = authResponse.status;
+                        if (status === 401) {
+                            throw new Error('Authentication failed: Your session has expired or is invalid. Please return to the home page and login again.');
+                        } else if (status === 403) {
+                            throw new Error('Authorization denied: You do not have permission to load Paradise. Please verify your account.');
+                        } else {
+                            throw new Error(`Server error (${status}): Unable to verify authentication. Please try again later.`);
+                        }
                     }
                     
                     const authData = await authResponse.json();
                     if (!authData.success) {
-                        throw new Error('Authorization denied');
+                        throw new Error('Authorization denied: The server did not approve your request to load Paradise.');
                     }
                     
                     // Now load the scene
