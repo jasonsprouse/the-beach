@@ -28,7 +28,7 @@ const useLit = () => {
 
     const LitNodeClient = window.LitJsSdk_litNodeClient.LitNodeClient;
     litNodeClient = new LitNodeClient({
-      litNetwork: config.litNetwork || 'cayenne',
+      litNetwork: config.litNetwork || 'datil-dev',
       debug: config.debug || false,
     });
     await litNodeClient.connect();
