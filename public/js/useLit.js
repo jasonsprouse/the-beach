@@ -96,6 +96,9 @@ const useLit = () => {
         throw new Error('Registration failed: ' + (result.message || 'Unknown error'));
       }
       
+      // Save username to localStorage on successful registration
+      localStorage.setItem('webauthn_username', username);
+
       console.log('WebAuthn registration successful');
     } catch (error) {
       console.error('WebAuthn registration error:', error);
@@ -340,11 +343,28 @@ const useLit = () => {
 
   const login = async () => {
     try {
-      const username = await showLoginModal();
-      await authenticateWebAuthn(username);
+      // Check for a stored username
+      const storedUsername = localStorage.getItem('webauthn_username');
+
+      if (storedUsername) {
+        // If a username is found, try to authenticate directly
+        await authenticateWebAuthn(storedUsername);
+      } else {
+        // Otherwise, show the login modal to get a username
+        const username = await showLoginModal();
+        await authenticateWebAuthn(username);
+      }
     } catch (error) {
       // User cancelled or error occurred
       console.log('Login cancelled or failed:', error.message);
+
+      // If authentication fails, it might be because the stored user was not found.
+      // In this case, we should clear the stored username and prompt the user to log in manually.
+      if (error.message.includes('No authenticators registered')) {
+        localStorage.removeItem('webauthn_username');
+        // We could optionally call login() again here to show the modal right away
+        // login();
+      }
     }
   };
 

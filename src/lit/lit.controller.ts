@@ -5,6 +5,7 @@ import {
   Body,
   Session,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
 import { LitService } from './lit.service';
 import {
@@ -16,12 +17,13 @@ import {
   type AuthenticationResponseJSON,
   type AuthenticatorTransportFuture,
 } from '@simplewebauthn/server';
+import { Request } from 'express';
 
 interface UserSession {
   currentChallenge?: string;
   username?: string; // Temporarily store username during registration
   authenticators?: Array<{
-    credentialID: string;
+    credentialID: string; // Stored as base64url
     credentialPublicKey: Uint8Array;
     counter: number;
     transports?: AuthenticatorTransportFuture[];
@@ -32,16 +34,6 @@ interface UserSession {
 @Controller('lit')
 export class LitController {
   private readonly rpName = 'The Beach';
-  private readonly rpID =
-    process.env.RP_ID ||
-    (process.env.NODE_ENV === 'production'
-      ? 'the-beach.vercel.app'
-      : 'localhost');
-  private readonly origin =
-    process.env.ORIGIN ||
-    (process.env.NODE_ENV === 'production'
-      ? 'https://the-beach.vercel.app'
-      : 'http://localhost:3000');
 
   constructor(private readonly litService: LitService) {}
 
@@ -57,8 +49,12 @@ export class LitController {
   async generateRegisterOptions(
     @Body() body: { username?: string },
     @Session() session: UserSession,
+    @Req() req: Request,
   ) {
     try {
+      const rpID = req.hostname;
+      const origin = `${req.protocol}://${req.get('host')}`;
+
       // Use provided username or generate a default one
       const username = body.username?.trim() || `user_${Date.now()}`;
 
@@ -69,7 +65,7 @@ export class LitController {
 
       const options = await generateRegistrationOptions({
         rpName: this.rpName,
-        rpID: this.rpID,
+        rpID,
         userName: username,
         userDisplayName: username,
         // Prevent users from re-registering existing authenticators
@@ -91,7 +87,6 @@ export class LitController {
       return options;
     } catch (error) {
       console.error('Error generating registration options:', error);
-      // Re-throw BadRequestException as is, wrap other errors
       if (error instanceof BadRequestException) {
         throw error;
       }
@@ -106,36 +101,37 @@ export class LitController {
   async verifyRegistration(
     @Body() body: RegistrationResponseJSON,
     @Session() session: UserSession,
+    @Req() req: Request,
   ) {
     try {
       if (!session.currentChallenge) {
         throw new BadRequestException('No challenge found in session');
       }
 
+      const rpID = req.hostname;
+      const origin = `${req.protocol}://${req.get('host')}`;
+
       const verification = await verifyRegistrationResponse({
         response: body,
         expectedChallenge: session.currentChallenge,
-        expectedOrigin: this.origin,
-        expectedRPID: this.rpID,
+        expectedOrigin: origin,
+        expectedRPID: rpID,
       });
 
       if (verification.verified && verification.registrationInfo) {
-        // Initialize authenticators array if it doesn't exist
         if (!session.authenticators) {
           session.authenticators = [];
         }
 
-        // Store the authenticator with the username
         const { credential } = verification.registrationInfo;
         session.authenticators.push({
           credentialID: Buffer.from(credential.id).toString('base64url'),
           credentialPublicKey: credential.publicKey,
           counter: credential.counter,
           transports: body.response.transports,
-          username: session.username, // Associate username
+          username: session.username,
         });
 
-        // Clear the challenge and temporary username
         delete session.currentChallenge;
         delete session.username;
 
@@ -166,19 +162,24 @@ export class LitController {
   async generateAuthenticateOptions(
     @Body() body: { username?: string },
     @Session() session: UserSession,
+    @Req() req: Request,
   ) {
     try {
-      // Find authenticators for the given username
-      const authenticators = session.authenticators?.filter(
-        (auth) => auth.username === body.username,
-      ) || [];
+      const rpID = req.hostname;
+
+      const authenticators =
+        session.authenticators?.filter(
+          (auth) => auth.username === body.username,
+        ) || [];
 
       if (authenticators.length === 0) {
-        throw new BadRequestException('No authenticators registered for this username');
+        throw new BadRequestException(
+          'No authenticators registered for this username',
+        );
       }
 
       const options = await generateAuthenticationOptions({
-        rpID: this.rpID,
+        rpID,
         allowCredentials: authenticators.map((auth) => ({
           id: auth.credentialID,
           transports: auth.transports,
@@ -186,15 +187,12 @@ export class LitController {
         userVerification: 'preferred',
       });
 
-      // Store challenge in session for verification
       session.currentChallenge = options.challenge;
 
       return options;
     } catch (error) {
       console.error('Error generating authentication options:', error);
-      throw new BadRequestException(
-        'Failed to generate authentication options',
-      );
+      throw new BadRequestException('Failed to generate authentication options');
     }
   }
 
@@ -205,6 +203,7 @@ export class LitController {
   async verifyAuthentication(
     @Body() body: AuthenticationResponseJSON,
     @Session() session: UserSession,
+    @Req() req: Request,
   ) {
     try {
       if (!session.currentChallenge) {
@@ -215,7 +214,6 @@ export class LitController {
         throw new BadRequestException('No authenticators registered');
       }
 
-      // Find the authenticator
       const authenticator = session.authenticators.find(
         (auth) => auth.credentialID === body.id,
       );
@@ -224,13 +222,14 @@ export class LitController {
         throw new BadRequestException('Authenticator not found');
       }
 
-      // Get the username associated with the authenticator
+      const rpID = req.hostname;
+      const origin = `${req.protocol}://${req.get('host')}`;
 
       const verification = await verifyAuthenticationResponse({
         response: body,
         expectedChallenge: session.currentChallenge,
-        expectedOrigin: this.origin,
-        expectedRPID: this.rpID,
+        expectedOrigin: origin,
+        expectedRPID: rpID,
         credential: {
           id: authenticator.credentialID,
           publicKey: authenticator.credentialPublicKey,
@@ -239,16 +238,14 @@ export class LitController {
       });
 
       if (verification.verified) {
-        // Update counter
         authenticator.counter = verification.authenticationInfo.newCounter;
-
-        // Clear the challenge
         delete session.currentChallenge;
 
         return {
           success: true,
           verified: verification.verified,
           message: 'WebAuthn authentication successful',
+          username: authenticator.username, // Return username on success
         };
       }
 
