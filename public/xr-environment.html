@@ -158,15 +158,7 @@
         const wagmi = window.useWagmi();
         const lit = window.useLit();
 
-        const loadParadiseButton = document.getElementById('loadParadise');
-
-        loadParadiseButton.addEventListener('click', () => {
-            if (!wagmi.state.isAuthenticated) {
-                alert('You must be logged in to load paradise.');
-                window.location.href = '/';
-            }
-        });
-
+        // Initialize Lit Protocol
         lit.initializeLit();
     </script>
 </body>

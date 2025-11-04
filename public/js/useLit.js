@@ -42,6 +42,39 @@ const useLit = () => {
     });
   };
 
+  const registerWebAuthn = async () => {
+    if (!litAuthClient) {
+      await initializeLit();
+    }
+
+    const provider = litAuthClient.initProvider('webauthn');
+
+    // Check if user is already registered
+    const isRegistered = await provider.isRegistered();
+    if (isRegistered) {
+      throw new Error('User is already registered. Please login instead.');
+    }
+
+    // Register new credential
+    const options = await provider.register();
+    const response = await fetch('/lit/webauthn/verify-registration', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(options),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Registration verification failed');
+    }
+    
+    const result = await response.json();
+    if (!result.success) {
+      throw new Error('Registration failed: ' + (result.message || 'Unknown error'));
+    }
+  };
+
   const authenticateWebAuthn = async () => {
     if (!litAuthClient) {
       await initializeLit();
@@ -52,32 +85,7 @@ const useLit = () => {
     // Check if user is registered first
     const isRegistered = await provider.isRegistered();
     if (!isRegistered) {
-      // User must register before they can log in
-      try {
-        const options = await provider.register();
-        const response = await fetch('/lit/webauthn/verify-registration', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(options),
-        });
-        
-        if (!response.ok) {
-          throw new Error('Registration verification failed');
-        }
-        
-        const result = await response.json();
-        if (!result.success) {
-          throw new Error('Registration failed: ' + (result.message || 'Unknown error'));
-        }
-        
-        // Registration successful, inform user and prompt to authenticate
-        alert('WebAuthn registration successful! Please authenticate to continue.');
-      } catch (error) {
-        console.error('WebAuthn registration error:', error);
-        throw new Error('You must complete WebAuthn registration before logging in. Error: ' + error.message);
-      }
+      throw new Error('You must register before logging in. Please click "Register with WebAuthn" first.');
     }
 
     // Now authenticate with the registered credential
@@ -142,6 +150,10 @@ const useLit = () => {
     wagmi.resetState();
   };
 
+  const register = async () => {
+    await registerWebAuthn();
+  };
+
   const login = async () => {
     await authenticateWebAuthn();
   };
@@ -150,7 +162,9 @@ const useLit = () => {
     initializeLit,
     signIn,
     signOut,
+    registerWebAuthn,
     authenticateWebAuthn,
+    register,
     login,
   };
 };

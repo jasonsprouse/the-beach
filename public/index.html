@@ -195,9 +195,14 @@
                 authContainer.innerHTML = `
                     <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <button
+                            id="registerButton"
+                            class="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200">
+                            🔐 Register with WebAuthn
+                        </button>
+                        <button
                             id="loginButton"
                             class="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200">
-                            🔐 Login with Lit Protocol
+                            🔐 Login with WebAuthn
                         </button>
                         <a
                             href="/xr"
@@ -205,13 +210,25 @@
                             🌴 Enter Paradise (Guest)
                         </a>
                     </div>
+                    <div id="authStatus" class="mt-6 text-indigo-100 font-medium"></div>
                 `;
+                
+                document.getElementById('registerButton').addEventListener('click', async () => {
+                    try {
+                        await lit.register();
+                        document.getElementById('authStatus').textContent = 'Registration successful! Please login to continue.';
+                    } catch (error) {
+                        console.error('Registration error:', error);
+                        document.getElementById('authStatus').textContent = 'Registration failed: ' + error.message;
+                    }
+                });
+                
                 document.getElementById('loginButton').addEventListener('click', async () => {
                     try {
                         await lit.login();
                     } catch (error) {
                         console.error('Login error:', error);
-                        alert('Login failed: ' + error.message);
+                        document.getElementById('authStatus').textContent = 'Login failed: ' + error.message;
                     }
                 });
             }
