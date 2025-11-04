@@ -58,6 +58,10 @@ export class LitController {
       // Use provided username or generate a default one
       const username = body.username?.trim() || `user_${Date.now()}`;
 
+      // Debug logging
+      console.log('Registration request for username:', username);
+      console.log('Request body:', body);
+
       // Basic validation
       if (username.length < 3) {
         throw new BadRequestException('Username must be at least 3 characters');
@@ -104,12 +108,19 @@ export class LitController {
     @Req() req: Request,
   ) {
     try {
+      console.log('Registration verification started');
+      console.log('Session username:', session.username);
+      console.log('Session challenge exists:', !!session.currentChallenge);
+      console.log('Request body received:', !!body);
+      
       if (!session.currentChallenge) {
+        console.log('ERROR: No challenge found in session');
         throw new BadRequestException('No challenge found in session');
       }
 
       const rpID = req.hostname;
       const origin = `${req.protocol}://${req.get('host')}`;
+      console.log('Verification params - rpID:', rpID, 'origin:', origin);
 
       const verification = await verifyRegistrationResponse({
         response: body,
@@ -118,19 +129,31 @@ export class LitController {
         expectedRPID: rpID,
       });
 
+      console.log('Verification result:', {
+        verified: verification.verified,
+        hasRegistrationInfo: !!verification.registrationInfo,
+        error: verification.verified ? null : 'Verification failed'
+      });
+
       if (verification.verified && verification.registrationInfo) {
         if (!session.authenticators) {
           session.authenticators = [];
         }
 
         const { credential } = verification.registrationInfo;
-        session.authenticators.push({
+        const newAuthenticator = {
           credentialID: Buffer.from(credential.id).toString('base64url'),
           credentialPublicKey: credential.publicKey,
           counter: credential.counter,
           transports: body.response.transports,
           username: session.username,
-        });
+        };
+        
+        session.authenticators.push(newAuthenticator);
+
+        // Debug logging
+        console.log('Registration successful for username:', session.username);
+        console.log('Total authenticators now:', session.authenticators.length);
 
         delete session.currentChallenge;
         delete session.username;
@@ -140,6 +163,10 @@ export class LitController {
           verified: verification.verified,
           message: 'WebAuthn registration successful',
         };
+      } else {
+        console.log('Registration verification failed');
+        console.log('Verification.verified:', verification.verified);
+        console.log('Has registrationInfo:', !!verification.registrationInfo);
       }
 
       return {
@@ -149,6 +176,7 @@ export class LitController {
       };
     } catch (error) {
       console.error('Error verifying registration:', error);
+      console.error('Error details:', error.message);
       throw new BadRequestException(
         `Registration verification failed: ${error.message}`,
       );
@@ -166,6 +194,11 @@ export class LitController {
   ) {
     try {
       const rpID = req.hostname;
+
+      // Debug logging
+      console.log('Authentication request for username:', body.username);
+      console.log('Session authenticators:', session.authenticators?.length || 0);
+      console.log('Available usernames:', session.authenticators?.map(auth => auth.username) || []);
 
       const authenticators =
         session.authenticators?.filter(

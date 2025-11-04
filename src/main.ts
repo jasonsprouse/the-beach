@@ -21,6 +21,21 @@ async function bootstrap() {
     }),
   );
 
+  // Add Permissions Policy headers for WebAuthn support
+  app.use((req, res, next) => {
+    res.setHeader('Permissions-Policy', 
+      'publickey-credentials-create=*, publickey-credentials-get=*'
+    );
+    res.setHeader('Feature-Policy', 
+      'publickey-credentials-create *; publickey-credentials-get *'
+    );
+    res.setHeader('Access-Control-Allow-Headers', 
+      'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    );
+    console.log('Setting WebAuthn permissions headers');
+    next();
+  });
+
   // Enable CORS for XR development
   app.enableCors({
     origin: true,

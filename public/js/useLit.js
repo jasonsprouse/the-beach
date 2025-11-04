@@ -29,7 +29,9 @@ const useLit = () => {
     await initializeLit();
 
     try {
-      // Get registration options from backend with username
+      console.log('🔐 Starting WebAuthn registration for username:', username);
+      
+      // Get registration options from server
       const optionsResponse = await fetch('/lit/webauthn/register-options', {
         method: 'POST',
         headers: {
@@ -39,33 +41,43 @@ const useLit = () => {
         body: JSON.stringify({ username }),
       });
       
+      console.log('📡 Registration options response status:', optionsResponse.status);
+      
       if (!optionsResponse.ok) {
-        throw new Error('Failed to get registration options');
+        const errorText = await optionsResponse.text();
+        console.error('❌ Failed to get registration options:', errorText);
+        throw new Error(`Failed to get registration options: ${optionsResponse.status}`);
       }
       
       const options = await optionsResponse.json();
+      console.log('📝 Registration options received:', options);
       
-      // Use WebAuthn browser API to create credential
+      // Create WebAuthn credential
+      console.log('🛡️ Creating WebAuthn credential...');
       const credential = await navigator.credentials.create({
         publicKey: {
           ...options,
-          challenge: Uint8Array.from(atob(options.challenge.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
+          challenge: new Uint8Array(atob(options.challenge.replace(/-/g, '+').replace(/_/g, '/')).split('').map(char => char.charCodeAt(0))),
           user: {
             ...options.user,
-            id: Uint8Array.from(atob(options.user.id.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
+            id: new Uint8Array(atob(options.user.id.replace(/-/g, '+').replace(/_/g, '/')).split('').map(char => char.charCodeAt(0))),
           },
           excludeCredentials: options.excludeCredentials?.map(cred => ({
             ...cred,
-            id: Uint8Array.from(atob(cred.id.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
+            id: new Uint8Array(atob(cred.id.replace(/-/g, '+').replace(/_/g, '/')).split('').map(char => char.charCodeAt(0))),
           })),
         },
       });
       
+      console.log('✅ WebAuthn credential created successfully:', credential);
+      
       if (!credential) {
+        console.error('❌ No credential returned from WebAuthn');
         throw new Error('Failed to create credential');
       }
       
       // Convert credential to JSON format for sending to backend
+      console.log('🔄 Converting credential to JSON format...');
       const credentialJSON = {
         id: credential.id,
         rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
@@ -77,6 +89,8 @@ const useLit = () => {
         type: credential.type,
       };
       
+      console.log('📤 Sending credential for verification...');
+      
       // Verify registration with backend
       const verifyResponse = await fetch('/lit/webauthn/verify-registration', {
         method: 'POST',
@@ -87,21 +101,29 @@ const useLit = () => {
         body: JSON.stringify(credentialJSON),
       });
       
+      console.log('📡 Verification response status:', verifyResponse.status);
+      
       if (!verifyResponse.ok) {
+        const errorText = await verifyResponse.text();
+        console.error('❌ Registration verification failed:', errorText);
         throw new Error('Registration verification failed');
       }
       
       const result = await verifyResponse.json();
+      console.log('📋 Verification result:', result);
+      
       if (!result.success) {
+        console.error('❌ Registration failed:', result.message);
         throw new Error('Registration failed: ' + (result.message || 'Unknown error'));
       }
       
       // Save username to localStorage on successful registration
       localStorage.setItem('webauthn_username', username);
+      console.log('✅ Registration successful! Username saved to localStorage');
 
       console.log('WebAuthn registration successful');
     } catch (error) {
-      console.error('WebAuthn registration error:', error);
+      console.error('💥 WebAuthn registration error:', error);
       throw error;
     }
   };
