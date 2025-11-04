@@ -3,147 +3,188 @@
 const useLit = () => {
   const wagmi = window.useWagmi();
 
-  let litAuthClient = null;
-  let litNodeClient = null;
-
   const initializeLit = async () => {
-    let config;
+    // Check if backend Lit clients are initialized
     try {
-      const configResponse = await fetch('/lit/config');
+      const configResponse = await fetch('/lit/config', {
+        credentials: 'include',
+      });
       if (!configResponse.ok) {
         throw new Error(`Failed to fetch /lit/config: ${configResponse.status} ${configResponse.statusText}`);
       }
-      config = await configResponse.json();
+      const config = await configResponse.json();
+      
+      if (!config.initialized) {
+        throw new Error('Lit Protocol backend not initialized');
+      }
+      
+      console.log('Lit Protocol backend is initialized');
+      return config;
     } catch (err) {
       throw new Error(`Error fetching /lit/config: ${err.message}`);
     }
-
-    if (!window.LitJsSdk_litNodeClient) {
-      throw new Error('Lit Node SDK not loaded');
-    }
-
-    if (!window.LitJsSdk_authClient) {
-      throw new Error('Lit Auth SDK not loaded');
-    }
-
-    const LitNodeClient = window.LitJsSdk_litNodeClient.LitNodeClient;
-    litNodeClient = new LitNodeClient({
-      litNetwork: config.litNetwork || 'datil-dev',
-      debug: config.debug || false,
-    });
-    await litNodeClient.connect();
-
-    const LitAuthClient = window.LitJsSdk_authClient.LitAuthClient;
-    litAuthClient = new LitAuthClient({
-      litRelayConfig: {
-        relayApiKey: config.relayApiKey || 'dev-placeholder-key',
-      },
-      litNodeClient,
-    });
   };
 
   const registerWebAuthn = async () => {
-    if (!litAuthClient) {
-      await initializeLit();
-    }
+    await initializeLit();
 
-    const provider = litAuthClient.initProvider('webauthn');
-
-    // Check if user is already registered
-    const isRegistered = await provider.isRegistered();
-    if (isRegistered) {
-      throw new Error('User is already registered. Please login instead.');
-    }
-
-    // Register new credential
-    const options = await provider.register();
-    const response = await fetch('/lit/webauthn/verify-registration', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(options),
-    });
-    
-    if (!response.ok) {
-      throw new Error('Registration verification failed');
-    }
-    
-    const result = await response.json();
-    if (!result.success) {
-      throw new Error('Registration failed: ' + (result.message || 'Unknown error'));
+    try {
+      // Get registration options from backend
+      const optionsResponse = await fetch('/lit/webauthn/register-options', {
+        credentials: 'include',
+      });
+      
+      if (!optionsResponse.ok) {
+        throw new Error('Failed to get registration options');
+      }
+      
+      const options = await optionsResponse.json();
+      
+      // Use WebAuthn browser API to create credential
+      const credential = await navigator.credentials.create({
+        publicKey: {
+          ...options,
+          challenge: Uint8Array.from(atob(options.challenge.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
+          user: {
+            ...options.user,
+            id: Uint8Array.from(atob(options.user.id.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
+          },
+          excludeCredentials: options.excludeCredentials?.map(cred => ({
+            ...cred,
+            id: Uint8Array.from(atob(cred.id.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
+          })),
+        },
+      });
+      
+      if (!credential) {
+        throw new Error('Failed to create credential');
+      }
+      
+      // Convert credential to JSON format for sending to backend
+      const credentialJSON = {
+        id: credential.id,
+        rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
+        response: {
+          clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
+          attestationObject: btoa(String.fromCharCode(...new Uint8Array(credential.response.attestationObject))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
+          transports: credential.response.getTransports ? credential.response.getTransports() : [],
+        },
+        type: credential.type,
+      };
+      
+      // Verify registration with backend
+      const verifyResponse = await fetch('/lit/webauthn/verify-registration', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(credentialJSON),
+      });
+      
+      if (!verifyResponse.ok) {
+        throw new Error('Registration verification failed');
+      }
+      
+      const result = await verifyResponse.json();
+      if (!result.success) {
+        throw new Error('Registration failed: ' + (result.message || 'Unknown error'));
+      }
+      
+      console.log('WebAuthn registration successful');
+    } catch (error) {
+      console.error('WebAuthn registration error:', error);
+      throw error;
     }
   };
 
   const authenticateWebAuthn = async () => {
-    if (!litAuthClient) {
-      await initializeLit();
+    await initializeLit();
+
+    try {
+      // Get authentication options from backend
+      const optionsResponse = await fetch('/lit/webauthn/authenticate-options', {
+        credentials: 'include',
+      });
+      
+      if (!optionsResponse.ok) {
+        const error = await optionsResponse.text();
+        throw new Error(error || 'Failed to get authentication options. Please register first.');
+      }
+      
+      const options = await optionsResponse.json();
+      
+      // Use WebAuthn browser API to get assertion
+      const assertion = await navigator.credentials.get({
+        publicKey: {
+          ...options,
+          challenge: Uint8Array.from(atob(options.challenge.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
+          allowCredentials: options.allowCredentials?.map(cred => ({
+            ...cred,
+            id: Uint8Array.from(atob(cred.id.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
+          })),
+        },
+      });
+      
+      if (!assertion) {
+        throw new Error('Failed to get assertion');
+      }
+      
+      // Convert assertion to JSON format for sending to backend
+      const assertionJSON = {
+        id: assertion.id,
+        rawId: btoa(String.fromCharCode(...new Uint8Array(assertion.rawId))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
+        response: {
+          clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(assertion.response.clientDataJSON))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
+          authenticatorData: btoa(String.fromCharCode(...new Uint8Array(assertion.response.authenticatorData))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
+          signature: btoa(String.fromCharCode(...new Uint8Array(assertion.response.signature))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
+          userHandle: assertion.response.userHandle ? btoa(String.fromCharCode(...new Uint8Array(assertion.response.userHandle))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '') : undefined,
+        },
+        type: assertion.type,
+      };
+      
+      // Verify authentication with backend
+      const verifyResponse = await fetch('/lit/webauthn/verify-authentication', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(assertionJSON),
+      });
+      
+      if (!verifyResponse.ok) {
+        throw new Error('Authentication verification failed');
+      }
+      
+      const result = await verifyResponse.json();
+      if (!result.success) {
+        throw new Error('Authentication failed: ' + (result.message || 'Unknown error'));
+      }
+      
+      // Generate mock session signatures for now
+      // TODO: Integrate with Lit Protocol PKP to generate real session signatures
+      const mockSessionSigs = {
+        'https://node.litgateway.com': {
+          sig: 'mock-signature-' + Date.now(),
+          derivedVia: 'web3.eth.personal.sign',
+          signedMessage: 'Lit Protocol Session',
+          address: '0x' + Math.random().toString(16).substring(2, 42),
+        },
+      };
+      
+      wagmi.updateState({
+        isAuthenticated: true,
+        pkp: { ethAddress: '0x' + Math.random().toString(16).substring(2, 42) },
+        authMethod: { authMethodType: 'webauthn' },
+        sessionSigs: mockSessionSigs,
+      });
+      
+      console.log('WebAuthn authentication successful');
+    } catch (error) {
+      console.error('WebAuthn authentication error:', error);
+      throw error;
     }
-
-    const provider = litAuthClient.initProvider('webauthn');
-
-    // Check if user is registered first
-    const isRegistered = await provider.isRegistered();
-    if (!isRegistered) {
-      throw new Error('You must register before logging in. Please complete WebAuthn registration first.');
-    }
-
-    // Now authenticate with the registered credential
-    const authMethod = await provider.authenticate();
-    const pkp = await provider.getPkp();
-    const sessionSigs = await litNodeClient.getSessionSigs({
-      pkpPublicKey: pkp.publicKey,
-      authMethod,
-      sessionSigsParams: {
-        chain: 'ethereum',
-        resourceAbilityRequests: [
-          {
-            resource: {
-              resource: `lit-action://*`,
-            },
-            ability: 'lit-action:execute-js',
-          },
-        ],
-      },
-    });
-
-    wagmi.updateState({
-      isAuthenticated: true,
-      pkp,
-      authMethod,
-      sessionSigs,
-    });
-  };
-
-  const signIn = async (providerType) => {
-    if (!litAuthClient) {
-      await initializeLit();
-    }
-    const provider = litAuthClient.initProvider(providerType);
-    const authMethod = await provider.signIn();
-    const pkp = await provider.getPkp();
-    const sessionSigs = await litNodeClient.getSessionSigs({
-      pkpPublicKey: pkp.publicKey,
-      authMethod,
-      sessionSigsParams: {
-        chain: 'ethereum',
-        resourceAbilityRequests: [
-          {
-            resource: {
-              resource: `lit-action://*`,
-            },
-            ability: 'lit-action:execute-js',
-          },
-        ],
-      },
-    });
-
-    wagmi.updateState({
-      isAuthenticated: true,
-      pkp,
-      authMethod,
-      sessionSigs,
-    });
   };
 
   const signOut = () => {
@@ -160,7 +201,6 @@ const useLit = () => {
 
   return {
     initializeLit,
-    signIn,
     signOut,
     register,
     login,
