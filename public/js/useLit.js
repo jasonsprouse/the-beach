@@ -25,13 +25,18 @@ const useLit = () => {
     }
   };
 
-  const registerWebAuthn = async () => {
+  const registerWebAuthn = async (username) => {
     await initializeLit();
 
     try {
-      // Get registration options from backend
+      // Get registration options from backend with username
       const optionsResponse = await fetch('/lit/webauthn/register-options', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         credentials: 'include',
+        body: JSON.stringify({ username }),
       });
       
       if (!optionsResponse.ok) {
@@ -191,8 +196,73 @@ const useLit = () => {
     wagmi.resetState();
   };
 
+  const showRegistrationModal = () => {
+    return new Promise((resolve, reject) => {
+      const modal = document.getElementById('webauthnModal');
+      const usernameInput = document.getElementById('username');
+      const registerBtn = document.getElementById('modalRegisterBtn');
+      const cancelBtn = document.getElementById('modalCancelBtn');
+      const errorDiv = document.getElementById('modalError');
+      
+      // Clear previous state
+      usernameInput.value = '';
+      errorDiv.classList.add('hidden');
+      errorDiv.textContent = '';
+      
+      // Show modal
+      modal.classList.remove('hidden');
+      usernameInput.focus();
+      
+      const cleanup = () => {
+        modal.classList.add('hidden');
+        registerBtn.removeEventListener('click', handleRegister);
+        cancelBtn.removeEventListener('click', handleCancel);
+        usernameInput.removeEventListener('keypress', handleKeyPress);
+      };
+      
+      const handleRegister = () => {
+        const username = usernameInput.value.trim();
+        if (!username) {
+          errorDiv.textContent = 'Username is required';
+          errorDiv.classList.remove('hidden');
+          return;
+        }
+        if (username.length < 3) {
+          errorDiv.textContent = 'Username must be at least 3 characters';
+          errorDiv.classList.remove('hidden');
+          return;
+        }
+        cleanup();
+        resolve(username);
+      };
+      
+      const handleCancel = () => {
+        cleanup();
+        reject(new Error('Registration cancelled by user'));
+      };
+      
+      const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+          handleRegister();
+        } else if (e.key === 'Escape') {
+          handleCancel();
+        }
+      };
+      
+      registerBtn.addEventListener('click', handleRegister);
+      cancelBtn.addEventListener('click', handleCancel);
+      usernameInput.addEventListener('keypress', handleKeyPress);
+    });
+  };
+
   const register = async () => {
-    await registerWebAuthn();
+    try {
+      const username = await showRegistrationModal();
+      await registerWebAuthn(username);
+    } catch (error) {
+      // User cancelled or error occurred
+      console.log('Registration cancelled or failed:', error.message);
+    }
   };
 
   const login = async () => {
