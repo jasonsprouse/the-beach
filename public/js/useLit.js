@@ -256,8 +256,13 @@ const useLit = () => {
   };
 
   const register = async () => {
-    const username = await showRegistrationModal();
-    await registerWebAuthn(username);
+    try {
+      const username = await showRegistrationModal();
+      await registerWebAuthn(username);
+    } catch (error) {
+      // User cancelled or error occurred
+      console.log('Registration cancelled or failed:', error.message);
+    }
   };
 
   const login = async () => {
