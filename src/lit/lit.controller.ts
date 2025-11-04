@@ -34,8 +34,28 @@ interface UserSession {
 @Controller('lit')
 export class LitController {
   private readonly rpName = 'The Beach';
+  private readonly userAuthenticators = new Map<string, Array<{
+    credentialID: string;
+    credentialPublicKey: Uint8Array;
+    counter: number;
+    credentialDeviceType: string;
+    credentialBackedUp: boolean;
+    transports: string[];
+  }>>();
 
   constructor(private readonly litService: LitService) {}
+
+  private getExpectedOrigin(): string {
+    return process.env.NODE_ENV === 'production' 
+      ? process.env.EXPECTED_ORIGIN || 'https://your-domain.com'
+      : 'http://localhost:3000';
+  }
+
+  private getRPID(): string {
+    return process.env.NODE_ENV === 'production'
+      ? process.env.RP_ID || 'your-domain.com'
+      : 'localhost';
+  }
 
   @Get('config')
   getConfig() {
@@ -101,85 +121,121 @@ export class LitController {
   /**
    * Verify WebAuthn registration response
    */
-  @Post('webauthn/verify-registration')
+    @Post('webauthn/verify-registration')
   async verifyRegistration(
-    @Body() body: RegistrationResponseJSON,
-    @Session() session: UserSession,
-    @Req() req: Request,
-  ) {
+    @Body() credential: any,
+    @Session() session: any,
+  ): Promise<{ success: boolean; message: string }> {
     try {
-      console.log('Registration verification started');
-      console.log('Session username:', session.username);
-      console.log('Session challenge exists:', !!session.currentChallenge);
-      console.log('Request body received:', !!body);
-      
+      console.log('Verifying registration credential...');
+      console.log('Credential received:', JSON.stringify(credential, null, 2));
+
       if (!session.currentChallenge) {
-        console.log('ERROR: No challenge found in session');
-        throw new BadRequestException('No challenge found in session');
+        console.log('❌ No challenge found in session');
+        throw new BadRequestException('No registration challenge found');
       }
 
-      const rpID = req.hostname;
-      const origin = `${req.protocol}://${req.get('host')}`;
-      console.log('Verification params - rpID:', rpID, 'origin:', origin);
+      if (!session.username) {
+        console.log('❌ No username found in session');
+        throw new BadRequestException('No username found in session');
+      }
 
       const verification = await verifyRegistrationResponse({
-        response: body,
+        response: credential,
         expectedChallenge: session.currentChallenge,
-        expectedOrigin: origin,
-        expectedRPID: rpID,
+        expectedOrigin: this.getExpectedOrigin(),
+        expectedRPID: this.getRPID(),
+        requireUserVerification: false,
       });
 
-      console.log('Verification result:', {
-        verified: verification.verified,
-        hasRegistrationInfo: !!verification.registrationInfo,
-        error: verification.verified ? null : 'Verification failed'
-      });
+      console.log('Verification result:', verification);
 
       if (verification.verified && verification.registrationInfo) {
-        if (!session.authenticators) {
-          session.authenticators = [];
+        // Store the authenticator
+        if (!this.userAuthenticators.has(session.username)) {
+          this.userAuthenticators.set(session.username, []);
         }
 
-        const { credential } = verification.registrationInfo;
         const newAuthenticator = {
-          credentialID: Buffer.from(credential.id).toString('base64url'),
-          credentialPublicKey: credential.publicKey,
-          counter: credential.counter,
-          transports: body.response.transports,
-          username: session.username,
+          credentialID: verification.registrationInfo.credential.id,
+          credentialPublicKey: verification.registrationInfo.credential.publicKey,
+          counter: verification.registrationInfo.credential.counter,
+          credentialDeviceType: verification.registrationInfo.credentialDeviceType,
+          credentialBackedUp: verification.registrationInfo.credentialBackedUp,
+          transports: credential.response.transports || [],
         };
-        
-        session.authenticators.push(newAuthenticator);
 
-        // Debug logging
-        console.log('Registration successful for username:', session.username);
-        console.log('Total authenticators now:', session.authenticators.length);
+        const userAuthenticators = this.userAuthenticators.get(session.username);
+        if (userAuthenticators) {
+          userAuthenticators.push(newAuthenticator);
+        }
 
+        console.log('✅ Registration successful for:', session.username);
+        console.log('Total authenticators:', this.userAuthenticators.get(session.username)?.length || 0);
+
+        // Clear the challenge
         delete session.currentChallenge;
-        delete session.username;
 
         return {
           success: true,
-          verified: verification.verified,
-          message: 'WebAuthn registration successful',
+          message: 'Registration successful',
         };
       } else {
-        console.log('Registration verification failed');
-        console.log('Verification.verified:', verification.verified);
-        console.log('Has registrationInfo:', !!verification.registrationInfo);
+        console.log('❌ Registration verification failed');
+        return {
+          success: false,
+          message: 'Registration verification failed',
+        };
+      }
+    } catch (error) {
+      console.error('Registration verification error:', error);
+      throw new BadRequestException(
+        'Registration verification failed: ' + error.message,
+      );
+    }
+  }
+
+  @Post('webauthn/demo-register')
+  async demoRegister(
+    @Body() body: { username?: string },
+    @Session() session: any,
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const username = body.username || `demo_${Date.now()}`;
+      console.log('🎭 Demo registration for:', username);
+
+      // Create a mock authenticator for demo purposes
+      if (!this.userAuthenticators.has(username)) {
+        this.userAuthenticators.set(username, []);
       }
 
+      const demoAuthenticator = {
+        credentialID: `demo_cred_${username}_${Date.now()}`,
+        credentialPublicKey: new Uint8Array([1, 2, 3, 4, 5]), // Simple demo key
+        counter: 0,
+        credentialDeviceType: 'singleDevice',
+        credentialBackedUp: false,
+        transports: ['internal'],
+      };
+
+      const userAuthenticators = this.userAuthenticators.get(username);
+      if (userAuthenticators) {
+        userAuthenticators.push(demoAuthenticator);
+      }
+
+      console.log('✅ Demo registration successful for:', username);
+      console.log('Total users:', Array.from(this.userAuthenticators.keys()));
+
+      // Store username in session for demo auth
+      session.demoUsername = username;
+
       return {
-        success: false,
-        verified: false,
-        message: 'Registration verification failed',
+        success: true,
+        message: `Demo registration successful for ${username}`,
       };
     } catch (error) {
-      console.error('Error verifying registration:', error);
-      console.error('Error details:', error.message);
-      throw new BadRequestException(
-        `Registration verification failed: ${error.message}`,
-      );
+      console.error('Demo registration error:', error);
+      throw new BadRequestException('Demo registration failed: ' + error.message);
     }
   }
 
@@ -196,14 +252,12 @@ export class LitController {
       const rpID = req.hostname;
 
       // Debug logging
-      console.log('Authentication request for username:', body.username);
-      console.log('Session authenticators:', session.authenticators?.length || 0);
-      console.log('Available usernames:', session.authenticators?.map(auth => auth.username) || []);
+      const username = body.username || '';
+      console.log('Authentication request for username:', username);
+      console.log('Available users in storage:', Array.from(this.userAuthenticators.keys()));
+      console.log('User authenticators for', username, ':', this.userAuthenticators.get(username)?.length || 0);
 
-      const authenticators =
-        session.authenticators?.filter(
-          (auth) => auth.username === body.username,
-        ) || [];
+      const authenticators = this.userAuthenticators.get(username) || [];
 
       if (authenticators.length === 0) {
         throw new BadRequestException(
@@ -215,7 +269,7 @@ export class LitController {
         rpID,
         allowCredentials: authenticators.map((auth) => ({
           id: auth.credentialID,
-          transports: auth.transports,
+          transports: auth.transports as any,
         })),
         userVerification: 'preferred',
       });
@@ -243,17 +297,24 @@ export class LitController {
         throw new BadRequestException('No challenge found in session');
       }
 
-      if (!session.authenticators || session.authenticators.length === 0) {
-        throw new BadRequestException('No authenticators registered');
+      // Find the authenticator across all users
+      let authenticator: any = null;
+      let username: string = '';
+      
+      for (const [user, userAuths] of this.userAuthenticators.entries()) {
+        const found = userAuths.find(auth => auth.credentialID === body.id);
+        if (found) {
+          authenticator = found;
+          username = user;
+          break;
+        }
       }
-
-      const authenticator = session.authenticators.find(
-        (auth) => auth.credentialID === body.id,
-      );
 
       if (!authenticator) {
         throw new BadRequestException('Authenticator not found');
       }
+
+      console.log('Found authenticator for user:', username);
 
       const rpID = req.hostname;
       const origin = `${req.protocol}://${req.get('host')}`;
@@ -265,7 +326,7 @@ export class LitController {
         expectedRPID: rpID,
         credential: {
           id: authenticator.credentialID,
-          publicKey: authenticator.credentialPublicKey,
+          publicKey: new Uint8Array(authenticator.credentialPublicKey),
           counter: authenticator.counter,
         },
       });
