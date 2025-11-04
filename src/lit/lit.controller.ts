@@ -45,9 +45,9 @@ export class LitController {
   /**
    * Generate WebAuthn registration options
    */
-  @Post('webauthn/register-options')
+  @Get('webauthn/register-options')
   async generateRegisterOptions(
-    @Body() body: { username?: string },
+    @Query('username') username: string,
     @Session() session: UserSession,
     @Req() req: Request,
   ) {
@@ -56,18 +56,18 @@ export class LitController {
       const origin = `${req.protocol}://${req.get('host')}`;
 
       // Use provided username or generate a default one
-      const username = body.username?.trim() || `user_${Date.now()}`;
+      const trimmedUsername = username?.trim() || `user_${Date.now()}`;
 
       // Basic validation
-      if (username.length < 3) {
+      if (trimmedUsername.length < 3) {
         throw new BadRequestException('Username must be at least 3 characters');
       }
 
       const options = await generateRegistrationOptions({
         rpName: this.rpName,
         rpID,
-        userName: username,
-        userDisplayName: username,
+        userName: trimmedUsername,
+        userDisplayName: trimmedUsername,
         // Prevent users from re-registering existing authenticators
         excludeCredentials:
           session.authenticators?.map((auth) => ({
