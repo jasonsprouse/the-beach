@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-user VR Chat Room (Babylon.js - Refactored)</title>
+    <title>Lit Protocol Babylon.js App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,11 +61,28 @@
             border-radius: 8px;
             font-size: 0.8em;
         }
+        #lit-auth-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 20;
+            color: white;
+        }
     </style>
 </head>
 <body class="bg-gray-900">
-    <canvas id="renderCanvas"></canvas>
-    <div id="video-container">
+    <div id="lit-auth-container">
+        <h2 class="text-xl mb-4">Lit Protocol Auth</h2>
+        <input type="text" id="username" placeholder="Enter username" class="text-black p-2 rounded">
+        <button id="register-button" class="bg-blue-500 p-2 rounded ml-2">Register with Passkey</button>
+        <button id="login-button" class="bg-green-500 p-2 rounded ml-2">Login with Passkey</button>
+    </div>
+    <canvas id="renderCanvas" style="display: none;"></canvas>
+    <div id="video-container" style="display: none;">
         <video id="local-video" class="video-feed local" autoplay muted playsinline></video>
     </div>
     <div id="debug-info">
@@ -294,34 +311,34 @@
             console.log("Setting up Socket.IO...");
             const socket = io('http://localhost:3000'); // Connect
 
-            socketInstance.on('connect', () => {
-                userId = socketInstance.id;
+            socket.on('connect', () => {
+                userId = socket.id;
                 debugElements.userId.textContent = userId;
                 console.log('Connected to server with ID:', userId);
                 // Join room *after* connection is established
-                socketInstance.emit('join-room', 'babylon-vr-room');
+                socket.emit('join-room', 'babylon-vr-room');
             });
 
-            socketInstance.on('joined-room', (joinedRoomId) => {
+            socket.on('joined-room', (joinedRoomId) => {
                 roomId = joinedRoomId;
                 debugElements.roomId.textContent = roomId;
                 console.log(`Joined room: ${roomId}`);
             });
 
-            socketInstance.on('disconnect', () => {
+            socket.on('disconnect', () => {
                 console.log('Disconnected from server.');
                  // Handle cleanup if needed
                  debugElements.userId.textContent = 'Disconnected';
                  debugElements.roomId.textContent = 'N/A';
             });
 
-            socketInstance.on('connect_error', (error) => {
+            socket.on('connect_error', (error) => {
                 console.error('Socket connection error:', error);
                 alert('Could not connect to the signaling server.');
             });
 
             console.log("Socket.IO Initialized.");
-            return socketInstance;
+            return socket;
         }
 
         // --- 5. WebRTC Signaling (Depends on Socket.IO and WebRTC) ---
@@ -646,8 +663,9 @@
         }
 
         // --- Start the application ---
-        main();
+        // main();
 
     </script>
+    <script src="/js/lit-auth.js"></script>
 </body>
 </html>

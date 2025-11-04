@@ -31,7 +31,7 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'public'));
 
   const port = process.env.PORT ?? 3000;
-  await app.listen(port, '0.0.0.0');
+  await app.listen(port, '127.0.0.1');
   console.log(`🚀 XR Server running on: http://localhost:${port}`);
 }
 bootstrap();
