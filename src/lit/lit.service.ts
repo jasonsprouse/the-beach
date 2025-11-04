@@ -35,7 +35,11 @@ export class LitService implements OnModuleInit {
       console.log('Lit Protocol clients initialized successfully');
     } catch (error) {
       console.error('Error initializing Lit Protocol clients:', error);
-      throw error;
+      console.warn(
+        'Continuing without Lit Protocol - some features may be limited',
+      );
+      // Don't throw error - allow app to start even if Lit Protocol can't connect
+      // This is useful in sandboxed environments or when blockchain nodes are unavailable
     }
   }
 
