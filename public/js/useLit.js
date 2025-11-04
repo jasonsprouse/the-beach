@@ -85,7 +85,7 @@ const useLit = () => {
     // Check if user is registered first
     const isRegistered = await provider.isRegistered();
     if (!isRegistered) {
-      throw new Error('You must register before logging in. Please click "Register with WebAuthn" first.');
+      throw new Error('You must register before logging in. Please complete WebAuthn registration first.');
     }
 
     // Now authenticate with the registered credential
@@ -162,8 +162,6 @@ const useLit = () => {
     initializeLit,
     signIn,
     signOut,
-    registerWebAuthn,
-    authenticateWebAuthn,
     register,
     login,
   };

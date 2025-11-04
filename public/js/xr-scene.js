@@ -519,8 +519,7 @@ class BabylonXRScene {
                 // Check authentication before loading
                 const wagmi = window.useWagmi();
                 if (!wagmi || !wagmi.state.isAuthenticated) {
-                    this.updateStatus("❌ Authentication required! Please return to home page and login with WebAuthn.");
-                    alert('You must be logged in with WebAuthn to load paradise. Please return to the home page and login.');
+                    alert('Authentication required! Please return to the home page and login with WebAuthn to load paradise.');
                     window.location.href = '/';
                     return;
                 }
