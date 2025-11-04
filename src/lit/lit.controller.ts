@@ -225,7 +225,6 @@ export class LitController {
       }
 
       // Get the username associated with the authenticator
-      const username = authenticator.username;
 
       const verification = await verifyAuthenticationResponse({
         response: body,
