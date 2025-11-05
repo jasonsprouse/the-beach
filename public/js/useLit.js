@@ -389,23 +389,46 @@ const useLit = () => {
 
   const login = async () => {
     try {
-      // Check for a stored username
-      const storedUsername = localStorage.getItem('webauthn_username');
+      // Check for a stored username first to avoid modal delays
+      let storedUsername = localStorage.getItem('webauthn_username');
 
       if (storedUsername) {
         // If a username is found, authenticate directly to maintain user gesture chain
         console.log('🔐 Using stored username for authentication:', storedUsername);
-        await authenticateWebAuthn(storedUsername);
-        return storedUsername;
-      } else {
-        // Otherwise, show the login modal to get a username, then authenticate
-        console.log('🔐 No stored username found, showing login modal');
-        const username = await showLoginModal();
-        if (username) {
-          await authenticateWebAuthn(username);
-          return username;
-        } else {
-          return null;
+        try {
+          await authenticateWebAuthn(storedUsername);
+          return storedUsername;
+        } catch (error) {
+          // If authentication fails with stored user, clear it and try default
+          if (error.message.includes('No authenticators registered') || error.message.includes('authentication failed')) {
+            console.log('Stored user authentication failed, clearing and trying default...');
+            localStorage.removeItem('webauthn_username');
+            storedUsername = null; // Clear so we fall through to default
+          } else {
+            throw error; // Re-throw other errors
+          }
+        }
+      }
+      
+      if (!storedUsername) {
+        // Try a default username to maintain user gesture chain
+        console.log('🔐 Trying default username authentication');
+        try {
+          const defaultUsername = 'testuser'; // Default fallback username
+          await authenticateWebAuthn(defaultUsername);
+          // Save successful username for future use
+          localStorage.setItem('webauthn_username', defaultUsername);
+          return defaultUsername;
+        } catch (error) {
+          console.log('Default username failed, will need to show modal:', error.message);
+          // If default username fails, we need to show modal (breaks gesture chain)
+          const username = await showLoginModal();
+          if (username) {
+            await authenticateWebAuthn(username);
+            return username;
+          } else {
+            return null;
+          }
         }
       }
     } catch (error) {

@@ -534,20 +534,10 @@ class BabylonXRScene {
                         }
                     } catch (error) {
                         console.error('Authentication failed:', error);
-                        this.updateStatus("❌ Authentication failed: " + error.message);
+                        this.updateStatus("❌ Authentication failed: " + error.message + " - Click 'Load Paradise' to try again");
                         
-                        // Offer alternative or retry after the WebAuthn error
-                        const retry = confirm(
-                            "Authentication failed: " + error.message + "\n\n" +
-                            "Would you like to try again?"
-                        );
-                        
-                        if (retry) {
-                            // Recursive call to try again with fresh user gesture
-                            setTimeout(() => {
-                                document.getElementById('loadParadise').click();
-                            }, 100);
-                        }
+                        // Simply return without blocking dialogs to maintain user gesture chain
+                        // The user can click the Load Paradise button again to retry
                         return;
                     }
                 }
