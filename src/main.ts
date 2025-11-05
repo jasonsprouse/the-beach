@@ -21,17 +21,35 @@ async function bootstrap() {
     }),
   );
 
-  // Add Permissions Policy headers for WebAuthn support
+  // Add comprehensive security and permissions headers
   app.use((req, res, next) => {
+    // WebAuthn permissions - Allow all origins for development
+    // Format: feature=(origin1 origin2) or feature=* for all
     res.setHeader('Permissions-Policy', 
       'publickey-credentials-create=*, publickey-credentials-get=*'
     );
     res.setHeader('Feature-Policy', 
       'publickey-credentials-create *; publickey-credentials-get *'
     );
+    
+    // CORS and security headers
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Headers', 
       'Origin, X-Requested-With, Content-Type, Accept, Authorization'
     );
+    res.setHeader('Access-Control-Allow-Methods', 
+      'GET, POST, PUT, DELETE, OPTIONS'
+    );
+    
+    // More permissive Content Security Policy for external CDN scripts
+    res.setHeader('Content-Security-Policy',
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://w.soundcloud.com https://cdn.tailwindcss.com https://cdn.jsdelivr.net; " +
+      "frame-src 'self' https://w.soundcloud.com; " +
+      "media-src 'self' https://*.soundcloud.com; " +
+      "connect-src 'self' https://*.soundcloud.com https://cdn.jsdelivr.net;"
+    );
+    
     console.log('Setting WebAuthn permissions headers');
     next();
   });

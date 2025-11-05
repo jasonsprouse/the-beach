@@ -18,6 +18,25 @@ class BabylonXRScene {
         this.initializeBasics();
     }
     
+    resizeCanvas(canvas) {
+        // Ensure canvas has proper dimensions
+        const parent = canvas.parentElement;
+        if (parent) {
+            const rect = parent.getBoundingClientRect();
+            canvas.width = rect.width || window.innerWidth;
+            canvas.height = rect.height || window.innerHeight;
+        } else {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        // Ensure minimum dimensions to prevent zero-width errors
+        canvas.width = Math.max(canvas.width, 100);
+        canvas.height = Math.max(canvas.height, 100);
+        
+        console.log(`Canvas resized to: ${canvas.width}x${canvas.height}`);
+    }
+    
     initializeBasics() {
         // Just setup the canvas and basic UI, don't load the full scene yet
         const canvas = document.getElementById("renderCanvas");
@@ -71,6 +90,12 @@ class BabylonXRScene {
             if (!canvas) {
                 throw new Error("Canvas not found!");
             }
+            
+            // Ensure canvas has proper dimensions before creating engine
+            this.resizeCanvas(canvas);
+            
+            // Add resize listener to handle window changes
+            window.addEventListener('resize', () => this.resizeCanvas(canvas));
             
             this.engine = new BABYLON.Engine(canvas, true, { 
                 preserveDrawingBuffer: true, 
@@ -135,6 +160,11 @@ class BabylonXRScene {
             
             console.log("Babylon.js initialization complete!");
             this.sceneLoaded = true;
+            this.enableSceneTransition();
+            
+            // Display authentication state
+            this.displayAuthState();
+            
             this.updateStatus("🏝️ Paradise Ready! Use WASD to explore. VR ready. Ocean Breeze soundtrack available! 🎵");
             
             // Auto-play ambient music at low volume if user interacted
@@ -516,34 +546,77 @@ class BabylonXRScene {
         // Load Paradise Controls
         document.getElementById('loadParadise').addEventListener('click', async () => {
             if (!this.sceneLoaded) {
-                // Check authentication before loading
-                const wagmi = window.useWagmi();
-                if (!wagmi || !wagmi.state.isAuthenticated) {
-                    alert('Authentication required! Please return to the home page and login with WebAuthn to load paradise.');
-                    window.location.href = '/';
-                    return;
+                console.log('🎯 Load Paradise clicked - preserving user gesture');
+                
+                // IMMEDIATE session check without consuming user gesture
+                const lit = window.useLit();
+                const sessionVerified = await lit.verifySessionForRoute('/xr/load-paradise');
+                
+                if (!sessionVerified) {
+                    if (window.updateStatus) {
+                        window.updateStatus("🔐 WebAuthn authentication required for Paradise access...", 'loading');
+                    } else {
+                        this.updateStatus("🔐 WebAuthn authentication required for Paradise access...");
+                    }
+                    
+                    // Trigger authentication IMMEDIATELY to preserve user gesture
+                    try {
+                        const username = await lit.login();
+                        if (username) {
+                            this.updateStatus("✅ WebAuthn verified! Accessing PKP-protected Paradise...");
+                            
+                            // Show PKP management info (this can be async since auth is complete)
+                            try {
+                                const pkpDashboard = await lit.getPKPDashboard();
+                                console.log('🔑 PKP Management Active:', pkpDashboard);
+                                this.updateStatus(`🎯 PKP ${pkpDashboard.primaryPKP.address.slice(-8)} managing ${pkpDashboard.totalManagedPKPs} total PKPs`);
+                            } catch (pkpError) {
+                                console.log('⚠️ PKP dashboard fetch failed (continuing anyway):', pkpError.message);
+                            }
+                        } else {
+                            this.updateStatus("❌ WebAuthn cancelled. Paradise access denied.");
+                            return;
+                        }
+                    } catch (error) {
+                        console.error('WebAuthn authentication failed:', error);
+                        this.updateStatus("❌ WebAuthn failed: " + error.message);
+                        
+                        // Provide specific guidance based on error type
+                        if (error.message.includes('user interaction') || error.message.includes('User interaction required')) {
+                            this.updateStatus("💡 Tip: Click 'Load Paradise' button again for fresh user interaction");
+                        }
+                        return;
+                    }
+                } else {
+                    this.updateStatus("✅ Session already verified - loading Paradise...");
                 }
                 
                 // Load the scene for the first time
-                this.updateStatus("🏗️ Loading tropical paradise...");
+                this.showLoadingState("🏗️ Loading PKP-authenticated tropical paradise...");
                 document.getElementById('loadParadise').textContent = "Loading...";
                 document.getElementById('loadParadise').disabled = true;
                 
                 try {
-                    // Verify authentication with backend before loading
-                    const token = JSON.stringify(wagmi.state.sessionSigs);
+                    // Verify WebAuthn authentication with backend
                     const authResponse = await fetch('/xr/load-paradise', {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json'
-                        }
+                        },
+                        credentials: 'include' // Use session cookies with WebAuthn verification
                     });
                     
                     if (!authResponse.ok) {
                         const status = authResponse.status;
                         if (status === 401) {
-                            throw new Error('Authentication failed: Your session has expired or is invalid. Please return to the home page and login again.');
+                            const errorData = await authResponse.json();
+                            if (errorData.code === 'WEBAUTHN_REQUIRED') {
+                                throw new Error('WebAuthn authentication required: Your PKP credentials are needed to access Paradise.');
+                            } else if (errorData.code === 'SESSION_EXPIRED') {
+                                throw new Error('Session expired: Please authenticate again with your WebAuthn credentials.');
+                            } else {
+                                throw new Error('Authentication failed: WebAuthn verification required.');
+                            }
                         } else if (status === 403) {
                             throw new Error('Authorization denied: You do not have permission to load Paradise. Please verify your account.');
                         } else {
@@ -558,11 +631,19 @@ class BabylonXRScene {
                     
                     // Now load the scene
                     await this.init();
+                    this.hideLoadingState();
+                    this.enableSceneTransition();
                     document.getElementById('loadParadise').textContent = "Paradise Loaded ✅";
                     document.getElementById('loadParadise').disabled = true;
+                    this.updateStatus("🏝️ Welcome to Paradise! Enjoy your tropical adventure with Ocean Breeze 🎵");
                 } catch (error) {
                     console.error("Failed to load scene:", error);
-                    this.updateStatus("Failed to load scene: " + error.message);
+                    this.hideLoadingState();
+                    if (window.updateStatus) {
+                        window.updateStatus("❌ Failed to load Paradise: " + error.message, 'error');
+                    } else {
+                        this.updateStatus("❌ Failed to load Paradise: " + error.message);
+                    }
                     document.getElementById('loadParadise').textContent = "Retry Load";
                     document.getElementById('loadParadise').disabled = false;
                 }
@@ -687,9 +768,122 @@ class BabylonXRScene {
         }
     }
     
+    async displayAuthState() {
+        try {
+            if (window.useLit) {
+                const litInstance = window.useLit();
+                const authState = litInstance.getAuthenticationState();
+                const walletState = litInstance.getWalletState();
+                
+                console.log('🔐 Authentication State:', authState);
+                console.log('💼 Wallet State:', walletState);
+                
+                if (authState.currentUser) {
+                    console.log(`✅ Authenticated as: ${authState.currentUser}`);
+                    
+                    // Try to get PKP info from localStorage
+                    const pkpAddress = localStorage.getItem('pkp_primary_address');
+                    if (pkpAddress) {
+                        console.log(`🔑 Primary PKP: ${pkpAddress}`);
+                        const subCount = localStorage.getItem('pkp_sub_count') || '0';
+                        console.log(`🔧 Sub-PKPs: ${subCount}`);
+                    }
+                    
+                    // Update UI wallet display
+                    const walletInfoEl = document.getElementById('walletInfo');
+                    if (walletInfoEl) {
+                        walletInfoEl.style.display = 'block';
+                        
+                        // Set user
+                        const walletUserEl = document.getElementById('walletUser');
+                        if (walletUserEl) {
+                            walletUserEl.textContent = authState.currentUser;
+                        }
+                        
+                        // Set PKP address
+                        const walletPKPEl = document.getElementById('walletPKP');
+                        if (walletPKPEl && pkpAddress) {
+                            walletPKPEl.textContent = `${pkpAddress.slice(0, 6)}...${pkpAddress.slice(-4)}`;
+                            walletPKPEl.title = pkpAddress; // Show full address on hover
+                        }
+                        
+                        // Set sub-PKP count
+                        const walletSubCountEl = document.getElementById('walletSubCount');
+                        if (walletSubCountEl) {
+                            const subCount = localStorage.getItem('pkp_sub_count') || '0';
+                            walletSubCountEl.textContent = subCount;
+                        }
+                        
+                        // Fetch and display detailed PKP dashboard
+                        try {
+                            const pkpDashboard = await litInstance.getPKPDashboard();
+                            console.log('📊 PKP Dashboard:', pkpDashboard);
+                            
+                            if (pkpDashboard && pkpDashboard.primaryPKP && pkpDashboard.primaryPKP.subPKPs) {
+                                const subPKPListEl = document.getElementById('subPKPList');
+                                if (subPKPListEl && pkpDashboard.primaryPKP.subPKPs.length > 0) {
+                                    subPKPListEl.style.display = 'block';
+                                    subPKPListEl.innerHTML = pkpDashboard.primaryPKP.subPKPs.map(subPKP => `
+                                        <div class="sub-pkp-item" title="${subPKP.ethAddress}">
+                                            <strong>${subPKP.purpose}</strong>: ${subPKP.ethAddress.slice(0, 6)}...${subPKP.ethAddress.slice(-4)}
+                                        </div>
+                                    `).join('');
+                                }
+                            }
+                        } catch (dashboardError) {
+                            console.warn('Could not fetch PKP dashboard:', dashboardError);
+                        }
+                    }
+                } else {
+                    console.log('⚠️ No authenticated user found');
+                    // Hide wallet info if not authenticated
+                    const walletInfoEl = document.getElementById('walletInfo');
+                    if (walletInfoEl) {
+                        walletInfoEl.style.display = 'none';
+                    }
+                }
+            } else {
+                console.log('⚠️ useLit not available');
+            }
+        } catch (error) {
+            console.error('❌ Error displaying auth state:', error);
+        }
+    }
+    
     updateStatus(message) {
-        document.getElementById('status').textContent = message;
+        // Use the enhanced status function if available, otherwise fall back to basic
+        if (window.updateStatus) {
+            window.updateStatus(message);
+        } else {
+            const statusEl = document.getElementById('status');
+            if (statusEl) {
+                statusEl.textContent = message;
+            }
+        }
         console.log('Status:', message);
+    }
+    
+    showLoadingState(message) {
+        if (window.showLoadingOverlay) {
+            window.showLoadingOverlay(message);
+        }
+        if (window.updateStatus) {
+            window.updateStatus(message, 'loading');
+        } else {
+            this.updateStatus(message);
+        }
+    }
+    
+    hideLoadingState() {
+        if (window.hideLoadingOverlay) {
+            window.hideLoadingOverlay();
+        }
+    }
+    
+    enableSceneTransition() {
+        if (window.enableSceneTransition) {
+            window.enableSceneTransition();
+        }
     }
 }
 

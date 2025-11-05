@@ -13,10 +13,19 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<{
       headers: { authorization?: string };
+      session?: any;
     }>();
+    
+    // First, check if there's a session-based authentication (WebAuthn session)
+    if (request.session && request.session.authenticated) {
+      console.log('✅ Session-based authentication found');
+      return true;
+    }
+    
+    // Fallback to token-based authentication
     const authHeader = request.headers.authorization;
     if (!authHeader || typeof authHeader !== 'string') {
-      throw new UnauthorizedException('Authorization header not found');
+      throw new UnauthorizedException('No valid authentication found. Please login again.');
     }
 
     // Split and validate the Authorization header format

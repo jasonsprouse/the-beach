@@ -46,7 +46,9 @@ describe('XrController', () => {
 
   describe('loadParadise', () => {
     it('should return success for authenticated request', () => {
-      const result = controller.loadParadise();
+      const mockSession = { username: 'testuser', authenticated: true };
+      const mockResponse = {};
+      const result = controller.loadParadise(mockSession as any, mockResponse as any);
 
       expect(result).toEqual({
         success: true,

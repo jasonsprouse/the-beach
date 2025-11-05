@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Authentication - XR Paradise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 min-h-screen flex items-center justify-center">
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-2xl p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">🏝️ XR Paradise</h1>
+            <p class="text-gray-600">Demo Authentication</p>
+        </div>
+
+        <div class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Username (Demo Mode)
+                </label>
+                <input type="text" id="username" placeholder="Enter username" 
+                       value="demo_user" 
+                       class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div class="space-y-3">
+                <button onclick="demoRegister()" 
+                        class="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all">
+                    🎭 Demo Register
+                </button>
+                
+                <button onclick="demoLogin()" 
+                        class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    🚀 Demo Login
+                </button>
+                
+                <button onclick="loadParadise()" 
+                        class="w-full bg-purple-600 text-white py-3 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
+                    🏝️ Enter Paradise
+                </button>
+            </div>
+
+            <div id="status" class="hidden p-3 rounded-md text-sm"></div>
+            
+            <div class="border-t pt-4">
+                <h3 class="text-sm font-medium text-gray-900 mb-2">Debug Logs</h3>
+                <pre id="logs" class="bg-gray-100 p-3 rounded-md text-xs overflow-auto max-h-40 hidden"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const logsDiv = document.getElementById('logs');
+        const statusDiv = document.getElementById('status');
+        const usernameInput = document.getElementById('username');
+        
+        function log(message) {
+            console.log(message);
+            logsDiv.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            logsDiv.classList.remove('hidden');
+        }
+        
+        function showStatus(message, type = 'info') {
+            statusDiv.className = `p-3 rounded-md text-sm ${type === 'error' ? 'bg-red-100 text-red-700 border border-red-200' : 
+                                                             type === 'success' ? 'bg-green-100 text-green-700 border border-green-200' : 
+                                                             'bg-blue-100 text-blue-700 border border-blue-200'}`;
+            statusDiv.textContent = message;
+            statusDiv.classList.remove('hidden');
+        }
+
+        async function demoRegister() {
+            const username = usernameInput.value.trim();
+            if (!username) {
+                showStatus('Please enter a username', 'error');
+                return;
+            }
+
+            try {
+                log('🎭 Starting demo registration for: ' + username);
+                showStatus('Creating demo registration...', 'info');
+                
+                const response = await fetch('/lit/webauthn/demo-register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username }),
+                });
+                
+                log('Demo register response status: ' + response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log('❌ Demo registration failed: ' + errorText);
+                    throw new Error(`Demo registration failed: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                log('✅ Demo registration result: ' + JSON.stringify(result));
+                
+                if (result.success) {
+                    showStatus('Demo registration successful! You can now login.', 'success');
+                } else {
+                    showStatus('Demo registration failed: ' + result.message, 'error');
+                }
+                
+            } catch (error) {
+                log('💥 Demo registration error: ' + error.message);
+                showStatus('Demo registration failed: ' + error.message, 'error');
+            }
+        }
+
+        async function demoLogin() {
+            const username = usernameInput.value.trim();
+            if (!username) {
+                showStatus('Please enter a username', 'error');
+                return;
+            }
+
+            try {
+                log('🔓 Starting demo authentication for: ' + username);
+                showStatus('Authenticating...', 'info');
+                
+                const authResponse = await fetch('/lit/webauthn/authenticate-options', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username }),
+                });
+                
+                log('Demo auth response status: ' + authResponse.status);
+                
+                if (!authResponse.ok) {
+                    const errorText = await authResponse.text();
+                    log('❌ Demo authentication failed: ' + errorText);
+                    throw new Error(`Demo authentication failed: ${authResponse.status}`);
+                }
+                
+                const authOptions = await authResponse.json();
+                log('✅ Demo authentication options received');
+                
+                showStatus('Demo authentication successful!', 'success');
+                
+            } catch (error) {
+                log('💥 Demo authentication error: ' + error.message);
+                showStatus('Demo authentication failed: ' + error.message, 'error');
+            }
+        }
+
+        function loadParadise() {
+            log('🏝️ Loading XR Paradise...');
+            showStatus('Opening paradise...', 'info');
+            window.location.href = '/';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🎭 Demo authentication interface loaded');
+        });
+    </script>
+</body>
+</html>
