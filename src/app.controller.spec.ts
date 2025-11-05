@@ -14,9 +14,13 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('status', () => {
+    it('should return server status', () => {
+      const result = appController.getStatus();
+      expect(result).toHaveProperty('message');
+      expect(result.message).toBe('Babylon.js XR Server is running!');
+      expect(result).toHaveProperty('endpoints');
+      expect(result).toHaveProperty('timestamp');
     });
   });
 });

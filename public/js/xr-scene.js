@@ -516,12 +516,47 @@ class BabylonXRScene {
         // Load Paradise Controls
         document.getElementById('loadParadise').addEventListener('click', async () => {
             if (!this.sceneLoaded) {
+                // Check authentication before loading
+                const wagmi = window.useWagmi();
+                if (!wagmi || !wagmi.state.isAuthenticated) {
+                    alert('Authentication required! Please return to the home page and login with WebAuthn to load paradise.');
+                    window.location.href = '/';
+                    return;
+                }
+                
                 // Load the scene for the first time
                 this.updateStatus("🏗️ Loading tropical paradise...");
                 document.getElementById('loadParadise').textContent = "Loading...";
                 document.getElementById('loadParadise').disabled = true;
                 
                 try {
+                    // Verify authentication with backend before loading
+                    const token = JSON.stringify(wagmi.state.sessionSigs);
+                    const authResponse = await fetch('/xr/load-paradise', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!authResponse.ok) {
+                        const status = authResponse.status;
+                        if (status === 401) {
+                            throw new Error('Authentication failed: Your session has expired or is invalid. Please return to the home page and login again.');
+                        } else if (status === 403) {
+                            throw new Error('Authorization denied: You do not have permission to load Paradise. Please verify your account.');
+                        } else {
+                            throw new Error(`Server error (${status}): Unable to verify authentication. Please try again later.`);
+                        }
+                    }
+                    
+                    const authData = await authResponse.json();
+                    if (!authData.success) {
+                        throw new Error('Authorization denied: The server did not approve your request to load Paradise.');
+                    }
+                    
+                    // Now load the scene
                     await this.init();
                     document.getElementById('loadParadise').textContent = "Paradise Loaded ✅";
                     document.getElementById('loadParadise').disabled = true;
