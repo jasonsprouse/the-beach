@@ -157,6 +157,10 @@ const useLit = () => {
       
       // Use WebAuthn browser API to get assertion with improved timeout and logging
       console.log('🛡️ Starting WebAuthn assertion...');
+      
+      // Add a small delay to ensure we're in a clean execution context
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
       const assertion = await navigator.credentials.get({
         publicKey: {
           ...options,
@@ -389,24 +393,32 @@ const useLit = () => {
       const storedUsername = localStorage.getItem('webauthn_username');
 
       if (storedUsername) {
-        // If a username is found, try to authenticate directly
+        // If a username is found, authenticate directly to maintain user gesture chain
+        console.log('🔐 Using stored username for authentication:', storedUsername);
         await authenticateWebAuthn(storedUsername);
+        return storedUsername;
       } else {
-        // Otherwise, show the login modal to get a username
+        // Otherwise, show the login modal to get a username, then authenticate
+        console.log('🔐 No stored username found, showing login modal');
         const username = await showLoginModal();
-        await authenticateWebAuthn(username);
+        if (username) {
+          await authenticateWebAuthn(username);
+          return username;
+        } else {
+          return null;
+        }
       }
     } catch (error) {
       // User cancelled or error occurred
-      console.log('Login cancelled or failed:', error.message);
+      console.error('Login failed:', error.message);
 
       // If authentication fails, it might be because the stored user was not found.
-      // In this case, we should clear the stored username and prompt the user to log in manually.
+      // In this case, we should clear the stored username and throw the error
       if (error.message.includes('No authenticators registered')) {
         localStorage.removeItem('webauthn_username');
-        // We could optionally call login() again here to show the modal right away
-        // login();
       }
+      
+      throw error;
     }
   };
 

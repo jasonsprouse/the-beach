@@ -521,24 +521,10 @@ class BabylonXRScene {
                 const lit = window.useLit();
                 
                 if (!wagmi || !wagmi.state.isAuthenticated) {
-                    this.updateStatus("🔐 Authentication required! Please login to access Paradise...");
+                    this.updateStatus("🔐 Triggering biometric authentication for Paradise access...");
                     
-                    // Show authentication options instead of automatically triggering WebAuthn
-                    const shouldAuthenticate = confirm(
-                        "Paradise access requires authentication.\n\n" +
-                        "Would you like to login with WebAuthn biometric authentication?\n\n" +
-                        "✓ Click OK to proceed with biometric login\n" +
-                        "✗ Click Cancel to return to main page"
-                    );
-                    
-                    if (!shouldAuthenticate) {
-                        this.updateStatus("❌ Authentication required for Paradise access.");
-                        return;
-                    }
-                    
-                    // Now trigger authentication with proper user gesture
+                    // Trigger authentication immediately to maintain user gesture chain
                     try {
-                        this.updateStatus("🔐 Please complete biometric authentication...");
                         const username = await lit.login();
                         if (username) {
                             this.updateStatus("✅ Authentication successful! Loading Paradise...");
@@ -550,15 +536,17 @@ class BabylonXRScene {
                         console.error('Authentication failed:', error);
                         this.updateStatus("❌ Authentication failed: " + error.message);
                         
-                        // Offer alternative or retry
+                        // Offer alternative or retry after the WebAuthn error
                         const retry = confirm(
                             "Authentication failed: " + error.message + "\n\n" +
-                            "Would you like to try again or return to the main page?"
+                            "Would you like to try again?"
                         );
                         
                         if (retry) {
-                            // Recursive call to try again
-                            document.getElementById('loadParadise').click();
+                            // Recursive call to try again with fresh user gesture
+                            setTimeout(() => {
+                                document.getElementById('loadParadise').click();
+                            }, 100);
                         }
                         return;
                     }
