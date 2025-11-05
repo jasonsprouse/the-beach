@@ -1,0 +1,14 @@
+{
+  "testuser": [
+    {
+      "credentialID": "Bhf_6xT1a8Kj4tf8NI82xjzaQIQNry9BCVZfo4xiPLo",
+      "credentialPublicKey": "pQECAyYgASFYINtfJjrsulrrWqEEjfKQNmANPAO2JVw1lGdxcIDDOpURIlggNNhatY5Q7N/mEDg1u8OQUSBeAH9a7++gv8LjislMaXA=",
+      "counter": 0,
+      "credentialDeviceType": "singleDevice",
+      "credentialBackedUp": false,
+      "transports": [
+        "internal"
+      ]
+    }
+  ]
+}

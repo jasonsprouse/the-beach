@@ -39,9 +39,12 @@ async function bootstrap() {
       'GET, POST, PUT, DELETE, OPTIONS'
     );
     
-    // Content Security Policy for SoundCloud embeds
+    // More permissive Content Security Policy for external CDN scripts
     res.setHeader('Content-Security-Policy',
-      "frame-src 'self' https://w.soundcloud.com; media-src 'self' https://*.soundcloud.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://w.soundcloud.com;"
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://w.soundcloud.com https://cdn.tailwindcss.com https://cdn.jsdelivr.net; " +
+      "frame-src 'self' https://w.soundcloud.com; " +
+      "media-src 'self' https://*.soundcloud.com; " +
+      "connect-src 'self' https://*.soundcloud.com https://cdn.jsdelivr.net;"
     );
     
     console.log('Setting WebAuthn permissions headers');
