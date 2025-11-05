@@ -52,5 +52,17 @@
         "internal"
       ]
     }
+  ],
+  "username": [
+    {
+      "credentialID": "UQ9pUt2Uh3zKkJDd7sd2U5izqLEECwl5MKFSl6kIVKc",
+      "credentialPublicKey": "pQECAyYgASFYIGM8WItZyq8NsvonceUisKz6DBCSn9kw3gomFT7F8dTrIlggA66sRtASiY//PCEGsHzaJEKG5CAmSTp/SVFbcI5ahvA=",
+      "counter": 0,
+      "credentialDeviceType": "singleDevice",
+      "credentialBackedUp": false,
+      "transports": [
+        "internal"
+      ]
+    }
   ]
 }

@@ -3,13 +3,38 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import session = require('express-session');
+import { createClient } from '@vercel/kv';
+import RedisStore from 'connect-redis';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  // Configure session store based on environment
+  let sessionStore;
+  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+    // Production: Use Vercel KV (Redis-compatible)
+    console.log('🔧 Configuring Vercel KV session store...');
+    const redisClient = createClient({
+      url: process.env.KV_REST_API_URL,
+      token: process.env.KV_REST_API_TOKEN,
+    });
+    
+    sessionStore = new RedisStore({
+      // @ts-ignore - RedisStore expects a different client type but works with Vercel KV
+      client: redisClient,
+      prefix: 'sess:',
+      ttl: 24 * 60 * 60, // 24 hours in seconds
+    });
+    console.log('✅ Vercel KV session store configured');
+  } else {
+    // Development: Use in-memory sessions
+    console.log('⚠️  Using in-memory session store (development only)');
+  }
+
   // Configure session middleware for WebAuthn
   app.use(
     session({
+      store: sessionStore,
       secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
       resave: false,
       saveUninitialized: false,
@@ -17,6 +42,7 @@ async function bootstrap() {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       },
     }),
   );

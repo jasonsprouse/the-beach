@@ -38,6 +38,8 @@
     "@nestjs/platform-socket.io": "^11.0.17",
     "@nestjs/websockets": "^11.0.17",
     "@simplewebauthn/server": "^13.2.2",
+    "@vercel/kv": "^1.0.1",
+    "connect-redis": "^9.0.0",
     "express-session": "^1.18.1",
     "helmet": "^8.1.0",
     "reflect-metadata": "^0.2.2",
