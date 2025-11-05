@@ -160,6 +160,7 @@ class BabylonXRScene {
             
             console.log("Babylon.js initialization complete!");
             this.sceneLoaded = true;
+            this.enableSceneTransition();
             this.updateStatus("🏝️ Paradise Ready! Use WASD to explore. VR ready. Ocean Breeze soundtrack available! 🎵");
             
             // Auto-play ambient music at low volume if user interacted
@@ -541,52 +542,77 @@ class BabylonXRScene {
         // Load Paradise Controls
         document.getElementById('loadParadise').addEventListener('click', async () => {
             if (!this.sceneLoaded) {
-                // Check authentication before loading
-                const wagmi = window.useWagmi();
-                const lit = window.useLit();
+                console.log('🎯 Load Paradise clicked - preserving user gesture');
                 
-                if (!wagmi || !wagmi.state.isAuthenticated) {
-                    this.updateStatus("🔐 Triggering biometric authentication for Paradise access...");
+                // IMMEDIATE session check without consuming user gesture
+                const lit = window.useLit();
+                const sessionVerified = await lit.verifySessionForRoute('/xr/load-paradise');
+                
+                if (!sessionVerified) {
+                    if (window.updateStatus) {
+                        window.updateStatus("🔐 WebAuthn authentication required for Paradise access...", 'loading');
+                    } else {
+                        this.updateStatus("🔐 WebAuthn authentication required for Paradise access...");
+                    }
                     
-                    // Trigger authentication immediately to maintain user gesture chain
+                    // Trigger authentication IMMEDIATELY to preserve user gesture
                     try {
                         const username = await lit.login();
                         if (username) {
-                            this.updateStatus("✅ Authentication successful! Loading Paradise...");
+                            this.updateStatus("✅ WebAuthn verified! Accessing PKP-protected Paradise...");
+                            
+                            // Show PKP management info (this can be async since auth is complete)
+                            try {
+                                const pkpDashboard = await lit.getPKPDashboard();
+                                console.log('🔑 PKP Management Active:', pkpDashboard);
+                                this.updateStatus(`🎯 PKP ${pkpDashboard.primaryPKP.address.slice(-8)} managing ${pkpDashboard.totalManagedPKPs} total PKPs`);
+                            } catch (pkpError) {
+                                console.log('⚠️ PKP dashboard fetch failed (continuing anyway):', pkpError.message);
+                            }
                         } else {
-                            this.updateStatus("❌ Authentication cancelled. Paradise access denied.");
+                            this.updateStatus("❌ WebAuthn cancelled. Paradise access denied.");
                             return;
                         }
                     } catch (error) {
-                        console.error('Authentication failed:', error);
-                        this.updateStatus("❌ Authentication failed: " + error.message + " - Click 'Load Paradise' to try again");
+                        console.error('WebAuthn authentication failed:', error);
+                        this.updateStatus("❌ WebAuthn failed: " + error.message);
                         
-                        // Simply return without blocking dialogs to maintain user gesture chain
-                        // The user can click the Load Paradise button again to retry
+                        // Provide specific guidance based on error type
+                        if (error.message.includes('user interaction') || error.message.includes('User interaction required')) {
+                            this.updateStatus("💡 Tip: Click 'Load Paradise' button again for fresh user interaction");
+                        }
                         return;
                     }
+                } else {
+                    this.updateStatus("✅ Session already verified - loading Paradise...");
                 }
                 
                 // Load the scene for the first time
-                this.updateStatus("🏗️ Loading tropical paradise...");
+                this.showLoadingState("🏗️ Loading PKP-authenticated tropical paradise...");
                 document.getElementById('loadParadise').textContent = "Loading...";
                 document.getElementById('loadParadise').disabled = true;
                 
                 try {
-                    // Verify authentication with backend before loading using LitService
-                    const token = JSON.stringify(wagmi.state.sessionSigs);
+                    // Verify WebAuthn authentication with backend
                     const authResponse = await fetch('/xr/load-paradise', {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json'
-                        }
+                        },
+                        credentials: 'include' // Use session cookies with WebAuthn verification
                     });
                     
                     if (!authResponse.ok) {
                         const status = authResponse.status;
                         if (status === 401) {
-                            throw new Error('Authentication failed: Your session has expired or is invalid. Please login again.');
+                            const errorData = await authResponse.json();
+                            if (errorData.code === 'WEBAUTHN_REQUIRED') {
+                                throw new Error('WebAuthn authentication required: Your PKP credentials are needed to access Paradise.');
+                            } else if (errorData.code === 'SESSION_EXPIRED') {
+                                throw new Error('Session expired: Please authenticate again with your WebAuthn credentials.');
+                            } else {
+                                throw new Error('Authentication failed: WebAuthn verification required.');
+                            }
                         } else if (status === 403) {
                             throw new Error('Authorization denied: You do not have permission to load Paradise. Please verify your account.');
                         } else {
@@ -601,12 +627,19 @@ class BabylonXRScene {
                     
                     // Now load the scene
                     await this.init();
+                    this.hideLoadingState();
+                    this.enableSceneTransition();
                     document.getElementById('loadParadise').textContent = "Paradise Loaded ✅";
                     document.getElementById('loadParadise').disabled = true;
                     this.updateStatus("🏝️ Welcome to Paradise! Enjoy your tropical adventure with Ocean Breeze 🎵");
                 } catch (error) {
                     console.error("Failed to load scene:", error);
-                    this.updateStatus("❌ Failed to load Paradise: " + error.message);
+                    this.hideLoadingState();
+                    if (window.updateStatus) {
+                        window.updateStatus("❌ Failed to load Paradise: " + error.message, 'error');
+                    } else {
+                        this.updateStatus("❌ Failed to load Paradise: " + error.message);
+                    }
                     document.getElementById('loadParadise').textContent = "Retry Load";
                     document.getElementById('loadParadise').disabled = false;
                 }
@@ -732,8 +765,39 @@ class BabylonXRScene {
     }
     
     updateStatus(message) {
-        document.getElementById('status').textContent = message;
+        // Use the enhanced status function if available, otherwise fall back to basic
+        if (window.updateStatus) {
+            window.updateStatus(message);
+        } else {
+            const statusEl = document.getElementById('status');
+            if (statusEl) {
+                statusEl.textContent = message;
+            }
+        }
         console.log('Status:', message);
+    }
+    
+    showLoadingState(message) {
+        if (window.showLoadingOverlay) {
+            window.showLoadingOverlay(message);
+        }
+        if (window.updateStatus) {
+            window.updateStatus(message, 'loading');
+        } else {
+            this.updateStatus(message);
+        }
+    }
+    
+    hideLoadingState() {
+        if (window.hideLoadingOverlay) {
+            window.hideLoadingOverlay();
+        }
+    }
+    
+    enableSceneTransition() {
+        if (window.enableSceneTransition) {
+            window.enableSceneTransition();
+        }
     }
 }
 

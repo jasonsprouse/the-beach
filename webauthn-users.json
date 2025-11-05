@@ -1,8 +1,50 @@
 {
   "testuser": [
     {
-      "credentialID": "Bhf_6xT1a8Kj4tf8NI82xjzaQIQNry9BCVZfo4xiPLo",
-      "credentialPublicKey": "pQECAyYgASFYINtfJjrsulrrWqEEjfKQNmANPAO2JVw1lGdxcIDDOpURIlggNNhatY5Q7N/mEDg1u8OQUSBeAH9a7++gv8LjislMaXA=",
+      "credentialID": "_3B388k7kvq9hivNRO-1APct91bKmTpQPpRpc_sEM4Y",
+      "credentialPublicKey": "pQECAyYgASFYIA4d521vnr6OEP2pRBlkA3bBlK35BluBKBj2IXkvWEJcIlggMCW8FhRu+lNH5nFo5+x1Fa/9ejhL9D6GwuMZjDvrBWg=",
+      "counter": 0,
+      "credentialDeviceType": "singleDevice",
+      "credentialBackedUp": false,
+      "transports": [
+        "internal"
+      ]
+    }
+  ],
+  "demo_user": [
+    {
+      "credentialID": "demo_cred_demo_user_1762308621160",
+      "credentialPublicKey": "AQIDBAU=",
+      "counter": 0,
+      "credentialDeviceType": "singleDevice",
+      "credentialBackedUp": false,
+      "transports": [
+        "internal"
+      ]
+    },
+    {
+      "credentialID": "demo_cred_demo_user_1762313270636",
+      "credentialPublicKey": "AQIDBAU=",
+      "counter": 0,
+      "credentialDeviceType": "singleDevice",
+      "credentialBackedUp": false,
+      "transports": [
+        "internal"
+      ]
+    },
+    {
+      "credentialID": "demo_cred_demo_user_1762313285737",
+      "credentialPublicKey": "AQIDBAU=",
+      "counter": 0,
+      "credentialDeviceType": "singleDevice",
+      "credentialBackedUp": false,
+      "transports": [
+        "internal"
+      ]
+    },
+    {
+      "credentialID": "demo_cred_demo_user_1762320209807",
+      "credentialPublicKey": "AQIDBAU=",
       "counter": 0,
       "credentialDeviceType": "singleDevice",
       "credentialBackedUp": false,
