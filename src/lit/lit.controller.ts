@@ -281,6 +281,19 @@ export class LitController {
    */
   @Get('session/status')
   getSessionStatus(@Session() session: UserSession) {
+    // Handle undefined session (happens in serverless environments like Vercel)
+    if (!session) {
+      return {
+        authenticated: false,
+        username: null,
+        authenticatedAt: null,
+        litPKP: null,
+        litAuthMethod: null,
+        litWalletSignature: null,
+        pkp: null
+      };
+    }
+
     return {
       authenticated: !!session.authenticated,
       username: session.username,
