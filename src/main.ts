@@ -23,15 +23,18 @@ async function bootstrap() {
 
   // Add comprehensive security and permissions headers
   app.use((req, res, next) => {
-    // WebAuthn permissions
+    // WebAuthn permissions - Allow all origins for development
+    // Format: feature=(origin1 origin2) or feature=* for all
     res.setHeader('Permissions-Policy', 
-      'publickey-credentials-create=*, publickey-credentials-get=*, encrypted-media=*, microphone=*, camera=*'
+      'publickey-credentials-create=*, publickey-credentials-get=*'
     );
     res.setHeader('Feature-Policy', 
-      'publickey-credentials-create *; publickey-credentials-get *; encrypted-media *; microphone *; camera *'
+      'publickey-credentials-create *; publickey-credentials-get *'
     );
     
     // CORS and security headers
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Headers', 
       'Origin, X-Requested-With, Content-Type, Accept, Authorization'
     );

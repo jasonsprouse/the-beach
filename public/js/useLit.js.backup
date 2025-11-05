@@ -327,47 +327,96 @@ const useLit = () => {
           return null;
         }) : Promise.resolve()
       ]);
-
-      // Validate credentials IMMEDIATELY
+      
+      // Check timing and gesture preservation
+      const elapsed = performance.now() - startTime;
+      console.log(`� Options fetched in ${elapsed.toFixed(0)}ms, verifying gesture...`);
+      
+      // CRITICAL: Verify user gesture is still active after minimal async work
+      if (!navigator.userActivation || !navigator.userActivation.isActive) {
+        throw new Error('User gesture expired during setup. Please try again quickly.');
+      }
+      
+      console.log('🎯 User gesture preserved after', elapsed.toFixed(0), 'ms');
+      
+      // Add enhanced logging for debugging
+      console.log('📝 Authentication options received for user:', username);
+      
+      // Use WebAuthn browser API to get assertion with preserved gesture
+      console.log('🛡️ Starting WebAuthn assertion with preserved gesture...');
+      
+      // Remove any delays to preserve user gesture chain - WebAuthn must be called synchronously
+      // with the user interaction to maintain the security requirement
+      
+      // Validate that we have proper credentials to authenticate with
       if (!options.allowCredentials || options.allowCredentials.length === 0) {
         throw new Error('No valid credentials found for this user. Please register first.');
       }
       
-      // PRE-DECODE: Do ALL base64 decoding BEFORE gesture check to save critical milliseconds
-      const challengeDecoded = Uint8Array.from(atob(options.challenge.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
-      const credentialsDecoded = options.allowCredentials?.map(cred => ({
-        type: 'public-key',
-        id: Uint8Array.from(atob(cred.id.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
-        transports: cred.transports || ['internal', 'hybrid']
-      })) || [];
+      // Prepare the authentication request with proper encoding
+      const authenticationOptions = {
+        challenge: Uint8Array.from(atob(options.challenge.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
+        timeout: 60000, // Reduce to 1 minute to avoid timeout issues
+        rpId: options.rpId || 'localhost',
+        userVerification: 'preferred', // Allow fallback if biometric not available
+        allowCredentials: options.allowCredentials?.map(cred => ({
+          type: 'public-key',
+          id: Uint8Array.from(atob(cred.id.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
+          transports: cred.transports || ['internal', 'hybrid']
+        })) || []
+      };
       
-      // Validate decoded data
-      if (!challengeDecoded || challengeDecoded.length === 0) {
+      console.log('🔧 Prepared authentication options:', {
+        ...authenticationOptions,
+        challenge: `[Uint8Array length: ${authenticationOptions.challenge.length}]`,
+        allowCredentials: authenticationOptions.allowCredentials.map(cred => ({
+          ...cred,
+          id: `[Uint8Array length: ${cred.id.length}]`
+        }))
+      });
+      
+      // Add debugging for credential processing
+      console.log('🎯 Debug: Original challenge from server:', options.challenge);
+      console.log('🎯 Debug: Number of credentials available:', authenticationOptions.allowCredentials.length);
+      console.log('🎯 Debug: Credential IDs processed successfully');
+      
+      // Log each credential for debugging
+      authenticationOptions.allowCredentials.forEach((cred, index) => {
+        console.log(`🎯 Debug: Credential ${index + 1}:`, {
+          type: cred.type,
+          idLength: cred.id.length,
+          transports: cred.transports
+        });
+      });
+      
+      // Validate that we have proper options
+      if (!authenticationOptions.challenge || authenticationOptions.challenge.length === 0) {
         throw new Error('Invalid challenge received from server');
       }
       
-      // CRITICAL: Gesture check RIGHT before WebAuthn call
-      const elapsed = performance.now() - startTime;
-      if (!navigator.userActivation || !navigator.userActivation.isActive) {
-        console.error('GESTURE LOST after ' + elapsed.toFixed(0) + 'ms');
-        throw new Error('User gesture expired. Please try again.');
+      if (!authenticationOptions.allowCredentials || authenticationOptions.allowCredentials.length === 0) {
+        throw new Error('No valid credentials found for authentication. Please register first.');
       }
       
-      console.log('CALLING WebAuthn after ' + elapsed.toFixed(0) + 'ms with gesture ACTIVE');
+      // Warn if too many credentials (might cause issues)
+      if (authenticationOptions.allowCredentials.length > 5) {
+        console.log('⚠️ Warning: Large number of credentials detected. This might cause authentication issues.');
+      }
       
-      // IMMEDIATE WebAuthn call - use pre-decoded data
-      const publicKeyOptions = {
-        challenge: challengeDecoded,
-        timeout: 60000,
-        rpId: options.rpId || 'localhost',
-        userVerification: 'preferred',
-        allowCredentials: credentialsDecoded
-      };
-      
+      // Create a more robust credential request with explicit error handling
       let assertion;
       try {
+        console.log('🎯 Debug: About to call navigator.credentials.get()');
+        console.log('🎯 Debug: webAuthnInProgress =', webAuthnInProgress);
+        console.log('🎯 Debug: authenticationInProgress =', authenticationInProgress);
+        console.log('🎯 Debug: User activation state:', {
+          isActive: navigator.userActivation?.isActive,
+          hasBeenActive: navigator.userActivation?.hasBeenActive
+        });
+        
+        // Call credentials.get with a promise race for better error handling
         const credentialPromise = navigator.credentials.get({
-          publicKey: publicKeyOptions,
+          publicKey: authenticationOptions,
         });
         
         console.log('🎯 Debug: navigator.credentials.get() call initiated');
@@ -376,7 +425,7 @@ const useLit = () => {
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => {
             reject(new Error('Authentication timed out. Please try again and complete the verification more quickly.'));
-          }, publicKeyOptions.timeout + 5000); // 5 seconds buffer
+          }, authenticationOptions.timeout + 5000); // 5 seconds buffer
         });
         
         assertion = await Promise.race([credentialPromise, timeoutPromise]);
@@ -391,13 +440,13 @@ const useLit = () => {
         });
         
         // If we have too many credentials and got NotAllowedError, try with fewer credentials
-        if (credError.name === 'NotAllowedError' && credentialsDecoded.length > 3) {
+        if (credError.name === 'NotAllowedError' && authenticationOptions.allowCredentials.length > 3) {
           console.log('⚠️ Retrying with fewer credentials due to NotAllowedError...');
           
           // Try with only the 3 most recent credentials
           const reducedOptions = {
-            ...publicKeyOptions,
-            allowCredentials: credentialsDecoded.slice(-3)
+            ...authenticationOptions,
+            allowCredentials: authenticationOptions.allowCredentials.slice(-3)
           };
           
           console.log('🔄 Retrying with', reducedOptions.allowCredentials.length, 'credentials');
@@ -432,7 +481,7 @@ const useLit = () => {
             }
             throw new Error('WebAuthn operation failed. Please try again.');
           } else if (credError.name === 'NotAllowedError') {
-            // For NotAllowedError, provide clear guidance based on the error message
+            // For NotAllowedError, check if user activation is lost and provide clear guidance
             const currentActivation = navigator.userActivation;
             console.log('🔍 NotAllowedError analysis:', {
               userActivationActive: currentActivation?.isActive,
@@ -440,25 +489,23 @@ const useLit = () => {
               errorMessage: credError.message
             });
             
-            // Check if this might be a timeout issue (most common)
+            // If user activation was lost, this is likely the root cause
+            if (!currentActivation?.isActive) {
+              console.error('🚨 User activation lost during WebAuthn operation');
+              throw new Error('User interaction required. Please click the button again to authenticate.');
+            }
+            
+            // Check if this might be a timeout issue
             if (credError.message.includes('timed out') || credError.message.includes('timeout')) {
               throw new Error('Authentication timed out. Please try again and complete the biometric verification more quickly.');
             }
             
-            // Check if user might have cancelled (also very common)
+            // Check if user might have cancelled
             if (credError.message.includes('not allowed') || credError.message.includes('operation either timed out or was not allowed')) {
               throw new Error('Authentication was cancelled or timed out. Please try again and complete the biometric verification when prompted.');
             }
             
-            // NOTE: User activation naturally becomes inactive after interacting with WebAuthn prompts
-            // (like clicking cancel). So we should NOT use this as the primary error indicator.
-            // Only throw "user interaction required" if gesture was NEVER active
-            if (!currentActivation?.hasBeenActive) {
-              console.error('🚨 No user activation detected - WebAuthn called without user gesture');
-              throw new Error('User interaction required. Please click the button to authenticate.');
-            }
-            
-            throw new Error('Authentication not permitted. This could be due to cancellation, timeout, or no matching credentials. Please try again.');
+            throw new Error('Authentication not permitted. Please ensure you are using a supported biometric method and try again.');
           } else if (credError.name === 'SecurityError') {
             throw new Error('Security error during authentication. Please ensure you are on a secure connection.');
           } else if (credError.name === 'InvalidStateError') {

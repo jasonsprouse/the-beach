@@ -25,15 +25,22 @@ export class XrController {
 
   @Get()
   getXrEnvironment(@Res() res: Response) {
-    // Allow guest access to the XR environment page
-    // Users can view and interact with basic features (soundcloud audio)
-    return res.sendFile(join(process.cwd(), 'public', 'xr-environment.html'));
+    // Serve the main index.html page
+    // This is the landing page for The Beach XR platform
+    return res.sendFile(join(process.cwd(), 'public', 'index.html'));
   }
 
   @Get('paradise')
-  getParadise(@Res() res: Response) {
+  @UseGuards(WebAuthnAuthGuard)
+  getParadise(
+    @Res() res: Response,
+    @Session() session: UserSession,
+    @Req() req: Request & { user?: any }
+  ) {
     // Serve the paradise VR scene (master branch architecture)
-    // This is the "Load Paradise" experience
+    // This is the "Load Paradise" experience - REQUIRES AUTHENTICATION
+    // Only authenticated users can access the full XR scene
+    console.log(`🎮 Paradise page access granted for: ${session.username}`);
     return res.sendFile(join(process.cwd(), 'public', 'paradise.html'));
   }
 
@@ -174,5 +181,71 @@ export class XrController {
         fallback: 'Mouse/keyboard controls for desktop exploration',
       },
     };
+  }
+
+  @Get('scenes')
+  getAvailableScenes() {
+    return {
+      success: true,
+      scenes: {
+        'tropical-paradise': {
+          name: 'Tropical Paradise',
+          description: 'Relaxing beach with palm trees and ocean waves',
+          requiredAuth: true,
+          features: ['Beach environment', 'Ocean waves', 'Palm trees', 'Multiplayer'],
+        },
+        'underwater-cave': {
+          name: 'Underwater Cave',
+          description: 'Bioluminescent underwater cave with marine life',
+          requiredAuth: true,
+          features: ['Bioluminescent plants', 'Schools of fish', 'Underwater lighting', 'Cave exploration'],
+        },
+        'space-station': {
+          name: 'Space Station',
+          description: 'Zero-gravity orbital platform with Earth views',
+          requiredAuth: true,
+          features: ['Zero gravity', 'Earth views', 'Futuristic design', 'Space walk'],
+        },
+        'desert-oasis': {
+          name: 'Desert Oasis',
+          description: 'Sand dunes with palm tree oasis',
+          requiredAuth: true,
+          features: ['Sand dunes', 'Palm oasis', 'Desert wildlife', 'Day/night cycle'],
+        },
+      },
+    };
+  }
+
+  @Get('underwater-cave')
+  @UseGuards(WebAuthnAuthGuard)
+  getUnderwaterCave(
+    @Res() res: Response,
+    @Session() session: UserSession,
+  ) {
+    console.log(`🐠 Underwater Cave access granted for: ${session.username}`);
+    // For now, redirect to paradise until scene is created
+    return res.sendFile(join(process.cwd(), 'public', 'paradise.html'));
+  }
+
+  @Get('space-station')
+  @UseGuards(WebAuthnAuthGuard)
+  getSpaceStation(
+    @Res() res: Response,
+    @Session() session: UserSession,
+  ) {
+    console.log(`🚀 Space Station access granted for: ${session.username}`);
+    // For now, redirect to paradise until scene is created
+    return res.sendFile(join(process.cwd(), 'public', 'paradise.html'));
+  }
+
+  @Get('desert-oasis')
+  @UseGuards(WebAuthnAuthGuard)
+  getDesertOasis(
+    @Res() res: Response,
+    @Session() session: UserSession,
+  ) {
+    console.log(`🏜️ Desert Oasis access granted for: ${session.username}`);
+    // For now, redirect to paradise until scene is created
+    return res.sendFile(join(process.cwd(), 'public', 'paradise.html'));
   }
 }

@@ -215,6 +215,7 @@
                 </div>
                                 <div class="hidden md:flex items-center space-x-8">
                     <a href="#features" class="text-gray-600 hover:text-indigo-600 transition">Features</a>
+                    <a href="#scenes" class="text-gray-600 hover:text-indigo-600 transition">Scenes</a>
                     <a href="#paradise" class="text-gray-600 hover:text-indigo-600 transition">Paradise</a>
                     <a href="/demo-auth.html" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
                         🎭 Demo Auth
@@ -314,6 +315,24 @@
         </div>
     </section>
 
+    <!-- Scenes Section -->
+    <section id="scenes" class="py-20 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-extrabold text-white mb-4">
+                    🌍 Explore Multiple Worlds
+                </h2>
+                <p class="text-xl text-indigo-200 max-w-3xl mx-auto">
+                    Choose your adventure from our collection of immersive XR environments. 
+                    Each scene offers unique experiences with full VR support.
+                </p>
+            </div>
+            <div id="sceneSelector">
+                <!-- Scene selector will be dynamically loaded here -->
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -365,24 +384,93 @@
     <!-- Scripts -->
     <script src="/js/useWagmi.js"></script>
     <script src="/js/useLit.js"></script>
+    <script src="/js/authController.js"></script>
+    <script src="/js/scene-loader.js"></script>
     <script>
+        // Legacy compatibility - keep for paradise.html
         const wagmi = window.useWagmi();
         const lit = window.useLit();
 
-        const authContainer = document.getElementById('authContainer');
+        // Initialize MVC Auth Controller and Scene Loader
+        document.addEventListener('DOMContentLoaded', async () => {
+            const authContainer = document.getElementById('authContainer');
+            await authController.init(authContainer);
+            
+            // Initialize Scene Loader
+            const sceneLoader = new SceneLoader();
+            const sceneSelector = document.getElementById('sceneSelector');
+            if (sceneSelector) {
+                sceneLoader.createSceneSelector(sceneSelector);
+            }
+        });
 
-        const render = (state) => {
+        // Legacy render function for backward compatibility (not used with MVC)
+        const _legacyRender = async (state) => {
             if (state.isAuthenticated) {
+                // Fetch PKP wallet info
+                let pkpDashboard = null;
+                try {
+                    pkpDashboard = await lit.getPKPDashboard();
+                } catch (error) {
+                    console.error('Failed to fetch PKP dashboard:', error);
+                }
+
+                // Build wallet info display
+                const walletInfoHTML = pkpDashboard ? `
+                    <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 mb-4 max-w-xl">
+                        <h3 class="text-xl font-semibold text-white mb-4">🔑 Your PKP Wallet</h3>
+                        <div class="space-y-3 text-left">
+                            <div class="flex justify-between items-center">
+                                <span class="text-indigo-200 font-medium">Primary PKP:</span>
+                                <code class="text-white bg-black bg-opacity-30 px-3 py-1 rounded text-sm font-mono">
+                                    ${pkpDashboard.primaryPKP?.ethAddress?.slice(0, 6)}...${pkpDashboard.primaryPKP?.ethAddress?.slice(-4)}
+                                </code>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-indigo-200 font-medium">Sub-PKPs:</span>
+                                <span class="text-white font-semibold">${pkpDashboard.primaryPKP?.subPKPs?.length || 0}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-indigo-200 font-medium">Can Mint:</span>
+                                <span class="text-white">${pkpDashboard.primaryPKP?.canMint ? '✅ Yes' : '❌ No'}</span>
+                            </div>
+                            ${pkpDashboard.primaryPKP?.subPKPs?.length > 0 ? `
+                                <div class="mt-4 pt-4 border-t border-white border-opacity-20">
+                                    <p class="text-indigo-200 font-medium mb-2">Sub-PKP Addresses:</p>
+                                    <div class="space-y-1 max-h-32 overflow-y-auto">
+                                        ${pkpDashboard.primaryPKP.subPKPs.map(subPKP => `
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs text-indigo-300">${subPKP.purpose}:</span>
+                                                <code class="text-xs text-white bg-black bg-opacity-30 px-2 py-0.5 rounded font-mono">
+                                                    ${subPKP.ethAddress?.slice(0, 6)}...${subPKP.ethAddress?.slice(-4)}
+                                                </code>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                ` : `
+                    <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-4 mb-4 max-w-xl">
+                        <p class="text-indigo-200">Loading wallet info...</p>
+                    </div>
+                `;
+
                 authContainer.innerHTML = `
                     <div class="flex flex-col items-center">
-                        <p class="text-lg text-indigo-200 mb-4">Welcome, ${state.username || state.pkp.ethAddress}</p>
+                        <p class="text-2xl font-bold text-white mb-2">Welcome, ${state.username}!</p>
+                        ${walletInfoHTML}
                         <button id="visitParadise" class="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200">🌴 Visit Paradise</button>
-                        <button id="signOut" class="mt-4 text-indigo-200">Sign Out</button>
+                        <button id="signOut" class="mt-4 text-indigo-200 hover:text-white transition">Sign Out</button>
                     </div>
                 `;
                 document.getElementById('visitParadise').addEventListener('click', () => {
-                    // Navigate to paradise VR scene
-                    window.location.href = '/paradise';
+                    // Authenticated user - navigate to paradise VR scene with xr-scene.js
+                    startParadiseTransition();
+                    setTimeout(() => {
+                        window.location.href = '/xr/paradise';
+                    }, 1500);
                 });
                 document.getElementById('signOut').addEventListener('click', () => {
                     lit.signOut();
@@ -411,11 +499,11 @@
                             style="display: none;">
                             📊 View Analytics
                         </button>
-                        <a
-                            href="/paradise"
+                        <button
+                            id="enterParadiseGuest"
                             class="bg-indigo-700 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200 border-2 border-white">
-                            🌴 Enter Paradise
-                        </a>
+                            🌴 Enter Paradise (Login Required)
+                        </button>
                     </div>
                     <div id="authStatus" class="mt-6 text-indigo-100 font-medium"></div>
                 `;
@@ -453,6 +541,36 @@
                     } catch (error) {
                         console.error('Session status error:', error);
                         document.getElementById('authStatus').textContent = 'Session status check failed: ' + error.message;
+                    }
+                });
+
+                // Guest Paradise button with authentication check
+                document.getElementById('enterParadiseGuest').addEventListener('click', async () => {
+                    try {
+                        // Check authentication status first
+                        const response = await fetch('/lit/session/status', {
+                            credentials: 'include'
+                        });
+                        const sessionData = await response.json();
+                        
+                        if (sessionData.authenticated) {
+                            // User is authenticated, allow navigation
+                            document.getElementById('authStatus').textContent = '✅ Authentication verified! Loading paradise...';
+                            startParadiseTransition();
+                            setTimeout(() => {
+                                window.location.href = '/xr/paradise';
+                            }, 1500);
+                        } else {
+                            // User not authenticated, show error
+                            document.getElementById('authStatus').textContent = '🔐 Please login or register first to access Paradise!';
+                            document.getElementById('authStatus').classList.add('text-yellow-300', 'font-bold');
+                            setTimeout(() => {
+                                document.getElementById('authStatus').classList.remove('text-yellow-300', 'font-bold');
+                            }, 3000);
+                        }
+                    } catch (error) {
+                        console.error('Paradise access error:', error);
+                        document.getElementById('authStatus').textContent = '❌ Unable to verify authentication. Please try again.';
                     }
                 });
 
@@ -506,36 +624,10 @@
             }
         };
 
-        wagmi.subscribe(render);
+        // Legacy wagmi subscription (kept for paradise.html compatibility)
+        // wagmi.subscribe(_legacyRender);
         
-        // Initialize Lit Protocol backend connection (does NOT trigger WebAuthn)
-        lit.initializeLit()
-            .then(() => {
-                console.log('✅ Lit Protocol initialized');
-                // Check if there's an existing session (server-side check only, no WebAuthn)
-                return fetch('/lit/session/status', { credentials: 'include' });
-            })
-            .then(response => response.json())
-            .then(session => {
-                if (session.authenticated && session.username) {
-                    console.log('✅ Found existing session for:', session.username);
-                    // Restore UI state from existing session WITHOUT triggering WebAuthn
-                    const restoredState = {
-                        isAuthenticated: true,
-                        username: session.username,
-                        pkp: session.pkp || { ethAddress: 'Restored Session' },
-                        authMethod: { authMethodType: 'webauthn' }
-                    };
-                    wagmi.updateState(restoredState);
-                } else {
-                    console.log('ℹ️ No existing session found, user needs to login');
-                    render(wagmi.state);
-                }
-            })
-            .catch(error => {
-                console.error('Initialization error:', error);
-                render(wagmi.state);
-            });
+        // MVC Controller handles initialization automatically
 
         // Paradise Transition Functions
         function startParadiseTransition() {

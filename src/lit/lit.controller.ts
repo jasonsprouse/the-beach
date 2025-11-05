@@ -24,9 +24,31 @@ import * as crypto from 'crypto';
 
 interface UserSession {
   currentChallenge?: string;
-  username?: string; // Temporarily store username during registration
+  username?: string; // User's primary identifier
   authenticated?: boolean; // Session authentication status
   authenticatedAt?: Date; // When the session was authenticated
+  
+  // Lit Protocol Components - Full session state
+  litWalletSignature?: string; // Wallet signature for Lit Protocol
+  litPKP?: {
+    address: string; // Primary PKP Ethereum address (0x...)
+    publicKey: string; // PKP public key
+    ethAddress: string; // Same as address, for consistency
+    subPKPs?: Array<{
+      address: string;
+      purpose: string;
+      index: number;
+      createdAt: string;
+    }>;
+    canMint?: boolean;
+  };
+  litAuthMethod?: {
+    authMethodType: number | string; // e.g., 'webauthn' or numeric type
+    credentialId?: string; // WebAuthn credential ID
+    publicKey?: string; // WebAuthn public key (if needed)
+  };
+  
+  // WebAuthn session data (for challenge validation)
   authenticators?: Array<{
     credentialID: string; // Stored as base64url
     credentialPublicKey: Uint8Array;
@@ -222,6 +244,39 @@ export class LitController {
   }
 
   /**
+   * Check if a user already has credentials registered
+   * This helps the frontend decide whether to show "Register" or "Login"
+   */
+  @Post('user/check-credentials')
+  checkUserCredentials(@Body() body: { username: string }) {
+    const username = body.username?.trim();
+    
+    if (!username || username.length < 3) {
+      return {
+        exists: false,
+        message: 'Invalid username'
+      };
+    }
+
+    const hasCredentials = this.userAuthenticators.has(username);
+    const authenticatorCount = hasCredentials 
+      ? this.userAuthenticators.get(username)?.length || 0 
+      : 0;
+
+    console.log(`🔍 Credential check for "${username}": ${hasCredentials ? 'EXISTS' : 'NOT FOUND'} (${authenticatorCount} authenticator(s))`);
+
+    return {
+      exists: hasCredentials,
+      username: username,
+      authenticatorCount: authenticatorCount,
+      canLogin: hasCredentials && authenticatorCount > 0,
+      message: hasCredentials 
+        ? `User "${username}" already registered - please login` 
+        : `User "${username}" not found - please register`
+    };
+  }
+
+  /**
    * Check session authentication status
    */
   @Get('session/status')
@@ -230,6 +285,17 @@ export class LitController {
       authenticated: !!session.authenticated,
       username: session.username,
       authenticatedAt: session.authenticatedAt,
+      // Include Lit Protocol session state
+      litPKP: session.litPKP,
+      litAuthMethod: session.litAuthMethod,
+      litWalletSignature: session.litWalletSignature,
+      // Include PKP info if authenticated
+      pkp: session.litPKP ? {
+        ethAddress: session.litPKP.address,
+        publicKey: session.litPKP.publicKey,
+        subPKPs: session.litPKP.subPKPs || [],
+        canMint: session.litPKP.canMint
+      } : null
     };
   }
 
@@ -242,6 +308,13 @@ export class LitController {
     session.username = undefined;
     session.authenticatedAt = undefined;
     session.currentChallenge = undefined;
+    
+    // Clear Lit Protocol session state
+    session.litPKP = undefined;
+    session.litAuthMethod = undefined;
+    session.litWalletSignature = undefined;
+    
+    console.log('🚪 Session cleared - all Lit Protocol state removed');
     
     return {
       success: true,
@@ -419,6 +492,34 @@ export class LitController {
         // Clear the challenge
         delete session.currentChallenge;
 
+        // ✅ IMPORTANT: Mark user as authenticated after successful registration
+        session.authenticated = true;
+        session.authenticatedAt = new Date();
+        console.log('✅ Session activated - user is now authenticated');
+
+        // Populate full Lit Protocol session state
+        const authenticators = this.userAuthenticators.get(session.username);
+        if (authenticators && authenticators.length > 0) {
+          const authenticator = authenticators[0];
+          
+          // Store Lit Protocol session data
+          session.litPKP = {
+            address: pkpInfo?.ethAddress,
+            publicKey: pkpInfo?.publicKey,
+          };
+
+          session.litAuthMethod = {
+            authMethodType: 'webauthn',
+            credentialId: authenticator.credentialID,
+            publicKey: Buffer.from(authenticator.credentialPublicKey).toString('base64'),
+          };
+
+          // Generate wallet signature placeholder (would be real signature in production)
+          session.litWalletSignature = `sig_${session.username}_${Date.now()}`;
+          
+          console.log('✅ Full Lit Protocol session state populated');
+        }
+
         return {
           success: true,
           message: 'Registration successful',
@@ -579,16 +680,40 @@ export class LitController {
         authenticator.counter = verification.authenticationInfo.newCounter;
         delete session.currentChallenge;
         
-        // Set session as authenticated for use by AuthGuard
-        session.authenticated = true;
-        session.username = username;
-        session.authenticatedAt = new Date();
-
         // Generate PKP information for one-to-one mapping
         const pkpInfo = this.getPKPForUser(username);
         
+        if (!pkpInfo) {
+          throw new BadRequestException('Could not generate PKP for user');
+        }
+        
+        // Set session as authenticated with full Lit Protocol state
+        session.authenticated = true;
+        session.username = username;
+        session.authenticatedAt = new Date();
+        
+        // Store Lit Protocol PKP in session
+        session.litPKP = {
+          address: pkpInfo.ethAddress,
+          publicKey: pkpInfo.publicKey,
+          ethAddress: pkpInfo.ethAddress,
+          subPKPs: pkpInfo.subPKPs,
+          canMint: pkpInfo.canMint
+        };
+        
+        // Store Lit Auth Method (WebAuthn)
+        session.litAuthMethod = {
+          authMethodType: 'webauthn',
+          credentialId: authenticator.credentialID,
+          publicKey: Buffer.from(authenticator.credentialPublicKey).toString('base64')
+        };
+        
+        // Generate wallet signature placeholder (would be signed by PKP in production)
+        session.litWalletSignature = `lit-wallet-sig-${username}-${Date.now()}`;
+        
         console.log(`✅ Authentication successful for ${username} with one-to-one PKP mapping`);
-        console.log(`🔑 PKP Address: ${pkpInfo?.ethAddress}`);
+        console.log(`🔑 PKP Address: ${pkpInfo.ethAddress}`);
+        console.log(`🔐 Session established with Lit Protocol state`);
 
         return {
           success: true,
@@ -597,6 +722,11 @@ export class LitController {
           username: username,
           pkp: pkpInfo, // Include PKP information in response
           oneToOneMapping: true, // Indicate this uses one-to-one mapping
+          session: {
+            litPKP: session.litPKP,
+            litAuthMethod: session.litAuthMethod,
+            litWalletSignature: session.litWalletSignature
+          }
         };
       }
 

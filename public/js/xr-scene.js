@@ -768,7 +768,7 @@ class BabylonXRScene {
         }
     }
     
-    displayAuthState() {
+    async displayAuthState() {
         try {
             if (window.useLit) {
                 const litInstance = window.useLit();
@@ -788,8 +788,59 @@ class BabylonXRScene {
                         const subCount = localStorage.getItem('pkp_sub_count') || '0';
                         console.log(`🔧 Sub-PKPs: ${subCount}`);
                     }
+                    
+                    // Update UI wallet display
+                    const walletInfoEl = document.getElementById('walletInfo');
+                    if (walletInfoEl) {
+                        walletInfoEl.style.display = 'block';
+                        
+                        // Set user
+                        const walletUserEl = document.getElementById('walletUser');
+                        if (walletUserEl) {
+                            walletUserEl.textContent = authState.currentUser;
+                        }
+                        
+                        // Set PKP address
+                        const walletPKPEl = document.getElementById('walletPKP');
+                        if (walletPKPEl && pkpAddress) {
+                            walletPKPEl.textContent = `${pkpAddress.slice(0, 6)}...${pkpAddress.slice(-4)}`;
+                            walletPKPEl.title = pkpAddress; // Show full address on hover
+                        }
+                        
+                        // Set sub-PKP count
+                        const walletSubCountEl = document.getElementById('walletSubCount');
+                        if (walletSubCountEl) {
+                            const subCount = localStorage.getItem('pkp_sub_count') || '0';
+                            walletSubCountEl.textContent = subCount;
+                        }
+                        
+                        // Fetch and display detailed PKP dashboard
+                        try {
+                            const pkpDashboard = await litInstance.getPKPDashboard();
+                            console.log('📊 PKP Dashboard:', pkpDashboard);
+                            
+                            if (pkpDashboard && pkpDashboard.primaryPKP && pkpDashboard.primaryPKP.subPKPs) {
+                                const subPKPListEl = document.getElementById('subPKPList');
+                                if (subPKPListEl && pkpDashboard.primaryPKP.subPKPs.length > 0) {
+                                    subPKPListEl.style.display = 'block';
+                                    subPKPListEl.innerHTML = pkpDashboard.primaryPKP.subPKPs.map(subPKP => `
+                                        <div class="sub-pkp-item" title="${subPKP.ethAddress}">
+                                            <strong>${subPKP.purpose}</strong>: ${subPKP.ethAddress.slice(0, 6)}...${subPKP.ethAddress.slice(-4)}
+                                        </div>
+                                    `).join('');
+                                }
+                            }
+                        } catch (dashboardError) {
+                            console.warn('Could not fetch PKP dashboard:', dashboardError);
+                        }
+                    }
                 } else {
                     console.log('⚠️ No authenticated user found');
+                    // Hide wallet info if not authenticated
+                    const walletInfoEl = document.getElementById('walletInfo');
+                    if (walletInfoEl) {
+                        walletInfoEl.style.display = 'none';
+                    }
                 }
             } else {
                 console.log('⚠️ useLit not available');

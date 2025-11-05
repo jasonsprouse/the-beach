@@ -101,6 +101,44 @@
             background: rgba(0, 100, 0, 0.3);
             border-radius: 4px;
         }
+        
+        #walletInfo {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 50, 100, 0.5);
+            border-radius: 4px;
+            border: 1px solid rgba(0, 120, 212, 0.5);
+        }
+        
+        .wallet-label {
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 2px;
+        }
+        
+        .wallet-value {
+            font-size: 12px;
+            font-family: monospace;
+            color: #4fc3f7;
+            word-break: break-all;
+        }
+        
+        .wallet-row {
+            margin-bottom: 8px;
+        }
+        
+        .sub-pkp-list {
+            font-size: 10px;
+            color: #81c784;
+            margin-top: 5px;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+        
+        .sub-pkp-item {
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -123,6 +161,22 @@
                 <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="30">
                 <span style="font-size: 12px;">🔊</span>
             </div>
+        </div>
+        <div id="walletInfo" style="display: none;">
+            <div class="wallet-label">🔑 Wallet Connected</div>
+            <div class="wallet-row">
+                <div class="wallet-label">User:</div>
+                <div class="wallet-value" id="walletUser">Loading...</div>
+            </div>
+            <div class="wallet-row">
+                <div class="wallet-label">Primary PKP:</div>
+                <div class="wallet-value" id="walletPKP">Loading...</div>
+            </div>
+            <div class="wallet-row">
+                <div class="wallet-label">Sub-PKPs:</div>
+                <div class="wallet-value" id="walletSubCount">0</div>
+            </div>
+            <div id="subPKPList" class="sub-pkp-list" style="display: none;"></div>
         </div>
         <div id="status">Welcome to Paradise - Click 'Load Paradise' to begin your tropical adventure</div>
     </div>

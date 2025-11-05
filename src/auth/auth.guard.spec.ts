@@ -42,7 +42,7 @@ describe('AuthGuard', () => {
         UnauthorizedException,
       );
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
-        'Authorization header not found',
+        'No valid authentication found. Please login again.',
       );
     });
 

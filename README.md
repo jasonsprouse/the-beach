@@ -1,7 +1,7 @@
-# 🏝️ The Beach - Tropical XR Paradise
+# 🏝️ The Beach - XR Platform for Digital AI Agents & NPEs
 
 <p align="center">
-  <strong>A next-generation biometric-secured tropical metaverse with WebAuthn + Lit Protocol PKP integration</strong>
+  <strong>A revolutionary WebXR metaverse enabling Non-Person Entities (NPEs) to operate autonomous digital AI agents with cryptographic identity and biometric security</strong>
 </p>
 
 <p align="center">
@@ -10,1016 +10,2128 @@
   <img src="https://img.shields.io/badge/WebXR-Enabled-blue.svg" alt="WebXR Enabled" />
   <img src="https://img.shields.io/badge/Babylon.js-8.x-green.svg" alt="Babylon.js" />
   <img src="https://img.shields.io/badge/NestJS-11.x-red.svg" alt="NestJS" />
-  <img src="https://img.shields.io/badge/PKP-1:1_Mapping-gold.svg" alt="PKP 1:1 Mapping" />
+  <img src="https://img.shields.io/badge/NPE-Ready-gold.svg" alt="NPE Ready" />
+  <img src="https://img.shields.io/badge/Multi--Agent-Enabled-cyan.svg" alt="Multi-Agent" />
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License" />
 </p>
 
-> � **Revolutionary Authentication**: Experience the future of passwordless access with biometric WebAuthn authentication seamlessly integrated with Lit Protocol PKP management.
+---
 
-> �💡 **New here?** Check out the [Quick Start Guide](#-quick-start) to experience the tropical paradise in 5 minutes!
+## 🤖 Vision: The Future of Digital AI Agents
 
-## 🌴 About
+**The Beach** is more than a tropical metaverse—it's a **platform for Non-Person Entities (NPEs)** to deploy and manage **multiple autonomous digital AI agents** in an immersive XR environment. Each agent operates with its own cryptographic identity (PKP), enabling teams of specialized AI services to collaborate, transact, and serve customers in a persistent virtual space.
 
-**The Beach** represents the cutting edge of Web3 metaverse technology - a fully immersive tropical paradise where your biometric identity becomes your key to a personalized digital world. Through revolutionary WebAuthn integration with Lit Protocol's Programmable Key Pairs (PKPs), users experience truly passwordless authentication while maintaining complete control over their digital identity.
+### 💡 What are Non-Person Entities (NPEs)?
 
-Built with Babylon.js 8.x and enhanced with sophisticated multiplayer architecture, The Beach combines the beauty of a tropical escape with the security and innovation of next-generation Web3 authentication. Every interaction is secured by your unique biometric signature, creating a one-to-one mapping between your physical identity and your digital presence.
+**NPEs** are organizations, AI systems, or automated services that require cryptographic identity without traditional human biometric authentication. In The Beach:
+
+- **🏢 Businesses** can deploy AI agents to sell complementary services (e.g., virtual tours, digital products, consulting)
+- **🤖 AI Systems** operate autonomously with their own wallets and transaction capabilities
+- **🔐 Each agent** has a unique PKP (Programmable Key Pair) for secure operations
+- **👥 Multi-agent teams** coordinate in shared XR spaces to deliver comprehensive service offerings
+- **💼 Revenue generation** through AI-driven commerce and automated transactions
+
+> 💡 **Inspired by Excellence**: [Y8's NPE Manager](https://y8-app.vercel.app/blog/npe-manager-guide) demonstrates the power of NPE management with extensible schemas, tiered business models, and autonomous agent capabilities. The Beach builds on these concepts by adding immersive XR environments, geo-fenced services, and game manager architecture for enterprise-scale deployments.
+
+### NPE Characteristics
+
+Following the [Y8 NPE Manager model](https://y8-app.vercel.app/blog/npe-manager-guide), each NPE in The Beach has:
+
+1. **Unique Cryptographic Identity**: PKP-based authentication for secure operations
+2. **Extensible JSON Schema**: Store metadata, configuration, and capabilities
+3. **Autonomous Action Capability**: Execute transactions, sign messages, and make decisions
+4. **Programmable Behavior**: Define custom logic through Lit Actions
+5. **Persistent State**: Maintain context across sessions and interactions
+
+```javascript
+// Example NPE Schema (inspired by Y8)
+const npeSchema = {
+  // Core Identity
+  pkpAddress: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+  publicKey: "0x04a5...",
+  
+  // Metadata
+  name: "Beach Concierge Agent #1",
+  type: "service-provider",
+  category: "hospitality",
+  
+  // Capabilities (extensible)
+  capabilities: {
+    languages: ["English", "Spanish", "French"],
+    services: ["booking", "recommendations", "support"],
+    paymentMethods: ["ETH", "USDC", "DAI"],
+    operatingHours: "24/7",
+    maxConcurrentSessions: 10
+  },
+  
+  // Geographic Configuration
+  location: {
+    lat: 25.7617,
+    lng: -80.1918,
+    timezone: "America/New_York",
+    serviceRadius: 5000 // meters
+  },
+  
+  // Business Logic
+  pricing: {
+    model: "per-transaction",
+    baseRate: 0.001, // ETH
+    commission: 0.15 // 15%
+  },
+  
+  // Performance Metrics
+  analytics: {
+    totalSessions: 1247,
+    successRate: 0.98,
+    avgResponseTime: 4.2, // seconds
+    customerSatisfaction: 4.7,
+    revenue: {
+      total: 12.45, // ETH
+      thisMonth: 3.21
+    }
+  },
+  
+  // Lit Actions Configuration
+  litActions: {
+    onCustomerRequest: "ipfs://QmCustomerRequestHandler",
+    onPaymentReceived: "ipfs://QmPaymentProcessor",
+    onEmergency: "ipfs://QmEmergencyProtocol"
+  },
+  
+  // Custom Fields (user-defined)
+  customFields: {
+    preferredGreeting: "Welcome to paradise!",
+    specializations: ["water sports", "beach activities"],
+    certifications: ["CPR", "First Aid", "Lifeguard"]
+  }
+};
+```
+
+### NPE Tiers & Business Model
+
+Inspired by [Y8's tiered approach](https://y8-app.vercel.app/blog/npe-manager-guide), The Beach offers flexible NPE deployment options:
+
+#### 🆓 **Freemium Tier** - Free
+- **NPE Limit**: 3 agents (ai-build#0, ai-build#1, session#0)
+- **Schema Fields**: Up to 5 custom fields per NPE
+- **Lit Actions**: Basic access
+- **XR Environment**: Limited to 1 location
+- **Service Radius**: 1km
+- **Perfect For**: 
+  - Experimenting with NPE capabilities
+  - Personal projects and prototypes
+  - Learning agent orchestration
+  - Simple automation tasks
+
+#### ⭐ **Base Tier** - $10/month
+- **NPE Limit**: 25 agents
+- **Schema Fields**: Up to 25 custom fields per NPE
+- **Lit Actions**: Full access
+- **XR Environment**: Up to 5 locations
+- **Service Radius**: 10km
+- **GBL Environments**: Access to Global Business Logic
+- **Analytics**: Basic performance metrics
+- **Perfect For**:
+  - Small to medium businesses
+  - Decentralized applications (dApps)
+  - Multi-agent service teams
+  - Local service marketplaces
+
+#### 💎 **Premium Tier** - $50/month
+- **NPE Limit**: Unlimited agents
+- **Schema Fields**: Unlimited custom fields
+- **Lit Actions**: Full access + priority execution
+- **XR Environment**: Unlimited locations
+- **Service Radius**: Unlimited (global)
+- **GBL Environments**: Full access with custom logic
+- **Analytics**: Advanced metrics + AI insights
+- **XR Networking**: Immersive multi-user experiences
+- **Dedicated Support**: Priority assistance
+- **API Access**: Full REST/GraphQL API
+- **Perfect For**:
+  - Enterprise-level applications
+  - Large-scale DAOs and metaverses
+  - Global service networks
+  - Research and development
+
+```javascript
+// Tier-based NPE management
+class NPETierManager {
+  constructor(tier) {
+    this.tier = tier; // 'freemium', 'base', 'premium'
+    this.limits = this.getTierLimits(tier);
+  }
+  
+  getTierLimits(tier) {
+    const limits = {
+      freemium: {
+        maxNPEs: 3,
+        maxSchemaFields: 5,
+        maxLocations: 1,
+        serviceRadius: 1000,
+        litActions: 'basic',
+        support: 'community'
+      },
+      base: {
+        maxNPEs: 25,
+        maxSchemaFields: 25,
+        maxLocations: 5,
+        serviceRadius: 10000,
+        litActions: 'full',
+        support: 'email'
+      },
+      premium: {
+        maxNPEs: Infinity,
+        maxSchemaFields: Infinity,
+        maxLocations: Infinity,
+        serviceRadius: Infinity,
+        litActions: 'full-priority',
+        support: 'dedicated'
+      }
+    };
+    return limits[tier];
+  }
+  
+  async createNPE(npeConfig) {
+    // Check tier limits
+    const currentNPECount = await this.getCurrentNPECount();
+    if (currentNPECount >= this.limits.maxNPEs) {
+      throw new Error(`NPE limit reached for ${this.tier} tier. Upgrade to create more agents.`);
+    }
+    
+    // Validate schema fields
+    const fieldCount = Object.keys(npeConfig.customFields || {}).length;
+    if (fieldCount > this.limits.maxSchemaFields) {
+      throw new Error(`Schema field limit (${this.limits.maxSchemaFields}) exceeded. Upgrade to add more fields.`);
+    }
+    
+    // Create NPE with tier restrictions
+    const npe = await this.mintNPE({
+      ...npeConfig,
+      tier: this.tier,
+      limits: this.limits
+    });
+    
+    console.log(`✅ NPE created: ${npe.name} (${this.tier} tier)`);
+    return npe;
+  }
+  
+  async upgrade(newTier) {
+    console.log(`⬆️ Upgrading from ${this.tier} to ${newTier}`);
+    this.tier = newTier;
+    this.limits = this.getTierLimits(newTier);
+    
+    // Unlock additional features
+    await this.unlockTierFeatures(newTier);
+  }
+}
+
+// Example usage
+const freemiumManager = new NPETierManager('freemium');
+const npe1 = await freemiumManager.createNPE({ name: 'Test Agent' }); // ✅
+const npe2 = await freemiumManager.createNPE({ name: 'Test Agent 2' }); // ✅
+const npe3 = await freemiumManager.createNPE({ name: 'Test Agent 3' }); // ✅
+// const npe4 = await freemiumManager.createNPE({ name: 'Test Agent 4' }); // ❌ Limit reached
+
+// Upgrade to unlock more NPEs
+await freemiumManager.upgrade('base');
+const npe4 = await freemiumManager.createNPE({ name: 'Test Agent 4' }); // ✅ Now allowed
+```
+
+---
+
+## 🎯 Core Use Cases
+
+### 1. **Multi-Agent Service Marketplace** 🛍️
+Deploy **multiple AI agents** simultaneously, each offering complementary services:
+- **Agent A**: Virtual tour guide for real estate in tropical locations
+- **Agent B**: Financial advisor for vacation property investments  
+- **Agent C**: Travel booking assistant for flights and accommodations
+- **Agent D**: Local experience curator (restaurants, activities, culture)
+
+All agents share a unified XR environment, creating a **comprehensive customer experience** where users can engage with specialized services in one seamless session.
+
+### 2. **NPE-Controlled Digital Storefronts** 🏪
+Organizations can establish **persistent AI-staffed locations**:
+- **24/7 availability** - AI agents never sleep
+- **Sub-PKP management** - Each product line or service has dedicated PKPs
+- **Automated transactions** - PKPs handle payments and smart contracts
+- **Multi-language support** - AI agents communicate in customer's preferred language
+- **Scalable operations** - Spin up additional agents during peak demand
+
+### 3. **Collaborative AI Workspaces** 🤝
+Teams of AI agents work together on complex tasks:
+- **Development agents** (ai-build#0, ai-build#1) collaborate on code generation
+- **Session management agents** (session#0) handle user state and persistence
+- **Specialized sub-PKPs** for different roles (research, analysis, execution, validation)
+- **Real-time coordination** through WebXR multiplayer infrastructure
+- **Shared context** in immersive 3D environment
+
+### 4. **Biometric-Secured AI Agent Management** 🔐
+Human operators manage NPE agents with military-grade security:
+- **WebAuthn biometric authentication** (fingerprint, face, security key)
+- **1:1 PKP mapping** ensures identity consistency
+- **Hierarchical PKP structure**: Master PKP → Sub-PKPs for each agent
+- **Session-based control** with automatic security timeouts
+- **Audit trails** for all NPE operations and transactions
+
+---
 
 ## 🚀 Revolutionary Features
 
-### 🔐 **Next-Generation Authentication System**
-- **🔑 WebAuthn Biometric Security**: Passwordless authentication using fingerprint, face recognition, Windows Hello, or device PIN
-- **⚡ One-to-One PKP Mapping**: Revolutionary 1:1 credential-to-PKP relationship ensuring perfect identity consistency  
-- **🎯 Deterministic PKP Generation**: Your unique PKP address is cryptographically derived from your biometric credentials
-- **🛡️ Concurrent Request Protection**: Advanced locking mechanisms prevent authentication conflicts
-- **🤝 User Gesture Preservation**: Sophisticated user interaction chain management for seamless WebAuthn flows
-- **💾 Session Persistence**: Intelligent session management with 24-hour authentication windows
-- **🐛 Debug Integration**: Comprehensive debugging tools for WebAuthn troubleshooting
+### 🤖 **Multi-Agent NPE Platform**
+- **🎭 Multiple Simultaneous Agents**: Deploy unlimited AI agents, each with unique PKP identity
+- **🔗 Hierarchical PKP Architecture**: Primary PKP spawns sub-PKPs for specialized agents
+- **💰 Agent-Level Wallets**: Each sub-PKP enables independent transactions and payments
+- **🎯 Purpose-Specific Agents**: Dedicated PKPs for ai-builds, sessions, experiments
+- **🌐 Persistent Presence**: NPE agents remain active 24/7 in XR environment
+- **📊 Agent Analytics**: Track performance, interactions, and revenue per agent
+- **🔄 Dynamic Scaling**: Spin up/down agents based on demand
 
-### 🔑 **Advanced PKP Management Dashboard**
-- **👑 Primary PKP Control**: Manage your main Programmable Key Pair with full administrative capabilities
-- **🔧 Sub-PKP Minting**: Create specialized PKPs for different purposes (AI builds, concurrent development, session management)
-- **📊 PKP Analytics**: Track PKP usage, creation history, and management capabilities
-- **🤖 AI Build Path Management**: Dedicated PKPs for concurrent development and experimentation
-- **🌳 Hierarchical PKP Structure**: Organized PKP ecosystem with clear parent-child relationships
+### 🏢 **NPE Identity & Authentication**
+- **🔑 WebAuthn for Operators**: Human managers use biometric auth to control NPE systems
+- **⚡ PKP for Agents**: Each AI agent operates with cryptographic identity (no passwords)
+- **🛡️ 1:1 PKP Mapping**: Revolutionary deterministic PKP generation ensures consistency
+- **🔐 Sub-PKP Minting**: Create unlimited specialized identities for different agent roles
+- **💾 Session Management**: Secure 24-hour authentication windows with automatic rotation
+- **🎫 Role-Based Access**: Operators, supervisors, and agents have distinct permission levels
 
-### 🏝️ **Immersive Tropical Metaverse**
-- **🌊 Photorealistic Beach Environment**: Animated ocean waves with realistic water physics and tropical atmosphere
-- **🌴 Dynamic Palm Tree Forest**: Procedurally generated tropical vegetation with natural variations
-- **💧 Living Ocean**: Real-time wave animations with specular lighting and transparency effects
-- **☁️ Tropical Skybox**: Dynamic sky system with animated clouds and atmospheric effects
-- **🏖️ Interactive Decorations**: Floating tropical elements and environmental interactions
-- **🥽 WebXR Ready**: Full VR/AR support for Meta Quest, PICO, and WebXR-compatible devices
+### 🌐 **Immersive XR Service Environments**
+- **🏝️ Tropical Metaverse**: Beautiful beach setting for pleasant customer interactions
+- **🥽 WebXR Compatible**: Full VR/AR support (Meta Quest, PICO, HTC Vive, WebXR devices)
+- **👥 Multiplayer Ready**: Multiple AI agents and human customers share space simultaneously
+- **📹 Video/Audio Chat**: WebRTC integration for human-AI interaction
+- **🎨 Customizable Environments**: Brand your NPE space with logos, colors, products
+- **🌊 Realistic Physics**: Ocean waves, atmospheric effects, spatial audio
 
-### � **Sophisticated Audio Integration**
-- **🎶 SoundCloud Widget**: Seamless "Ocean Breeze" ambient soundtrack integration
-- **🔊 Advanced Audio Controls**: Real-time volume adjustment, play/pause, and audio state management
-- **🎚️ Spatial Audio Ready**: Positioned audio sources for immersive 3D sound experience
-- **🎵 Automatic Audio Management**: Smart audio initialization with user interaction compliance
+---
 
-### 👥 **Real-Time Multiplayer Ecosystem**
-- **⚡ Socket.IO Infrastructure**: High-performance real-time communication with connection management
-- **👤 Dynamic Avatar System**: Procedural avatar generation with unique visual identities
-- **📹 WebRTC Integration**: Peer-to-peer video/audio chat for social interaction
-- **📈 Session Analytics**: Track multiplayer sessions, duration, and user engagement
-- **🔄 Player State Management**: Real-time position updates and interaction synchronization
-
-### 🤖 **AI-Powered Development Platform**
-- **🔒 PKP-Protected AI Builds**: AI development paths secured by individual PKPs
-- **🔀 Concurrent Development**: Multiple AI build paths running simultaneously with sub-PKP management
-- **✨ Intelligent Scene Generation**: AI-assisted tropical environment creation and enhancement
-- **🤝 Collaborative AI**: Community-driven development with PKP-verified contributions
-- **📊 Build Path Analytics**: Track AI development iterations and success metrics
-
-### 🛡️ **Enterprise-Grade Security**
-- **🔐 WebAuthn Guard System**: Route-level protection requiring biometric verification
-- **🎫 Session-Based Authorization**: Secure session management with automatic expiration
-- **💾 Credential Storage**: Encrypted credential storage with JSON persistence
-- **🌐 Origin Validation**: Strict origin checking for WebAuthn security compliance
-- **🏷️ RPID Management**: Proper Relying Party identification for multi-domain support
-
-### ⚡ **Performance & Scalability**
-- **📦 Optimized Asset Loading**: Progressive loading with smooth scene transitions
-- **🖼️ Canvas Management**: Advanced canvas resizing and rendering optimization
-- **🧹 Memory Management**: Efficient resource cleanup and garbage collection
-- **⏳ Loading States**: Beautiful loading overlays with progress indication
-- **❌ Error Handling**: Comprehensive error management with user-friendly messages
-
-### 🛠️ **Technical Excellence**
-- **🏗️ NestJS 11.x Backend**: Modern TypeScript server architecture with decorator-based routing
-- **🎮 Babylon.js 8.x Engine**: Latest WebGL/WebGPU rendering with advanced features
-- **🔥 Lit Protocol 7.x**: Cutting-edge PKP management and session signature generation
-- **� SimpleWebAuthn**: Industry-standard WebAuthn implementation with full browser support
-- **🍪 Express Sessions**: Robust session management with in-memory and persistent storage options
-- **⚡ Socket.IO 4.x**: Real-time bidirectional communication with automatic reconnection
-
-## 🎯 Quick Start
+## 🎯 Quick Start for NPE Deployment
 
 ### Prerequisites
-
-- **Node.js** 18.0.0 or higher (recommended: 20.x)
+- **Node.js** 18.0.0+ (recommended: 20.x)
 - **npm** or **yarn**
-- A modern browser with WebAuthn support (Chrome 67+, Firefox 60+, Safari 14+, Edge 88+)
-- Optional: Biometric authentication device (fingerprint reader, camera for face recognition, Windows Hello)
-- Optional: VR headset with WebXR support (Meta Quest, PICO, HTC Vive)
+- **WebAuthn-compatible device** (laptop with fingerprint reader, smartphone, security key)
+- **WebXR device** (optional, for immersive experience)
 
-### 🚀 Installation & Setup
+### Installation
 
-1. **Clone the repository**
-   ```bash
-   # To use the app:
-   git clone https://github.com/jasonsprouse/the-beach.git
-   cd the-beach
-   
-   # To contribute, fork first then clone your fork:
-   # git clone https://github.com/YOUR_USERNAME/the-beach.git
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/jasonsprouse/the-beach.git
+cd the-beach
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+# Install dependencies
+npm install
 
-3. **Build the project**
-   ```bash
-   npm run build
-   ```
+# Start development server
+npm run start:dev
 
-4. **Start the development server**
-   ```bash
-   npm run start:dev
-   ```
+# Open browser
+open http://localhost:3000
+```
 
-5. **🔐 Experience Biometric Authentication**
-   
-   Navigate to `http://localhost:3000` and experience the future of passwordless authentication:
-   
-   - **First Visit**: Click "Register with WebAuthn" to create your biometric credential
-   - **Biometric Setup**: Follow your browser's prompts for fingerprint, face recognition, or device PIN
-   - **PKP Generation**: Your unique Programmable Key Pair is automatically generated
-   - **Paradise Access**: Click "Load Paradise" to enter your PKP-protected tropical metaverse!
+### Setting Up Your First NPE
 
-### 🏝️ Entering Paradise
+```bash
+# 1. Access the platform
+open http://localhost:3000
 
-Once authenticated, navigate to the tropical paradise:
+# 2. Register as NPE Operator (use biometric authentication)
+# Click "🔐 Register" → Enter operator username → Complete WebAuthn
 
-1. **Visit the XR Environment**: Go to `http://localhost:3000/xr`
-2. **Biometric Verification**: Your session will be automatically verified
-3. **Load Paradise**: Click "🌴 Load Paradise" to initialize your tropical escape
-4. **Explore**: Use WASD keys to move around the beach environment
-5. **Enter VR**: Click "🥽 Enter VR" if you have a WebXR-compatible headset
+# 3. Your Primary PKP is automatically generated
+# This becomes the master identity for your NPE organization
 
-### 🎵 Audio Experience
+# 4. View your PKP Dashboard
+# Navigate to http://localhost:3000/lit/pkp/dashboard
 
-- **Ocean Breeze Soundtrack**: Enjoy the ambient "Ocean Breeze" track by Jason Sprouse
-- **Volume Controls**: Adjust audio levels using the integrated SoundCloud widget
-- **Auto-Play**: Music starts automatically at low volume after user interaction
+# 5. You'll see 3 default sub-PKPs automatically created:
+# - ai-build#0: For development agent
+# - ai-build#1: For testing agent  
+# - session#0: For customer interaction agent
+```
 
-### 🔐 WebAuthn Features
-
-Experience cutting-edge biometric authentication:
-
-- **Passwordless Login**: No passwords required - just your biometric signature
-- **Device Flexibility**: Works with fingerprint readers, face recognition, Windows Hello, or device PINs
-- **One-to-One Mapping**: Each biometric credential maps to exactly one PKP
-- **Session Persistence**: Stay authenticated for 24 hours with automatic renewal
-- **Debug Tools**: Access browser console for advanced WebAuthn debugging functions
-
-### 🔑 PKP Management
-
-Explore your Programmable Key Pair capabilities:
+### Deploying Multiple AI Agents
 
 ```javascript
-// In browser console, try these debug commands:
-debugWebAuthn.getState()           // Check authentication state
-debugWebAuthn.checkOneToOneMapping() // Verify your 1:1 PKP mapping
-debugWebAuthn.testUserGesture()    // Test user interaction preservation
+// Mint additional sub-PKPs for specialized agents
+await authController.mintSubPKP('sales-agent-1', 'Customer acquisition specialist');
+await authController.mintSubPKP('support-agent-1', 'Technical support specialist');
+await authController.mintSubPKP('billing-agent-1', 'Payment and invoicing specialist');
+
+// Each agent now has its own cryptographic identity and wallet
+// Deploy them in the XR environment:
+open http://localhost:3000/paradise
 ```
 
-Access your PKP dashboard through authenticated endpoints:
-- **PKP Dashboard**: `/lit/pkp/dashboard` - View your primary and sub-PKPs
-- **AI Build Paths**: `/lit/pkp/ai-builds` - Manage AI development paths
-- **Session Status**: `/lit/session/status` - Check authentication status
+---
 
-### Production Deployment
+## 📚 NPE Architecture Guide
 
-For production deployment, see [DEPLOY.md](./DEPLOY.md) which includes detailed instructions for deploying to Vercel.
+### Hierarchical PKP Structure
 
-Quick deploy to Vercel:
-```bash
-npm i -g vercel
-vercel --prod
+```
+┌─────────────────────────────────────────────┐
+│         NPE Operator (Human)                │
+│         WebAuthn Biometric Auth             │
+└─────────────────┬───────────────────────────┘
+                  │
+                  ▼
+        ┌─────────────────────┐
+        │   Primary PKP        │
+        │  (Master Identity)   │
+        └──────────┬───────────┘
+                   │
+         ┌─────────┼─────────────────────┐
+         │         │                     │
+         ▼         ▼                     ▼
+    ┌────────┐  ┌────────┐         ┌────────┐
+    │Sub-PKP │  │Sub-PKP │   ...   │Sub-PKP │
+    │ai-build│  │session │         │custom  │
+    │  #0    │  │  #0    │         │  #N    │
+    └────────┘  └────────┘         └────────┘
+         │         │                     │
+         ▼         ▼                     ▼
+    ┌────────┐  ┌────────┐         ┌────────┐
+    │ Agent  │  │ Agent  │         │ Agent  │
+    │   A    │  │   B    │         │   N    │
+    └────────┘  └────────┘         └────────┘
 ```
 
-## 🔐 WebAuthn + PKP Integration
+---
 
-### Authentication Flow
+## 🎮 Game Manager Architecture
 
-The Beach implements a revolutionary authentication system that combines WebAuthn biometric security with Lit Protocol's Programmable Key Pairs:
+### Overview
 
-```mermaid
-graph TD
-    A[User Clicks Button] --> B[User Gesture Preserved]
-    B --> C[WebAuthn Registration/Auth]
-    C --> D[Biometric Verification]
-    D --> E[Credential Generated]
-    E --> F[Deterministic PKP Creation]
-    F --> G[1:1 Mapping Established]
-    G --> H[Session Authenticated]
-    H --> I[Paradise Access Granted]
+The Beach implements a **Game Manager Pattern** to orchestrate multiple AI agents, handle service requests, and manage the XR environment. The Game Manager acts as the central coordinator for all NPE operations, ensuring efficient resource allocation, load balancing, and seamless customer experiences.
+
+### Core Components
+
 ```
+┌───────────────────────────────────────────────────────────┐
+│                    Game Manager                           │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐      │
+│  │   Agent     │  │   Service   │  │   Location  │      │
+│  │   Registry  │  │   Router    │  │   Manager   │      │
+│  └─────────────┘  └─────────────┘  └─────────────┘      │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐      │
+│  │   Session   │  │   Analytics │  │   Event     │      │
+│  │   Manager   │  │   Engine    │  │   Bus       │      │
+│  └─────────────┘  └─────────────┘  └─────────────┘      │
+└───────────────────────────────────────────────────────────┘
+         │                  │                  │
+         ▼                  ▼                  ▼
+    ┌────────┐         ┌────────┐        ┌────────┐
+    │ Agent  │         │ Agent  │        │ Agent  │
+    │Pool #1 │         │Pool #2 │        │Pool #3 │
+    └────────┘         └────────┘        └────────┘
+```
+
+### Game Manager Responsibilities
+
+#### 1. **Agent Registry & Lifecycle Management**
+```javascript
+class GameManager {
+  constructor() {
+    this.agents = new Map(); // agentId -> Agent instance
+    this.agentPools = new Map(); // purpose -> Agent[]
+    this.activeServices = new Map(); // serviceId -> Service config
+  }
+  
+  // Register new agent with the system
+  async registerAgent(agentPKP, purpose, capabilities) {
+    const agent = {
+      id: agentPKP.address,
+      pkp: agentPKP,
+      purpose,
+      capabilities, // ['sales', 'support', 'consulting']
+      status: 'active',
+      currentLoad: 0,
+      maxLoad: 10,
+      location: null, // GPS coordinates if geo-enabled
+      serviceArea: null // Geofence polygon
+    };
+    
+    this.agents.set(agent.id, agent);
+    this.addToPool(purpose, agent);
+    
+    console.log(`✅ Agent ${agent.id} registered: ${purpose}`);
+    return agent;
+  }
+  
+  // Spawn agent on-demand
+  async spawnAgent(purpose, location = null) {
+    const subPKP = await this.mintSubPKP(purpose, `Dynamic agent for ${purpose}`);
+    return this.registerAgent(subPKP, purpose, this.getDefaultCapabilities(purpose));
+  }
+  
+  // Gracefully shutdown agent
+  async decommissionAgent(agentId) {
+    const agent = this.agents.get(agentId);
+    if (agent.currentLoad > 0) {
+      await this.migrateActiveSessions(agentId);
+    }
+    this.agents.delete(agentId);
+    console.log(`🔴 Agent ${agentId} decommissioned`);
+  }
+}
+```
+
+#### 2. **Service Routing & Load Balancing**
+```javascript
+// Intelligent request routing to best available agent
+async routeRequest(request) {
+  const { service, location, priority, customerProfile } = request;
+  
+  // Get agents capable of handling this service
+  const capableAgents = this.agents.values().filter(
+    agent => agent.capabilities.includes(service) && 
+             agent.status === 'active'
+  );
+  
+  // Apply routing strategy
+  const selectedAgent = await this.selectAgent(capableAgents, {
+    strategy: 'least-load', // or 'nearest-location', 'highest-rating', 'round-robin'
+    location,
+    priority
+  });
+  
+  if (!selectedAgent) {
+    // No available agents - spawn new one
+    console.log(`⚡ Spawning new ${service} agent on-demand`);
+    return await this.spawnAgent(service, location);
+  }
+  
+  selectedAgent.currentLoad++;
+  return selectedAgent;
+}
+
+// Load balancing strategies
+selectAgent(agents, options) {
+  switch(options.strategy) {
+    case 'least-load':
+      return agents.reduce((best, agent) => 
+        agent.currentLoad < best.currentLoad ? agent : best
+      );
+      
+    case 'nearest-location':
+      if (!options.location) return agents[0];
+      return this.findNearestAgent(agents, options.location);
+      
+    case 'highest-rating':
+      return agents.sort((a, b) => 
+        b.performanceScore - a.performanceScore
+      )[0];
+      
+    case 'round-robin':
+      return agents[this.roundRobinIndex++ % agents.length];
+  }
+}
+```
+
+#### 3. **Session Management**
+```javascript
+// Manage customer-agent sessions
+class SessionManager {
+  async createSession(customer, agent, service) {
+    const session = {
+      id: crypto.randomUUID(),
+      customerId: customer.id,
+      agentId: agent.id,
+      service,
+      startTime: Date.now(),
+      status: 'active',
+      context: {}, // Shared conversation context
+      transactions: []
+    };
+    
+    this.sessions.set(session.id, session);
+    await this.notifyAgent(agent.id, 'new-session', session);
+    
+    return session;
+  }
+  
+  // Handoff session between agents
+  async handoffSession(sessionId, fromAgent, toAgent, reason) {
+    const session = this.sessions.get(sessionId);
+    session.previousAgent = fromAgent.id;
+    session.agentId = toAgent.id;
+    session.handoffReason = reason;
+    session.handoffTime = Date.now();
+    
+    // Transfer context to new agent
+    await this.transferContext(session, fromAgent, toAgent);
+    
+    console.log(`🔀 Session ${sessionId} handed off: ${fromAgent.id} → ${toAgent.id}`);
+  }
+}
+```
+
+---
+
+## 🎯 Agent Deployment Patterns
+
+### Pattern 1: **Default Development Pattern** (ai-build#0, ai-build#1, session#0)
+
+**Purpose**: Concurrent AI-powered development and session management
+
+```javascript
+// Automatically created on NPE registration
+const defaultAgents = [
+  {
+    purpose: 'ai-build#0',
+    role: 'Primary Development Agent',
+    capabilities: ['code-generation', 'architecture-design', 'testing'],
+    description: 'Main AI agent for concurrent development tasks',
+    useCase: 'Generate code, create features, implement business logic'
+  },
+  {
+    purpose: 'ai-build#1', 
+    role: 'Secondary Development Agent',
+    capabilities: ['code-review', 'optimization', 'debugging'],
+    description: 'Parallel development agent for code quality',
+    useCase: 'Review code from ai-build#0, suggest improvements, find bugs'
+  },
+  {
+    purpose: 'session#0',
+    role: 'Session Coordinator Agent',
+    capabilities: ['state-management', 'user-tracking', 'analytics'],
+    description: 'Manages user sessions and interaction state',
+    useCase: 'Track customer journey, persist conversation context, coordinate handoffs'
+  }
+];
+
+// Example: Concurrent development workflow
+async function concurrentDevelopment(feature) {
+  // ai-build#0 generates initial implementation
+  const implementation = await aiBuild0.generate(feature.spec);
+  
+  // ai-build#1 reviews and optimizes in parallel
+  const [review, tests] = await Promise.all([
+    aiBuild1.review(implementation),
+    aiBuild1.generateTests(implementation)
+  ]);
+  
+  // session#0 tracks progress and reports to operator
+  await session0.logProgress({
+    feature: feature.name,
+    implementation,
+    review,
+    tests,
+    status: 'complete'
+  });
+  
+  return { implementation, review, tests };
+}
+```
+
+### Pattern 2: **Geo-Fenced Service Deployment** 🌍
+
+**Purpose**: Location-based service agents that respond to nearby customer requests
+
+```javascript
+// Deploy agents in specific geographic regions
+class GeoFencedDeployment {
+  constructor(gameManager) {
+    this.gameManager = gameManager;
+    this.serviceDatabase = new Map(); // serviceId -> ServiceListing
+    this.geoIndex = new GeoSpatialIndex(); // For fast location queries
+  }
+  
+  // Post a new service with geographic coverage
+  async postService(service) {
+    const listing = {
+      id: crypto.randomUUID(),
+      npeId: service.npeId,
+      name: service.name,
+      category: service.category, // 'food-delivery', 'ride-share', 'consulting'
+      location: service.location, // { lat, lng }
+      serviceRadius: service.radius || 5000, // meters
+      geofence: this.createGeofence(service.location, service.radius),
+      agentPKP: service.agentPKP,
+      pricing: service.pricing,
+      availability: service.availability, // 24/7 or scheduled
+      responseTime: service.estimatedResponse || 300 // seconds
+    };
+    
+    // Index service for geographic queries
+    this.serviceDatabase.set(listing.id, listing);
+    this.geoIndex.insert(listing);
+    
+    // Deploy agent for this service
+    await this.gameManager.registerAgent(
+      listing.agentPKP,
+      `geo-service-${listing.category}`,
+      [listing.category, 'location-based']
+    );
+    
+    console.log(`📍 Service posted: ${listing.name} at (${listing.location.lat}, ${listing.location.lng})`);
+    return listing;
+  }
+  
+  // Find nearest service provider based on GPS
+  async findNearestProvider(customerLocation, serviceType) {
+    // Query geospatial index for nearby services
+    const nearbyServices = this.geoIndex.queryRadius(
+      customerLocation,
+      10000 // 10km search radius
+    ).filter(s => s.category === serviceType);
+    
+    if (nearbyServices.length === 0) {
+      return { error: 'No providers found in your area' };
+    }
+    
+    // Calculate distances and sort by proximity
+    const servicesWithDistance = nearbyServices.map(service => ({
+      ...service,
+      distance: this.calculateDistance(customerLocation, service.location),
+      eta: this.estimateArrival(customerLocation, service.location, service.responseTime)
+    })).sort((a, b) => a.distance - b.distance);
+    
+    // Return nearest provider (first responder)
+    const nearest = servicesWithDistance[0];
+    
+    console.log(`🎯 Nearest ${serviceType}: ${nearest.name} (${nearest.distance}m away, ETA: ${nearest.eta}min)`);
+    
+    // Route request to agent
+    const agent = this.gameManager.agents.get(nearest.agentPKP.address);
+    await this.gameManager.routeRequest({
+      service: serviceType,
+      location: customerLocation,
+      provider: nearest,
+      customer: { location: customerLocation }
+    });
+    
+    return nearest;
+  }
+  
+  // Calculate distance between two points (Haversine formula)
+  calculateDistance(point1, point2) {
+    const R = 6371e3; // Earth radius in meters
+    const φ1 = point1.lat * Math.PI / 180;
+    const φ2 = point2.lat * Math.PI / 180;
+    const Δφ = (point2.lat - point1.lat) * Math.PI / 180;
+    const Δλ = (point2.lng - point1.lng) * Math.PI / 180;
+    
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    
+    return R * c; // Distance in meters
+  }
+  
+  // Create circular geofence polygon
+  createGeofence(center, radius) {
+    const points = [];
+    const steps = 32;
+    for (let i = 0; i < steps; i++) {
+      const angle = (i / steps) * 2 * Math.PI;
+      points.push({
+        lat: center.lat + (radius / 111320) * Math.cos(angle),
+        lng: center.lng + (radius / (111320 * Math.cos(center.lat * Math.PI / 180))) * Math.sin(angle)
+      });
+    }
+    return points;
+  }
+}
+
+// Example: Food delivery service
+const foodDelivery = await geoFencedDeployment.postService({
+  npeId: 'npe-restaurant-123',
+  name: 'Tropical Smoothie Bar',
+  category: 'food-delivery',
+  location: { lat: 25.7617, lng: -80.1918 }, // Miami Beach
+  radius: 5000, // 5km delivery radius
+  agentPKP: await mintSubPKP('delivery-agent-miami', 'Food delivery coordinator'),
+  pricing: { deliveryFee: 5.99, minimumOrder: 15.00 },
+  availability: '24/7',
+  estimatedResponse: 45 * 60 // 45 minutes
+});
+
+// Customer requests nearby service
+const customerLocation = { lat: 25.7650, lng: -80.1900 }; // 400m away
+const nearestProvider = await geoFencedDeployment.findNearestProvider(
+  customerLocation,
+  'food-delivery'
+);
+// → Returns: Tropical Smoothie Bar (412m away, ETA: 6min)
+```
+
+### Pattern 3: **Specialized Service Teams** 🏢
+
+**Purpose**: Deploy complementary agents that work together
+
+```javascript
+// Example: Real estate service team
+const realEstateTeam = {
+  listing: {
+    purpose: 'real-estate-listing-agent',
+    capabilities: ['property-search', 'market-analysis', 'virtual-tours'],
+    agentPKP: await mintSubPKP('re-listing', 'Property listing specialist')
+  },
+  
+  financing: {
+    purpose: 'real-estate-finance-agent',
+    capabilities: ['mortgage-calculation', 'pre-approval', 'loan-comparison'],
+    agentPKP: await mintSubPKP('re-finance', 'Mortgage specialist')
+  },
+  
+  closing: {
+    purpose: 'real-estate-closing-agent',
+    capabilities: ['contract-review', 'escrow-management', 'title-insurance'],
+    agentPKP: await mintSubPKP('re-closing', 'Closing coordinator')
+  },
+  
+  inspector: {
+    purpose: 'real-estate-inspection-agent',
+    capabilities: ['property-inspection', 'defect-reporting', 'repair-estimates'],
+    agentPKP: await mintSubPKP('re-inspector', 'Property inspector')
+  }
+};
+
+// Coordinated workflow
+async function homebuying Process(customer) {
+  // 1. Listing agent shows properties
+  const properties = await realEstateTeam.listing.search(customer.criteria);
+  const selectedProperty = await customer.selectProperty(properties);
+  
+  // 2. Finance agent handles pre-approval
+  const financing = await realEstateTeam.financing.preApprove({
+    customer,
+    property: selectedProperty,
+    downPayment: customer.downPayment
+  });
+  
+  // 3. Inspector evaluates property
+  const inspection = await realEstateTeam.inspector.inspect(selectedProperty);
+  
+  // 4. Closing agent finalizes transaction
+  if (inspection.approved) {
+    await realEstateTeam.closing.initiateClosing({
+      property: selectedProperty,
+      buyer: customer,
+      financing,
+      inspection
+    });
+  }
+}
+```
+
+### Pattern 4: **Dynamic Scaling Pattern** 📈
+
+**Purpose**: Auto-scale agents based on demand
+
+```javascript
+class AutoScalingManager {
+  constructor(gameManager) {
+    this.gameManager = gameManager;
+    this.metrics = {
+      requestQueue: [],
+      avgResponseTime: 0,
+      agentUtilization: {}
+    };
+    
+    // Monitor every 30 seconds
+    setInterval(() => this.checkScaling(), 30000);
+  }
+  
+  async checkScaling() {
+    const utilization = this.calculateUtilization();
+    
+    // Scale up if agents are overloaded
+    if (utilization > 0.8) {
+      console.log(`⬆️ High load detected (${(utilization * 100).toFixed(1)}%), scaling up`);
+      await this.scaleUp();
+    }
+    
+    // Scale down if agents are underutilized
+    if (utilization < 0.3 && this.gameManager.agents.size > 3) {
+      console.log(`⬇️ Low load detected (${(utilization * 100).toFixed(1)}%), scaling down`);
+      await this.scaleDown();
+    }
+  }
+  
+  async scaleUp() {
+    // Spawn agents for high-demand services
+    const demandAnalysis = this.analyzeDemand();
+    
+    for (const [service, demand] of Object.entries(demandAnalysis)) {
+      if (demand.queueLength > 5) {
+        await this.gameManager.spawnAgent(service);
+      }
+    }
+  }
+  
+  async scaleDown() {
+    // Decommission idle agents
+    const idleAgents = Array.from(this.gameManager.agents.values())
+      .filter(agent => agent.currentLoad === 0 && 
+                       !agent.purpose.includes('default'))
+      .sort((a, b) => a.lastActivity - b.lastActivity);
+    
+    if (idleAgents.length > 0) {
+      await this.gameManager.decommissionAgent(idleAgents[0].id);
+    }
+  }
+}
+```
+
+### Pattern 5: **Event-Driven Agent Activation** ⚡
+
+**Purpose**: Activate agents in response to specific events
+
+```javascript
+// Event-based agent deployment
+class EventDrivenDeployment {
+  constructor(gameManager) {
+    this.gameManager = gameManager;
+    this.eventBus = new EventEmitter();
+    this.setupEventHandlers();
+  }
+  
+  setupEventHandlers() {
+    // Deploy support agent when error detected
+    this.eventBus.on('customer-error', async (error) => {
+      const supportAgent = await this.gameManager.routeRequest({
+        service: 'emergency-support',
+        priority: 'high',
+        context: error
+      });
+      await supportAgent.handleEmergency(error);
+    });
+    
+    // Deploy sales agent when high-value customer detected
+    this.eventBus.on('high-value-customer', async (customer) => {
+      const premiumAgent = await this.gameManager.spawnAgent('premium-sales');
+      await premiumAgent.greet(customer, 'vip-welcome');
+    });
+    
+    // Deploy compliance agent when regulated transaction occurs
+    this.eventBus.on('regulated-transaction', async (transaction) => {
+      const complianceAgent = await this.gameManager.routeRequest({
+        service: 'compliance-review',
+        priority: 'high'
+      });
+      await complianceAgent.review(transaction);
+    });
+  }
+}
+```
+
+---
+
+## 🔐 Authentication Flow
+
+### For NPE Operators (Humans)
+
+```javascript
+// 1. Operator registers with biometric authentication
+await authController.register('npe-operator-name');
+// → WebAuthn prompt (fingerprint/face/security key)
+// → Primary PKP generated deterministically
+// → 3 default sub-PKPs created (ai-build#0, ai-build#1, session#0)
+
+// 2. Operator logs in (subsequent sessions)
+await authController.login();
+// → WebAuthn authentication
+// → Session established (24-hour validity)
+// → Access to PKP dashboard and agent management
+
+// 3. Operator manages agents
+await authController.fetchPKPDashboard();
+// → View all sub-PKPs and their assigned agents
+// → Monitor agent performance and revenue
+// → Create new agents as needed
+```
+
+### For AI Agents (NPEs)
+
+```javascript
+// Agents operate using sub-PKPs (no biometric needed)
+// Each agent has:
+// - Unique Ethereum address (from sub-PKP)
+// - Ability to sign transactions
+// - Persistent identity across sessions
+
+// Example: Agent initiates transaction
+const agentPKP = getSubPKP('sales-agent-1');
+const transaction = await agentPKP.signTransaction({
+  to: customerWallet,
+  value: servicePrice,
+  data: invoiceDetails
+});
+```
+
+---
+
+## � NPE Manager Dashboard
+
+### Overview
+
+Inspired by [Y8's NPE Manager](https://y8-app.vercel.app/blog/npe-manager-guide), The Beach provides a comprehensive web-based dashboard for managing your NPE fleet. Access it at `/shop` → **Digital** tab.
 
 ### Key Features
 
-#### 🎯 **One-to-One Credential Mapping**
-- Each user maintains exactly **one WebAuthn credential** mapped to **one primary PKP**
-- Eliminates credential conflicts and ensures consistent identity
-- New registrations replace existing credentials for perfect 1:1 mapping
-
-#### 🔒 **Deterministic PKP Generation**
-```typescript
-// PKP addresses are deterministically generated from:
-const seed = `${username}:${credentialID}`;
-const hash = crypto.createHash('sha256').update(seed).digest();
-const pkpAddress = '0x' + hash.slice(-20).toString('hex');
-```
-
-#### 🛡️ **Advanced Security Features**
-- **Concurrent Request Protection**: Prevents multiple simultaneous WebAuthn operations
-- **User Gesture Preservation**: Maintains user activation throughout async operations
-- **Session Validation**: 24-hour rolling session windows with automatic renewal
-- **Origin Verification**: Strict origin checking for WebAuthn security
-
-#### 🔧 **Sub-PKP Management**
-Primary PKPs can mint specialized sub-PKPs for different purposes:
-- **AI Build Paths**: Dedicated PKPs for concurrent development
-- **Session Management**: Temporary PKPs for session-specific operations
-- **Experimental Features**: Sandbox PKPs for testing new capabilities
-
-### API Endpoints
-
-#### Authentication Routes
-```typescript
-POST /lit/webauthn/register-options     // Get WebAuthn registration options
-POST /lit/webauthn/verify-registration  // Verify registration and create PKP
-POST /lit/webauthn/authenticate-options // Get authentication options  
-POST /lit/webauthn/verify-authentication // Verify auth and activate session
-GET  /lit/session/status               // Check authentication status
-POST /lit/session/logout               // Clear session and logout
-```
-
-#### PKP Management Routes
-```typescript
-GET  /lit/pkp/dashboard                // PKP management dashboard
-POST /lit/pkp/mint                     // Mint new sub-PKP
-GET  /lit/pkp/ai-builds               // AI development paths
-GET  /lit/user/profile                // User profile and stats
-```
-
-#### Protected Routes
-```typescript
-POST /xr/load-paradise                // Load tropical paradise (requires auth)
-GET  /xr/analytics                    // User session analytics
-POST /xr/session/end                  // End XR session
-```
-
-### WebAuthn Browser Support
-
-| Browser | Version | Support Level |
-|---------|---------|---------------|
-| Chrome | 67+ | ✅ Full Support |
-| Firefox | 60+ | ✅ Full Support |
-| Safari | 14+ | ✅ Full Support |
-| Edge | 88+ | ✅ Full Support |
-| Opera | 54+ | ✅ Full Support |
-
-### Debug Functions
-
-The Beach includes comprehensive debugging tools for WebAuthn development:
+#### 1. **Generate New NPEs** 🎭
 
 ```javascript
-// Available in browser console:
-debugWebAuthn.getState()              // Get complete authentication state
-debugWebAuthn.resetState()            // Reset locks and clear state
-debugWebAuthn.testAuth()              // Test authentication with logging
-debugWebAuthn.checkSupport()          // Check WebAuthn browser support
-debugWebAuthn.testConcurrentRequests() // Test concurrent protection
-debugWebAuthn.checkOneToOneMapping()  // Verify 1:1 credential mapping
-debugWebAuthn.testUserGesture()       // Test user gesture preservation
+// UI: Click "Generate NPE" button
+// Backend creates new PKP with default schema
+const newNPE = await npeManager.generateNPE({
+  name: 'Customer Service Agent #4',
+  type: 'service-provider',
+  category: 'support',
+  location: null, // Set later if geo-enabled
+  tier: 'freemium' // Based on user's subscription
+});
+
+console.log(`
+🎉 New NPE Created!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Address: ${newNPE.pkpAddress}
+Public Key: ${newNPE.publicKey}
+Type: ${newNPE.type}
+Status: Active
+`);
 ```
 
-## 🏗️ Architecture
+#### 2. **View & Refresh PKPs** 🔄
 
-### Technology Stack
-
-#### Frontend
-- **Babylon.js 8.x**: WebGL/WebGPU rendering engine with full WebXR support
-- **WebAuthn API**: Native browser biometric authentication
-- **Socket.IO Client**: Real-time multiplayer communication
-- **SoundCloud Widget API**: Integrated audio streaming
-- **WebRTC**: Peer-to-peer video/audio communication
-
-#### Backend
-- **NestJS 11.x**: Modern TypeScript server framework
-- **SimpleWebAuthn**: Industry-standard WebAuthn implementation
-- **Lit Protocol SDK**: PKP management and session signatures
-- **Socket.IO**: Real-time bidirectional communication
-- **Express Sessions**: Secure session management
-
-#### Security & Authentication
-- **WebAuthn**: Passwordless biometric authentication
-- **Lit Protocol**: Programmable Key Pair management
-- **PKP Deterministic Generation**: Cryptographic identity derivation
-- **Session Guards**: Route-level authentication protection
-
-### Project Structure
-
-```
-src/
-├── lit/                    # Lit Protocol & WebAuthn integration
-│   ├── lit.controller.ts   # 12 endpoints for auth & PKP management
-│   ├── lit.service.ts      # Core Lit Protocol service
-│   └── webauthn-auth.guard.ts # WebAuthn route protection
-├── xr/                     # XR environment & multiplayer
-│   └── xr.controller.ts    # Paradise loading & session management
-├── events/                 # Socket.IO real-time events
-│   ├── events.gateway.ts   # WebSocket event handling
-│   └── events.module.ts    # Events module configuration
-├── auth/                   # Authentication infrastructure
-│   └── auth.guard.ts       # Multi-layer auth guard
-└── main.ts                 # Application bootstrap
-
-public/
-├── js/
-│   ├── useLit.js          # WebAuthn + PKP client integration
-│   └── xr-scene.js        # Babylon.js tropical paradise
-├── xr-environment.html    # XR interface with WebAuthn modals
-└── index.html             # Landing page with authentication
-```
-
-### WebAuthn Implementation Details
-
-#### Registration Flow
-1. **User Gesture Check**: Verify user interaction before WebAuthn calls
-2. **Challenge Generation**: Server generates cryptographic challenge
-3. **Credential Creation**: Browser creates biometric credential
-4. **Verification**: Server verifies credential and generates PKP
-5. **Session Establishment**: User session activated with PKP info
-
-#### Authentication Flow
-1. **Session Check**: Verify existing session before prompting
-2. **Challenge Request**: Get authentication challenge from server
-3. **Biometric Verification**: User completes biometric authentication
-4. **PKP Retrieval**: Server returns deterministic PKP information
-5. **Paradise Access**: User gains access to protected XR environment
-
-#### Error Handling
-- **User Gesture Expired**: Clear guidance for fresh interaction
-- **Concurrent Requests**: Protection against simultaneous operations
-- **Credential Conflicts**: Automatic resolution with 1:1 mapping
-- **Browser Compatibility**: Graceful fallbacks for unsupported browsers
-
-## 🎮 How to Experience The Beach
-
-### 🔐 Authentication Experience
-
-1. **Biometric Registration**: First-time users complete WebAuthn registration with fingerprint, face recognition, or device PIN
-2. **PKP Generation**: Your unique Programmable Key Pair is automatically created and mapped to your biometric credential
-3. **Seamless Access**: Future visits authenticate instantly with your biometric signature
-4. **Paradise Unlocked**: Authenticated users gain access to the full tropical metaverse
-
-### 🖥️ Desktop Controls (Non-VR)
-
-- **W/A/S/D or Arrow Keys** - Navigate the tropical paradise
-- **Mouse** - Look around (click and drag for camera control)
-- **E** - Move up (fly upward)
-- **Q** - Move down (descend)
-- **Space** - Jump/interact with objects
-- **ESC** - Exit fullscreen or VR mode
-
-### 🥽 VR Controls
-
-- **VR Controllers** - Point and teleport using tropical markers
-- **Joystick/Thumbstick** - Smooth locomotion through the environment
-- **Hand Tracking** - Natural interaction with objects (device-dependent)
-- **Voice Commands** - "Load Paradise" to enter authenticated areas
-
-### 👥 Multiplayer & Social Features
-
-- **Automatic Voice/Video**: WebRTC-powered communication when joining sessions
-- **Real-time Avatars**: See other authenticated users in the tropical environment
-- **PKP-Verified Interactions**: All social features secured by biometric authentication
-- **Session Analytics**: Track your time in paradise and interaction statistics
-
-## 🔧 Development & Architecture
-
-### 🏗️ Enhanced Project Structure
-
-```
-the-beach/
-├── src/                           # Backend (NestJS + WebAuthn + PKP)
-│   ├── lit/                      # 🔐 Lit Protocol & WebAuthn integration
-│   │   ├── lit.controller.ts     # 12 endpoints for auth & PKP management
-│   │   ├── lit.service.ts        # Core Lit Protocol service
-│   │   └── webauthn-auth.guard.ts # Route-level biometric protection
-│   ├── xr/                       # 🏝️ XR environment & session management
-│   │   └── xr.controller.ts      # Paradise loading with PKP verification
-│   ├── events/                   # ⚡ Socket.IO real-time multiplayer
-│   │   ├── events.gateway.ts     # WebSocket event handling
-│   │   └── events.module.ts      # Events module configuration
-│   ├── auth/                     # 🛡️ Multi-layer authentication
-│   │   └── auth.guard.ts         # Session + token auth guard
-│   ├── app.module.ts             # Main application module
-│   └── main.ts                   # Application bootstrap
-├── public/                       # Frontend (Babylon.js + WebAuthn)
-│   ├── js/
-│   │   ├── useLit.js            # 🔑 WebAuthn + PKP client integration
-│   │   └── xr-scene.js          # 🌴 Tropical paradise with auth integration
-│   ├── xr-environment.html      # 🏝️ Main XR interface with biometric modals
-│   └── index.html               # 🏠 Landing page with authentication
-├── webauthn-users.json          # 💾 Encrypted credential storage
-├── package.json
-└── README.md
-```
-
-### 🚀 Available Scripts
-
-- `npm run start` - Production server with full WebAuthn + PKP support
-- `npm run start:dev` - Development mode with hot-reload and debug tools
-- `npm run build` - Build TypeScript backend with optimization
-- `npm run test` - Run unit tests including WebAuthn flows
-- `npm run test:e2e` - End-to-end tests with biometric simulation
-- `npm run lint` - Lint code with WebAuthn best practices
-- `npm run format` - Format code with Prettier
-
-### 🔗 Enhanced API Endpoints
-
-#### 🔐 Authentication & PKP Management
-- `GET /lit/config` - Lit Protocol configuration status
-- `GET /lit/session/status` - Check authentication and PKP status
-- `POST /lit/session/logout` - Clear session and revoke access
-- `GET /lit/user/profile` - User profile with PKP information
-- `POST /lit/webauthn/register-options` - Get WebAuthn registration challenge
-- `POST /lit/webauthn/verify-registration` - Verify registration and create PKP
-- `POST /lit/webauthn/authenticate-options` - Get authentication challenge
-- `POST /lit/webauthn/verify-authentication` - Verify auth and activate session
-- `GET /lit/pkp/dashboard` - PKP management dashboard
-- `POST /lit/pkp/mint` - Mint new sub-PKP for specific purposes
-- `GET /lit/pkp/ai-builds` - AI development paths with PKP protection
-
-#### 🏝️ Protected Paradise Access
-- `GET /xr` - Tropical XR environment (guest access for viewing)
-- `POST /xr/load-paradise` - Load full paradise (requires WebAuthn auth)
-- `GET /xr/analytics` - User session analytics and XR metrics
-- `POST /xr/session/end` - End XR session with duration tracking
-- `GET /xr/demo` - Demo scene with limited features
-- `GET /xr/info` - Paradise information and feature list
-
-#### ⚡ Real-time Communication
-- `WebSocket ws://localhost:3000` - Multiplayer with PKP-verified users
-- Real-time events: `userJoined`, `userLeft`, `userMoved`, `voiceChat`
-
-## 🤝 Contributing to The Beach
-
-We welcome contributions to make The Beach the premier biometric-secured tropical metaverse! Here's how you can help:
-
-### 🌟 How to Contribute
-
-1. **Fork the Repository**
-   
-   Click the "Fork" button to create your own copy with full WebAuthn + PKP functionality.
-
-2. **Create a Feature Branch**
-   ```bash
-   git checkout -b feature/your-amazing-feature
-   ```
-
-3. **Set Up Development Environment**
-   ```bash
-   npm install
-   npm run build
-   npm run start:dev
-   ```
-   
-   Test the WebAuthn flow by visiting `http://localhost:3000` and registering with biometrics.
-
-4. **Make Your Changes**
-   
-   Follow existing patterns for WebAuthn integration. Ideas for contributions:
-   - Enhance tropical environment with new 3D assets
-   - Improve WebAuthn user experience and error handling
-   - Add new PKP management features
-   - Implement additional biometric authentication methods
-   - Create new WebXR interactions and teleportation systems
-   - Expand multiplayer features with PKP-verified social interactions
-   - Add AI-powered scene generation with PKP protection
-
-5. **Test Thoroughly**
-   ```bash
-   # Test the full authentication flow
-   npm run test
-   
-   # Test in browser with WebAuthn
-   # Visit http://localhost:3000 and test:
-   # - Biometric registration
-   # - Authentication with stored credentials
-   # - Paradise loading with PKP verification
-   # - VR mode functionality
-   ```
-
-6. **Commit and Push**
-   ```bash
-   git add .
-   git commit -m "feat: add biometric-protected AI scene generator"
-   git push origin feature/your-amazing-feature
-   ```
-
-7. **Open a Pull Request**
-   
-   Include details about WebAuthn compatibility and PKP integration testing.
-
-### 🎨 Creating New PKP-Protected Scenes with AI
-
-Extend The Beach with AI-generated environments that leverage PKP authentication:
-
-#### Step 1: Design Your Scene
-
-Choose a theme and plan PKP integration:
-- **🌊 Underwater Atlantis** - PKP-gated ancient wisdom chambers
-- **🌌 Space Observatory** - Biometric-locked telescope controls
-- **🏰 Fantasy Realm** - WebAuthn-protected magical artifacts
-- **🏔️ Arctic Research Station** - PKP-verified scientific data access
-
-#### Step 2: Use AI for Code Generation
-
-Prompt example for AI assistants:
-
-```
-I'm building a WebAuthn + PKP secured tropical metaverse using Babylon.js and NestJS.
-I need to create a new scene: [YOUR_SCENE_DESCRIPTION]
-
-Requirements:
-- Integrate with existing WebAuthn authentication system
-- Include PKP-protected areas requiring biometric verification
-- Support WebXR teleportation and VR controllers
-- Follow the existing project structure in /src/xr/ and /public/js/
-- Include proper error handling for authentication failures
-- Add Socket.IO multiplayer support for authenticated users
-
-Please provide TypeScript code for both the NestJS controller and Babylon.js scene.
-
-Here's the existing auth structure: [paste relevant code from lit.controller.ts]
-```
-
-#### Step 3: Implement PKP-Protected Features
-
-```typescript
-// Example: PKP-protected treasure chest
-const createPKPTreasureChest = async (scene) => {
-  const chest = BABYLON.MeshBuilder.CreateBox("treasureChest", {size: 2}, scene);
+```javascript
+// Fetch all PKPs associated with your account
+async function refreshPKPs() {
+  const pkps = await fetch('/lit/pkp/dashboard', {
+    credentials: 'include' // Include session cookie
+  }).then(r => r.json());
   
-  chest.actionManager = new BABYLON.ActionManager(scene);
-  chest.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
-    BABYLON.ActionManager.OnPickTrigger, 
-    async () => {
-      // Verify PKP authentication before opening
-      const lit = window.useLit();
-      const authState = lit.getAuthenticationState();
-      
-      if (authState.currentUser) {
-        // Open chest with PKP verification
-        const pkpDashboard = await lit.getPKPDashboard();
-        console.log('🔑 PKP verified, opening treasure:', pkpDashboard);
-        animateChestOpening(chest);
-      } else {
-        // Prompt for biometric authentication
-        showAuthPrompt("🔐 Biometric authentication required to open treasure");
+  return {
+    primaryPKP: pkps.primaryPKP,
+    subPKPs: pkps.subPKPs, // Array of all NPEs
+    totalNPEs: pkps.subPKPs.length,
+    tierLimit: pkps.tierInfo.maxNPEs
+  };
+}
+
+// Display in UI
+const dashboard = await refreshPKPs();
+console.log(`
+📊 Your NPE Fleet
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Primary PKP: ${dashboard.primaryPKP.address}
+Total NPEs: ${dashboard.totalNPEs} / ${dashboard.tierLimit}
+Active: ${dashboard.subPKPs.filter(n => n.status === 'active').length}
+Tier: ${dashboard.tierInfo.tier}
+`);
+```
+
+#### 3. **Manage NPE Schemas** 📝
+
+Following Y8's extensible schema model:
+
+```javascript
+// NPE Schema Editor Component
+class NPESchemaEditor {
+  constructor(npeId) {
+    this.npeId = npeId;
+    this.schema = null;
+  }
+  
+  async loadSchema() {
+    this.schema = await fetch(`/npe/${this.npeId}/schema`).then(r => r.json());
+    this.renderFields();
+  }
+  
+  renderFields() {
+    const fields = Object.entries(this.schema.customFields);
+    return `
+      <div class="npe-schema-editor">
+        <h3>Edit NPE Schema: ${this.schema.name}</h3>
+        
+        <!-- Core Fields (read-only) -->
+        <div class="core-fields">
+          <label>PKP Address:</label>
+          <input disabled value="${this.schema.pkpAddress}" />
+          
+          <label>Type:</label>
+          <input disabled value="${this.schema.type}" />
+        </div>
+        
+        <!-- Custom Fields (editable) -->
+        <div class="custom-fields">
+          ${fields.map(([key, value]) => `
+            <div class="field-row">
+              <label>${key}:</label>
+              <input 
+                id="field-${key}" 
+                value="${value}"
+                onchange="editor.updateField('${key}', this.value)"
+              />
+              <button onclick="editor.removeField('${key}')">🗑️</button>
+            </div>
+          `).join('')}
+        </div>
+        
+        <!-- Add New Field -->
+        <div class="add-field">
+          <input id="new-field-name" placeholder="Field name" />
+          <input id="new-field-value" placeholder="Field value" />
+          <button onclick="editor.addField()">➕ Add Field</button>
+        </div>
+        
+        <!-- Tier Limit Warning -->
+        ${this.checkTierLimit()}
+        
+        <button onclick="editor.saveSchema()">💾 Save Schema</button>
+      </div>
+    `;
+  }
+  
+  checkTierLimit() {
+    const currentFields = Object.keys(this.schema.customFields).length;
+    const maxFields = this.schema.tierInfo.maxSchemaFields;
+    
+    if (currentFields >= maxFields) {
+      return `
+        <div class="tier-warning">
+          ⚠️ You've reached your schema field limit (${maxFields} fields).
+          <a href="/shop?upgrade=true">Upgrade to ${this.getNextTier()}</a> 
+          to add more fields.
+        </div>
+      `;
+    }
+    return '';
+  }
+  
+  async addField() {
+    const name = document.getElementById('new-field-name').value;
+    const value = document.getElementById('new-field-value').value;
+    
+    if (!name || !value) {
+      alert('Please enter both field name and value');
+      return;
+    }
+    
+    // Check tier limit
+    const currentFields = Object.keys(this.schema.customFields).length;
+    if (currentFields >= this.schema.tierInfo.maxSchemaFields) {
+      alert(`Schema field limit reached. Upgrade to add more fields.`);
+      return;
+    }
+    
+    this.schema.customFields[name] = value;
+    await this.saveSchema();
+    this.renderFields();
+  }
+  
+  async removeField(fieldName) {
+    if (confirm(`Remove field "${fieldName}"?`)) {
+      delete this.schema.customFields[fieldName];
+      await this.saveSchema();
+      this.renderFields();
+    }
+  }
+  
+  async updateField(fieldName, newValue) {
+    this.schema.customFields[fieldName] = newValue;
+    // Auto-save after 500ms debounce
+    clearTimeout(this.saveTimeout);
+    this.saveTimeout = setTimeout(() => this.saveSchema(), 500);
+  }
+  
+  async saveSchema() {
+    const response = await fetch(`/npe/${this.npeId}/schema`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(this.schema)
+    });
+    
+    if (response.ok) {
+      console.log('✅ Schema saved successfully');
+      this.showNotification('Schema saved!', 'success');
+    } else {
+      console.error('❌ Failed to save schema');
+      this.showNotification('Failed to save schema', 'error');
+    }
+  }
+  
+  getNextTier() {
+    const tiers = ['freemium', 'base', 'premium'];
+    const currentIndex = tiers.indexOf(this.schema.tierInfo.tier);
+    return tiers[currentIndex + 1] || 'premium';
+  }
+  
+  showNotification(message, type) {
+    // Display toast notification
+    const toast = document.createElement('div');
+    toast.className = `notification ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+}
+
+// Usage
+const editor = new NPESchemaEditor('npe-customer-service-4');
+await editor.loadSchema();
+```
+
+#### 4. **NPE Analytics Dashboard** 📊
+
+```javascript
+// Real-time NPE performance metrics
+class NPEAnalyticsDashboard {
+  async render(npeId) {
+    const metrics = await this.fetchMetrics(npeId);
+    
+    return `
+      <div class="npe-analytics">
+        <h2>📊 ${metrics.name} - Performance</h2>
+        
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <h4>Total Sessions</h4>
+            <div class="value">${metrics.totalSessions}</div>
+            <div class="change">+${metrics.sessionsChange}% this week</div>
+          </div>
+          
+          <div class="metric-card">
+            <h4>Success Rate</h4>
+            <div class="value">${(metrics.successRate * 100).toFixed(1)}%</div>
+            <div class="change">${metrics.successTrend}</div>
+          </div>
+          
+          <div class="metric-card">
+            <h4>Avg Response Time</h4>
+            <div class="value">${metrics.avgResponseTime}s</div>
+            <div class="change">${metrics.responseTrend}</div>
+          </div>
+          
+          <div class="metric-card">
+            <h4>Revenue (ETH)</h4>
+            <div class="value">${metrics.revenue.total}</div>
+            <div class="change">+${metrics.revenue.thisMonth} this month</div>
+          </div>
+        </div>
+        
+        <!-- Customer Satisfaction -->
+        <div class="satisfaction-chart">
+          <h4>⭐ Customer Satisfaction: ${metrics.customerSatisfaction}/5</h4>
+          <div class="rating-bar">
+            <div class="fill" style="width: ${metrics.customerSatisfaction * 20}%"></div>
+          </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="recent-activity">
+          <h4>📝 Recent Activity</h4>
+          <ul>
+            ${metrics.recentActivity.map(activity => `
+              <li>
+                <span class="time">${this.formatTime(activity.timestamp)}</span>
+                <span class="event">${activity.event}</span>
+                <span class="customer">${activity.customer}</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+        
+        <!-- Location Map (if geo-enabled) -->
+        ${metrics.location ? this.renderLocationMap(metrics) : ''}
+      </div>
+    `;
+  }
+  
+  async fetchMetrics(npeId) {
+    return await fetch(`/npe/${npeId}/analytics`).then(r => r.json());
+  }
+  
+  renderLocationMap(metrics) {
+    return `
+      <div class="location-map">
+        <h4>📍 Service Area</h4>
+        <div id="map-${metrics.npeId}" class="map-container"></div>
+        <p>
+          Location: ${metrics.location.lat}, ${metrics.location.lng}<br>
+          Service Radius: ${metrics.location.serviceRadius}m<br>
+          Recent Customers: ${metrics.locationStats.customersInRadius}
+        </p>
+      </div>
+    `;
+  }
+  
+  formatTime(timestamp) {
+    const date = new Date(timestamp);
+    const now = Date.now();
+    const diff = now - timestamp;
+    
+    if (diff < 60000) return 'Just now';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    return date.toLocaleDateString();
+  }
+}
+```
+
+#### 5. **Batch NPE Operations** 🔧
+
+```javascript
+// Manage multiple NPEs simultaneously
+class BatchNPEManager {
+  async batchUpdate(npeIds, updates) {
+    const results = await Promise.all(
+      npeIds.map(id => this.updateNPE(id, updates))
+    );
+    
+    console.log(`✅ Updated ${results.filter(r => r.success).length} NPEs`);
+    return results;
+  }
+  
+  async batchActivate(npeIds) {
+    return this.batchUpdate(npeIds, { status: 'active' });
+  }
+  
+  async batchPause(npeIds) {
+    return this.batchUpdate(npeIds, { status: 'paused' });
+  }
+  
+  async batchDelete(npeIds) {
+    if (!confirm(`Delete ${npeIds.length} NPEs? This cannot be undone.`)) {
+      return;
+    }
+    
+    const results = await Promise.all(
+      npeIds.map(id => fetch(`/npe/${id}`, { method: 'DELETE' }))
+    );
+    
+    console.log(`🗑️ Deleted ${results.filter(r => r.ok).length} NPEs`);
+    return results;
+  }
+  
+  async bulkSchemaUpdate(npeIds, fieldUpdates) {
+    // Update specific fields across multiple NPEs
+    return this.batchUpdate(npeIds, {
+      customFields: fieldUpdates
+    });
+  }
+}
+
+// Example: Update all customer service agents
+const batchManager = new BatchNPEManager();
+const customerServiceNPEs = ['npe-cs-1', 'npe-cs-2', 'npe-cs-3'];
+
+await batchManager.bulkSchemaUpdate(customerServiceNPEs, {
+  operatingHours: '24/7',
+  languages: ['English', 'Spanish', 'French'],
+  priority: 'high'
+});
+```
+
+### UI Screenshots (Conceptual)
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  🏝️ The Beach - NPE Manager                             │
+├──────────────────────────────────────────────────────────┤
+│                                                           │
+│  Your NPE Fleet (7 / 25)                    [Base Tier] │
+│  ┌────────────────────────────────────────────────────┐ │
+│  │  ✅ ai-build#0         Development Agent           │ │
+│  │  ✅ ai-build#1         Testing Agent               │ │
+│  │  ✅ session#0          Session Manager             │ │
+│  │  ✅ watersports-rental Equipment Rental Agent      │ │
+│  │  ✅ food-delivery      Food Delivery Coordinator   │ │
+│  │  ✅ mobile-massage     Wellness Agent              │ │
+│  │  ✅ beach-photographer Photography Agent           │ │
+│  └────────────────────────────────────────────────────┘ │
+│                                                           │
+│  [🎭 Generate NPE]  [🔄 Refresh PKPs]  [⬆️ Upgrade]    │
+│                                                           │
+├──────────────────────────────────────────────────────────┤
+│  Selected: food-delivery                                 │
+│  ┌────────────────────────────────────────────────────┐ │
+│  │  📊 Analytics          📝 Edit Schema              │ │
+│  │  ────────────────────  ─────────────────────────   │ │
+│  │  Sessions: 327         Name: Beach Bites Delivery  │ │
+│  │  Success: 99.2%        Type: food-delivery         │ │
+│  │  Response: 4.2s        Location: 25.7650, -80.1900│ │
+│  │  Rating: 4.7/5         Radius: 5000m               │ │
+│  │  Revenue: 4.89 ETH     Hours: 24/7                 │ │
+│  │                                                     │ │
+│  │  Custom Fields (8 / 25):                          │ │
+│  │  • deliveryFee: 5.99                              │ │
+│  │  • minimumOrder: 15.00                            │ │
+│  │  • cuisineTypes: ["American", "Asian", "Italian"] │ │
+│  │  • avgDeliveryTime: 30                            │ │
+│  │  [➕ Add Field]                                    │ │
+│  └────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+## �🌐 API Endpoints
+
+### NPE Management
+
+```javascript
+// Authentication
+POST /lit/webauthn/register-options    // Start registration
+POST /lit/webauthn/verify-registration // Complete registration
+POST /lit/webauthn/authenticate-options // Start login
+POST /lit/webauthn/verify-authentication // Complete login
+POST /lit/session/logout               // End session
+
+// PKP Dashboard & Management
+GET  /lit/pkp/dashboard                // View primary PKP + all sub-PKPs
+POST /lit/pkp/mint                     // Create new sub-PKP for agent
+GET  /lit/pkp/ai-builds                // List development agents
+GET  /lit/session/status               // Check authentication state
+GET  /lit/user/profile                 // Get operator details
+
+// NPE Manager (inspired by Y8)
+GET  /shop/digital                     // NPE Manager UI
+POST /npe/generate                     // Generate new NPE (mint PKP)
+GET  /npe/list                         // List all user's NPEs
+GET  /npe/:id                          // Get specific NPE details
+PUT  /npe/:id                          // Update NPE configuration
+DELETE /npe/:id                        // Delete NPE (decommission)
+
+// NPE Schema Management
+GET  /npe/:id/schema                   // Get NPE schema
+PUT  /npe/:id/schema                   // Update NPE schema
+POST /npe/:id/schema/field             // Add custom field to schema
+DELETE /npe/:id/schema/field/:name     // Remove custom field
+
+// NPE Analytics
+GET  /npe/:id/analytics                // Get NPE performance metrics
+GET  /npe/:id/sessions                 // Get NPE session history
+GET  /npe/:id/revenue                  // Get NPE revenue data
+GET  /npe/:id/customers                // Get NPE customer interactions
+
+// Batch Operations
+POST /npe/batch/update                 // Batch update multiple NPEs
+POST /npe/batch/activate               // Activate multiple NPEs
+POST /npe/batch/pause                  // Pause multiple NPEs
+POST /npe/batch/delete                 // Delete multiple NPEs
+
+// Geo-Fenced Services
+POST /service/post                     // Post geo-fenced service
+GET  /service/nearby                   // Find nearby services (lat, lng, radius)
+GET  /service/:id                      // Get service details
+PUT  /service/:id                      // Update service configuration
+DELETE /service/:id                    // Remove service
+
+// XR Environment
+GET  /xr/paradise                      // Load immersive XR scene
+POST /xr/load-paradise                 // Initialize scene assets
+POST /xr/session/end                   // End XR session
+GET  /xr/analytics                     // View NPE performance metrics
+GET  /xr/locations                     // List all XR locations (tier-based)
+POST /xr/location                      // Create new XR location (premium)
+```
+
+### API Examples
+
+#### Generate a New NPE
+
+```javascript
+// POST /npe/generate
+const response = await fetch('/npe/generate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include',
+  body: JSON.stringify({
+    name: 'Customer Support Agent #1',
+    type: 'service-provider',
+    category: 'support',
+    capabilities: ['chat', 'phone', 'email'],
+    location: { lat: 25.7617, lng: -80.1918 },
+    serviceRadius: 5000
+  })
+});
+
+const npe = await response.json();
+console.log(`✅ NPE Created: ${npe.pkpAddress}`);
+```
+
+#### Update NPE Schema
+
+```javascript
+// PUT /npe/:id/schema
+await fetch(`/npe/${npeId}/schema`, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include',
+  body: JSON.stringify({
+    customFields: {
+      languages: ['English', 'Spanish'],
+      operatingHours: '9am-5pm',
+      specialization: 'technical-support',
+      certifications: ['AWS', 'Azure']
+    }
+  })
+});
+```
+
+#### Find Nearest Service
+
+```javascript
+// GET /service/nearby?lat=25.7650&lng=-80.1900&category=food-delivery
+const response = await fetch(
+  '/service/nearby?' + new URLSearchParams({
+    lat: 25.7650,
+    lng: -80.1900,
+    category: 'food-delivery',
+    radius: 10000 // 10km
+  })
+);
+
+const services = await response.json();
+console.log(`Found ${services.length} services nearby`);
+services.forEach(s => {
+  console.log(`${s.name}: ${s.distance}m away (ETA: ${s.eta}min)`);
+});
+```
+
+#### Batch Update NPEs
+
+```javascript
+// POST /npe/batch/update
+await fetch('/npe/batch/update', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include',
+  body: JSON.stringify({
+    npeIds: ['npe-1', 'npe-2', 'npe-3'],
+    updates: {
+      customFields: {
+        priority: 'high',
+        alertEmail: 'alerts@example.com'
       }
     }
-  ));
-};
+  })
+});
 ```
 
-#### Step 4: Test WebAuthn Integration
+#### Get NPE Analytics
 
-1. **Register New Scene Route**:
-   ```typescript
-   // In src/xr/xr.controller.ts
-   @Get('new-scene')
-   getNewScene(@Res() res: Response) {
-     return res.sendFile(join(process.cwd(), 'public', 'new-scene.html'));
-   }
-   
-   @Post('new-scene/protected-area')
-   @UseGuards(WebAuthnAuthGuard)
-   accessProtectedArea(@Session() session: UserSession) {
-     return {
-       success: true,
-       message: 'PKP-protected area accessed',
-       pkpInfo: this.getPKPForUser(session.username)
-     };
-   }
-   ```
-
-2. **Test Authentication Flow**:
-   ```bash
-   # Start development server
-   npm run start:dev
-   
-   # Test in browser:
-   # 1. Visit http://localhost:3000/xr/new-scene
-   # 2. Attempt to access protected features
-   # 3. Complete WebAuthn authentication
-   # 4. Verify PKP-protected content unlocks
-   # 5. Test in VR mode if available
-   ```
-
-### 🔐 WebAuthn Development Guidelines
-
-When contributing WebAuthn features:
-
-#### Security Best Practices
-```typescript
-// ✅ Always preserve user gesture
-const handleInteraction = async (event) => {
-  // Check user gesture immediately
-  if (!navigator.userActivation?.isActive) {
-    throw new Error('User interaction required');
-  }
-  
-  // Perform WebAuthn operation immediately
-  const credential = await navigator.credentials.create(options);
-};
-
-// ✅ Implement proper error handling
-try {
-  await authenticateWebAuthn(username);
-} catch (error) {
-  if (error.message.includes('user interaction')) {
-    showUserFriendlyMessage('Please click the button and try again');
-  }
-}
-
-// ✅ Use the provided concurrent protection
-const lit = window.useLit();
-if (lit.isWebAuthnBusy()) {
-  console.log('WebAuthn operation in progress, please wait');
-  return;
-}
-```
-
-#### PKP Integration Patterns
-```typescript
-// ✅ Check PKP authentication before protected actions
-const verifyPKPAccess = async (requiredLevel = 'basic') => {
-  const lit = window.useLit();
-  const authState = lit.getAuthenticationState();
-  
-  if (!authState.currentUser) {
-    const username = await lit.login();
-    if (!username) throw new Error('Authentication required');
-  }
-  
-  const pkpDashboard = await lit.getPKPDashboard();
-  return pkpDashboard.primaryPKP;
-};
-
-// ✅ Mint sub-PKPs for specific features
-const enableAdvancedFeatures = async () => {
-  const lit = window.useLit();
-  const subPKP = await lit.mintSubPKP('advanced-features', 'Enhanced scene interactions');
-  console.log('🔧 Advanced features PKP:', subPKP.subPKP.address);
-};
-```
-
-### 💡 Contribution Ideas
-
-#### 🔐 Authentication Enhancements
-- Multi-device PKP synchronization
-- Biometric authentication recovery flows
-- Enhanced WebAuthn debugging tools
-- Cross-browser compatibility improvements
-
-#### 🏝️ Environment Expansions
-- Seasonal tropical variations (storms, sunsets, night mode)
-- Interactive wildlife with PKP-protected special interactions
-- Hidden areas unlocked by PKP verification
-- Weather system controlled by authenticated users
-
-#### 🎮 Gameplay Features
-- PKP-protected inventory system
-- Biometric-locked treasure hunts
-- WebAuthn-verified multiplayer competitions
-- AI-generated quests tied to user PKPs
-
-#### 🛠️ Technical Improvements
-- WebXR hand tracking integration
-- Advanced physics with tropical elements
-- Performance optimizations for VR
-- Enhanced audio with spatial positioning
-
-### 🎨 Creating New Scenes with AI
-
-One of the most exciting ways to extend The Beach is by creating new scenes! Here's how to use AI tools like ChatGPT, Claude, or GitHub Copilot to generate new environments:
-
-#### Step 1: Fork and Branch
-
-```bash
-# Fork the repo on GitHub, then clone your fork
-git clone https://github.com/YOUR_USERNAME/the-beach.git
-cd the-beach
-git checkout -b feature/new-scene-underwater-cave
-```
-
-#### Step 2: Use AI to Generate Scene Code
-
-Ask an AI assistant to help you create a new Babylon.js scene. Here's an example prompt:
-
-```
-I'm working on a Babylon.js WebXR project. I need to create an underwater cave scene 
-with the following features:
-- Bioluminescent plants on cave walls
-- Schools of fish swimming around
-- Underwater lighting effects with caustics
-- Collision detection for cave walls
-- Teleportation points using glowing crystals
-- Ambient underwater sound effects
-
-Please provide the JavaScript/TypeScript code for creating this scene in Babylon.js,
-following the structure in this example: [paste relevant code from xr-scene.js]
-```
-
-#### Step 3: Integrate the AI-Generated Scene
-
-1. Create a new scene file in `public/js/`:
-   ```bash
-   touch public/js/underwater-cave-scene.js
-   ```
-
-2. Paste and adapt the AI-generated code, making sure to:
-   - Follow the existing code structure and patterns
-   - Use consistent naming conventions
-   - Add proper error handling
-   - Include collision detection
-   - Add WebXR teleportation support
-
-3. Create a new HTML page or route for your scene:
-   ```bash
-   cp public/index.html public/underwater-cave.html
-   ```
-   
-   Update the script reference to load your new scene file.
-
-4. Add a controller route in `src/xr/xr.controller.ts`:
-   ```typescript
-   @Get('underwater-cave')
-   getUnderwaterCave(@Res() res: Response) {
-     return res.sendFile(join(process.cwd(), 'public', 'underwater-cave.html'));
-   }
-   ```
-
-#### Step 4: Test and Refine
-
-```bash
-npm run build
-npm run start:dev
-```
-
-Visit `http://localhost:3000/xr/underwater-cave` and test your new scene. Iterate with the AI assistant to fix any issues or add enhancements.
-
-#### Step 5: Document and Share
-
-Add documentation for your new scene:
-- Update the README with information about the new scene
-- Add screenshots or videos
-- Document any new controls or interactions
-- Update the `/xr/info` endpoint to include your scene
-
-### 💡 Ideas for New Scenes
-
-Here are some scene ideas you can create with AI assistance:
-
-- 🌲 **Forest Retreat** - Dense forest with wildlife and treehouse
-- 🏔️ **Mountain Summit** - Snowy peak with aurora borealis
-- 🌙 **Moonbase** - Sci-fi lunar station with Earth views
-- 🏛️ **Ancient Temple** - Mysterious ruins with puzzles
-- 🌊 **Underwater City** - Submerged Atlantis-style metropolis
-- 🏜️ **Desert Oasis** - Sand dunes with palm tree oasis
-- 🌌 **Space Station** - Zero-gravity orbital platform
-- 🏰 **Medieval Castle** - Fantasy fortress with dragons
-
-### 📝 Code Style Guidelines
-
-- **TypeScript First**: Use TypeScript for all new backend code
-- **WebAuthn Patterns**: Follow existing authentication flow patterns
-- **PKP Integration**: Ensure all protected features use PKP verification
-- **Error Handling**: Provide clear, user-friendly error messages
-- **Security Focus**: Always validate user permissions before protected actions
-- **Documentation**: Include JSDoc comments for public functions
-- **Testing**: Write tests for WebAuthn flows and PKP interactions
-
-## 🌐 Browser Compatibility & Requirements
-
-### WebAuthn Support Matrix
-
-| Browser | Version | Biometric Support | PKP Integration | VR Support |
-|---------|---------|-------------------|-----------------|------------|
-| Chrome | 67+ | ✅ Full Support | ✅ Tested | ✅ Full |
-| Firefox | 60+ | ✅ Full Support | ✅ Tested | ✅ Full |
-| Safari | 14+ | ✅ iOS/macOS | ✅ Tested | ❌ Limited |
-| Edge | 88+ | ✅ Windows Hello | ✅ Tested | ✅ Full |
-| Opera | 54+ | ✅ Full Support | ✅ Tested | ✅ Full |
-
-### Authentication Methods Supported
-
-| Method | Platform | Support Level |
-|--------|----------|---------------|
-| 🔒 **Windows Hello** | Windows 10+ | ✅ Full Support |
-| 👆 **Fingerprint** | All Platforms | ✅ Full Support |
-| 👤 **Face Recognition** | iOS/Android/Windows | ✅ Full Support |
-| 📱 **Device PIN** | All Platforms | ✅ Fallback Support |
-| 🔑 **Hardware Keys** | YubiKey, etc. | ✅ Advanced Support |
-
-### WebXR Device Compatibility
-
-| Device | WebAuthn | PKP Integration | Paradise Access |
-|--------|----------|-----------------|------------------|
-| Meta Quest 2/3 | ✅ | ✅ | ✅ Full Experience |
-| PICO 4 | ✅ | ✅ | ✅ Full Experience |
-| HTC Vive | ✅ | ✅ | ✅ Full Experience |
-| Varjo Aero | ✅ | ✅ | ✅ Full Experience |
-| Desktop | ✅ | ✅ | ✅ Full Experience |
-| Mobile | ✅ | ✅ | ⚠️ Limited VR |
-
-✅ Full support | ⚠️ Partial support | ❌ No support
-
-## 🎥 Experience Examples
-
-### 🔐 Authentication Journey
-1. **First Visit**: Elegant biometric registration with PKP generation
-2. **Return Visits**: Instant authentication with stored biometric credentials
-3. **Paradise Access**: Seamless entry to PKP-protected tropical metaverse
-4. **VR Transition**: Authenticated VR mode with full feature access
-
-### 🏝️ Tropical Paradise Features
-1. **Beach Exploration**: Walk along animated shorelines with realistic water physics
-2. **Palm Tree Forest**: Navigate through procedurally generated tropical vegetation
-3. **Multiplayer Social**: Interact with other PKP-verified users in real-time
-4. **Hidden Treasures**: Discover PKP-protected secrets throughout the environment
-
-### 🎮 WebXR Interactions
-1. **Teleportation**: Point-and-click movement using tropical markers
-2. **Hand Tracking**: Natural interaction with objects (device-dependent)
-3. **Voice Commands**: "Load Paradise" for hands-free authentication
-4. **Spatial Audio**: Immersive 3D audio with directional ocean sounds
-
-## 📚 Technologies & Architecture
-
-### 🔧 Core Technologies
-
-#### 🖥️ Frontend Stack
-- **[Babylon.js 8.x](https://www.babylonjs.com/)** - Advanced 3D engine with WebXR support
-- **[WebAuthn API](https://webauthn.guide/)** - Native browser biometric authentication
-- **[Lit Protocol 7.x](https://litprotocol.com/)** - Programmable Key Pair management
-- **[Socket.IO Client](https://socket.io/)** - Real-time multiplayer communication
-- **[SoundCloud Widget API](https://developers.soundcloud.com/docs/api/html5-widget)** - Integrated audio streaming
-- **[WebRTC](https://webrtc.org/)** - Peer-to-peer video/audio communication
-
-#### ⚙️ Backend Stack
-- **[NestJS 11.x](https://nestjs.com/)** - Modern TypeScript server framework
-- **[SimpleWebAuthn](https://simplewebauthn.dev/)** - Industry-standard WebAuthn implementation
-- **[Lit Protocol Node SDK](https://litprotocol.com/)** - Server-side PKP management
-- **[Socket.IO](https://socket.io/)** - Real-time bidirectional communication
-- **[Express Sessions](https://github.com/expressjs/session)** - Secure session management
-
-#### 🔐 Security & Authentication
-- **WebAuthn Level 2** - Passwordless biometric authentication standard
-- **FIDO2 Protocol** - Cross-platform authentication framework
-- **PKP Deterministic Generation** - Cryptographic identity derivation
-- **Session Guards** - Multi-layer route protection
-- **Origin Validation** - Strict security origin verification
-
-### 🏗️ Architecture Highlights
-
-#### Authentication Flow Architecture
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant B as Browser
-    participant S as Server
-    participant L as Lit Protocol
-    
-    U->>B: Click "Register"
-    B->>B: Check user gesture
-    B->>S: Request registration options
-    S->>B: Return challenge + options
-    B->>U: Prompt for biometric
-    U->>B: Complete biometric verification
-    B->>S: Send credential
-    S->>S: Verify credential
-    S->>L: Generate deterministic PKP
-    L->>S: Return PKP info
-    S->>B: Registration successful + PKP
-    B->>U: Welcome to Paradise!
-```
-
-#### PKP Management System
-```mermaid
-graph TD
-    A[Primary PKP] --> B[Sub-PKP: AI Builds]
-    A --> C[Sub-PKP: Session Management]
-    A --> D[Sub-PKP: Experimental]
-    B --> E[Concurrent Development Path 1]
-    B --> F[Concurrent Development Path 2]
-    C --> G[Temporary Session Keys]
-    D --> H[Feature Testing Environment]
-```
-
-## 🐛 Known Issues & Limitations
-
-### WebAuthn Limitations
-- **Safari Restrictions**: Limited WebAuthn support on older iOS versions
-- **Concurrent Operations**: Only one WebAuthn operation per user session (by design)
-- **User Gesture Requirements**: WebAuthn requires fresh user interaction for security
-
-### VR/WebXR Considerations
-- **Hand Tracking**: Varies by device and browser implementation
-- **Performance**: Complex scenes may require performance adjustments in VR
-- **WebSocket Timeout**: Vercel WebSocket connections may timeout (plan-dependent)
-
-### Browser-Specific Issues
-- **Firefox Reality**: Some advanced WebXR features may be limited
-- **Mobile Safari**: WebXR support is experimental
-- **Incognito Mode**: WebAuthn credentials don't persist across incognito sessions
-
-### Workarounds & Solutions
 ```javascript
-// Debug WebAuthn issues
-debugWebAuthn.checkSupport();           // Verify browser capabilities
-debugWebAuthn.testUserGesture();        // Test user interaction preservation
-debugWebAuthn.getState();               // Check authentication state
+// GET /npe/:id/analytics
+const analytics = await fetch(`/npe/${npeId}/analytics`)
+  .then(r => r.json());
 
-// Reset authentication state if needed
-debugWebAuthn.resetState();             // Clear locks and state
-// Then refresh page for full reset
+console.log(`
+📊 NPE Analytics
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total Sessions: ${analytics.totalSessions}
+Success Rate: ${(analytics.successRate * 100).toFixed(1)}%
+Avg Response Time: ${analytics.avgResponseTime}s
+Customer Satisfaction: ${analytics.customerSatisfaction}/5
+Revenue (Total): ${analytics.revenue.total} ETH
+Revenue (This Month): ${analytics.revenue.thisMonth} ETH
+`);
 ```
 
-## 🚀 Roadmap & Future Features
 
-### 🔜 Short-term Goals (Next Release)
-- **Enhanced Biometric Recovery**: Multi-device PKP synchronization
-- **Advanced PKP Analytics**: Detailed usage tracking and insights
-- **Mobile WebXR Optimization**: Improved AR support for mobile devices
-- **Cross-Platform PKP Migration**: Move PKPs between devices securely
+---
 
-### 🌟 Medium-term Vision (6 months)
-- **AI-Powered Scene Generation**: Community-driven environment creation with PKP protection
-- **Advanced Multiplayer**: Guild systems and collaborative building with biometric verification
-- **Web3 Integration**: NFT display and trading within the tropical metaverse
-- **Haptic Feedback**: Advanced controller support for immersive interaction
+## 🛡️ Security Best Practices for NPEs
 
-### 🔮 Long-term Dreams (1+ years)
-- **Decentralized Identity**: Full self-sovereign identity management with PKPs
-- **Cross-Metaverse Travel**: PKP-authenticated access to partner virtual worlds
-- **AI Companion System**: Personal AI assistants secured by individual PKPs
-- **Collaborative Development**: Real-time multi-user scene editing with biometric permissions
+### Operator Security
 
-## 📄 License & Legal
+```javascript
+// 1. Use hardware security keys for WebAuthn
+// Recommended: YubiKey, Google Titan, or device biometrics
+
+// 2. Regular session rotation
+setInterval(async () => {
+  await authController.rotateSession();
+}, 6 * 60 * 60 * 1000); // Every 6 hours
+
+// 3. Audit agent activities
+await authController.exportAuditLog('2025-01-01', '2025-12-31');
+```
+
+### Agent Security
+
+```javascript
+// 1. Isolate sub-PKPs by purpose
+// Never reuse sub-PKPs across different agent roles
+
+// 2. Set spending limits per agent
+await agentPKP.setTransactionLimit({
+  maxPerTransaction: '0.1 ETH',
+  maxDailyTotal: '1 ETH',
+  requireApproval: '> 0.5 ETH'
+});
+
+// 3. Monitor for anomalous behavior
+monitorAgent(agentPKP, {
+  alertOn: ['unusual-spending', 'rapid-transactions', 'failed-auth'],
+  autoDisable: true // Disable agent if suspicious activity detected
+});
+```
+
+---
+
+## 🌟 Real-World Implementation Example
+
+### Scenario: "Beach Concierge Services" - Multi-Agent Tourism Platform
+
+Let's build a complete NPE platform that combines all deployment patterns to create a comprehensive tourism service in Miami Beach.
+
+#### Step 1: Initialize the Game Manager
+
+```javascript
+// Initialize core system
+const gameManager = new GameManager();
+const geoDeployment = new GeoFencedDeployment(gameManager);
+const autoScaler = new AutoScalingManager(gameManager);
+const eventDriven = new EventDrivenDeployment(gameManager);
+
+// Register NPE operator
+const operator = await authController.register('beach-concierge-npe');
+console.log(`✅ NPE registered with primary PKP: ${operator.primaryPKP.address}`);
+```
+
+#### Step 2: Deploy Default Development Team (ai-build#0, ai-build#1, session#0)
+
+```javascript
+// These are automatically created on registration
+const developmentTeam = {
+  aiBuild0: gameManager.agents.get('ai-build#0'),
+  aiBuild1: gameManager.agents.get('ai-build#1'),
+  session0: gameManager.agents.get('session#0')
+};
+
+// ai-build#0 and ai-build#1 continuously improve the platform
+async function continuousImprovement() {
+  while (true) {
+    // ai-build#0: Analyze customer feedback and generate improvements
+    const feedback = await session0.getCustomerFeedback();
+    const improvements = await aiBuild0.generateImprovements(feedback);
+    
+    // ai-build#1: Review and test improvements
+    const validated = await aiBuild1.validateImprovements(improvements);
+    
+    // Deploy if tests pass
+    if (validated.allTestsPassed) {
+      await gameManager.deployUpdate(validated.changes);
+      console.log(`🚀 Platform improved: ${validated.changes.length} updates deployed`);
+    }
+    
+    await sleep(3600000); // Check every hour
+  }
+}
+continuousImprovement();
+```
+
+#### Step 3: Deploy Geo-Fenced Service Agents
+
+```javascript
+// Deploy location-based services across Miami Beach
+
+// 1. Beach Activity Rentals
+const watersportsAgent = await geoDeployment.postService({
+  npeId: 'beach-concierge-npe',
+  name: 'Tropical Watersports Rentals',
+  category: 'equipment-rental',
+  location: { lat: 25.7617, lng: -80.1918 }, // South Beach
+  radius: 2000, // 2km coverage
+  agentPKP: await authController.mintSubPKP('watersports-rental', 'Jet ski, paddleboard, kayak rentals'),
+  pricing: { jetski: 80, paddleboard: 30, kayak: 25 },
+  availability: '8am-6pm',
+  estimatedResponse: 15 * 60 // 15 min delivery to customer location
+});
+
+// 2. Food & Beverage Delivery
+const foodDeliveryAgent = await geoDeployment.postService({
+  npeId: 'beach-concierge-npe',
+  name: 'Beach Bites Delivery',
+  category: 'food-delivery',
+  location: { lat: 25.7650, lng: -80.1900 },
+  radius: 5000, // 5km coverage
+  agentPKP: await authController.mintSubPKP('food-delivery', 'Beach food & drinks'),
+  pricing: { deliveryFee: 5.99, minimumOrder: 15 },
+  availability: '24/7',
+  estimatedResponse: 30 * 60 // 30 min delivery
+});
+
+// 3. Beach Massage Services
+const massageAgent = await geoDeployment.postService({
+  npeId: 'beach-concierge-npe',
+  name: 'Tropical Spa Mobile',
+  category: 'wellness',
+  location: { lat: 25.7700, lng: -80.1850 },
+  radius: 3000, // 3km coverage
+  agentPKP: await authController.mintSubPKP('mobile-massage', 'Beach massage therapy'),
+  pricing: { massage60min: 120, massage90min: 170 },
+  availability: '9am-7pm',
+  estimatedResponse: 20 * 60 // 20 min arrival
+});
+
+// 4. Photography Services
+const photoAgent = await geoDeployment.postService({
+  npeId: 'beach-concierge-npe',
+  name: 'Beach Memories Photography',
+  category: 'photography',
+  location: { lat: 25.7680, lng: -80.1920 },
+  radius: 4000, // 4km coverage
+  agentPKP: await authController.mintSubPKP('beach-photographer', 'Professional beach photos'),
+  pricing: { photoSession: 200, instantPrint: 15 },
+  availability: 'sunrise-sunset',
+  estimatedResponse: 25 * 60 // 25 min arrival
+});
+
+console.log(`📍 Deployed 4 geo-fenced services covering 5km radius`);
+```
+
+#### Step 4: Deploy Specialized Service Team
+
+```javascript
+// Create comprehensive concierge team
+const conciergeTeam = {
+  // First contact agent - greets and qualifies customers
+  greeter: await gameManager.registerAgent(
+    await authController.mintSubPKP('concierge-greeter', 'Customer greeting & qualification'),
+    'customer-greeting',
+    ['welcome', 'needs-assessment', 'routing']
+  ),
+  
+  // Activity coordinator - plans daily itineraries  
+  activities: await gameManager.registerAgent(
+    await authController.mintSubPKP('concierge-activities', 'Activity planning & booking'),
+    'activity-coordination',
+    ['itinerary-planning', 'booking', 'scheduling', 'group-coordination']
+  ),
+  
+  // VIP services - handles premium customers
+  vip: await gameManager.registerAgent(
+    await authController.mintSubPKP('concierge-vip', 'VIP & luxury services'),
+    'vip-services',
+    ['luxury-experiences', 'yacht-charter', 'private-events', 'celebrity-services']
+  ),
+  
+  // Problem solver - handles issues and complaints
+  support: await gameManager.registerAgent(
+    await authController.mintSubPKP('concierge-support', 'Issue resolution & support'),
+    'customer-support',
+    ['problem-solving', 'refunds', 'rescheduling', 'emergency-assistance']
+  ),
+  
+  // Payment processor - handles all transactions
+  billing: await gameManager.registerAgent(
+    await authController.mintSubPKP('concierge-billing', 'Payment & invoicing'),
+    'payment-processing',
+    ['payment-processing', 'invoicing', 'receipt-generation', 'refunds']
+  )
+};
+
+console.log(`👥 Deployed 5-agent concierge team`);
+```
+
+#### Step 5: Implement Customer Journey
+
+```javascript
+// Complete customer interaction flow
+class CustomerJourney {
+  constructor(customer) {
+    this.customer = customer;
+    this.session = null;
+    this.services = [];
+  }
+  
+  async start() {
+    // 1. Customer opens app and shares location
+    console.log(`📱 Customer ${this.customer.name} at (${this.customer.location.lat}, ${this.customer.location.lng})`);
+    
+    // 2. Greeter agent welcomes customer
+    this.session = await gameManager.createSession(this.customer, conciergeTeam.greeter, 'welcome');
+    const greeting = await conciergeTeam.greeter.greet(this.customer);
+    console.log(`👋 ${greeting.message}`);
+    
+    // 3. Customer requests nearby services
+    const request = {
+      type: 'equipment-rental',
+      item: 'jet ski',
+      duration: '2 hours',
+      location: this.customer.location
+    };
+    
+    // 4. Find nearest provider
+    const provider = await geoDeployment.findNearestProvider(
+      this.customer.location,
+      request.type
+    );
+    console.log(`🎯 Found: ${provider.name} (${provider.distance}m away, ETA: ${provider.eta}min)`);
+    
+    // 5. Route to activity coordinator for booking
+    await gameManager.handoffSession(
+      this.session.id,
+      conciergeTeam.greeter,
+      conciergeTeam.activities,
+      'booking-requested'
+    );
+    
+    const booking = await conciergeTeam.activities.book({
+      provider,
+      request,
+      customer: this.customer
+    });
+    console.log(`✅ Booked: ${request.item} for ${request.duration}`);
+    
+    // 6. Process payment
+    await gameManager.handoffSession(
+      this.session.id,
+      conciergeTeam.activities,
+      conciergeTeam.billing,
+      'payment-required'
+    );
+    
+    const payment = await conciergeTeam.billing.processPayment({
+      customer: this.customer,
+      amount: booking.totalPrice,
+      description: `${request.item} rental - ${request.duration}`
+    });
+    console.log(`💳 Payment processed: $${payment.amount} via ${this.customer.pkp.address}`);
+    
+    // 7. Service delivered
+    this.services.push({
+      provider,
+      booking,
+      payment,
+      deliveryTime: Date.now() + (provider.eta * 60 * 1000)
+    });
+    
+    // 8. Track delivery in real-time
+    await this.trackDelivery(provider, booking);
+    
+    // 9. Post-service feedback
+    await this.collectFeedback();
+    
+    return {
+      session: this.session,
+      services: this.services,
+      totalSpent: this.services.reduce((sum, s) => sum + s.payment.amount, 0)
+    };
+  }
+  
+  async trackDelivery(provider, booking) {
+    console.log(`🚤 Tracking ${provider.name} delivery...`);
+    
+    // Simulate real-time tracking
+    const updates = setInterval(async () => {
+      const status = await provider.agent.getDeliveryStatus(booking.id);
+      console.log(`📍 ${status.message} (${status.eta}min remaining)`);
+      
+      if (status.delivered) {
+        clearInterval(updates);
+        console.log(`🎉 Service delivered! Enjoy your ${booking.item}!`);
+      }
+    }, 60000); // Update every minute
+  }
+  
+  async collectFeedback() {
+    // session#0 collects feedback for continuous improvement
+    const feedback = await session0.collectFeedback({
+      customer: this.customer,
+      services: this.services,
+      session: this.session
+    });
+    
+    // Store for ai-build#0 analysis
+    await aiBuild0.analyzeFeedback(feedback);
+    
+    console.log(`⭐ Feedback collected: ${feedback.rating}/5 stars`);
+  }
+}
+
+// Execute customer journey
+const customer = {
+  name: 'Sarah Martinez',
+  id: 'customer-12345',
+  location: { lat: 25.7640, lng: -80.1910 }, // 300m from providers
+  pkp: { address: '0xCustomerPKPAddress...' },
+  preferences: { vip: false }
+};
+
+const journey = new CustomerJourney(customer);
+const result = await journey.start();
+
+console.log(`
+🎊 Journey Complete!
+   Services Used: ${result.services.length}
+   Total Spent: $${result.totalSpent}
+   Session Duration: ${(Date.now() - result.session.startTime) / 60000} minutes
+`);
+```
+
+#### Step 6: Auto-Scaling in Action
+
+```javascript
+// Simulate rush hour - many customers arrive
+async function simulateRushHour() {
+  console.log(`🌅 Rush hour started - beach is getting crowded!`);
+  
+  // 50 customers arrive within 10 minutes
+  const customers = Array.from({ length: 50 }, (_, i) => ({
+    name: `Customer ${i + 1}`,
+    location: {
+      lat: 25.7617 + (Math.random() * 0.01),
+      lng: -80.1918 + (Math.random() * 0.01)
+    }
+  }));
+  
+  // Process all customer requests
+  const journeys = customers.map(customer => new CustomerJourney(customer).start());
+  
+  // AutoScalingManager detects high load
+  // → Spawns additional agents automatically
+  await Promise.all(journeys);
+  
+  console.log(`
+  📊 Rush Hour Stats:
+     Customers Served: ${customers.length}
+     Peak Agent Count: ${gameManager.agents.size}
+     Avg Response Time: ${autoScaler.metrics.avgResponseTime}s
+     Customer Satisfaction: 4.8/5
+  `);
+}
+```
+
+#### Step 7: Event-Driven Responses
+
+```javascript
+// Automatic responses to events
+
+// High-value customer detected → Deploy VIP agent
+eventDriven.eventBus.emit('high-value-customer', {
+  name: 'Celebrity Guest',
+  location: { lat: 25.7700, lng: -80.1850 },
+  estimatedSpend: 5000,
+  preferences: { privacy: 'maximum', luxury: true }
+});
+// → VIP agent automatically assigned
+
+// Weather alert → Notify all active customers
+eventDriven.eventBus.on('weather-alert', async (alert) => {
+  if (alert.type === 'thunderstorm') {
+    const activeSessions = gameManager.sessions.getActive();
+    
+    for (const session of activeSessions) {
+      await conciergeTeam.support.notifyCustomer(session.customerId, {
+        message: '⚠️ Thunderstorm approaching. Please return to shore.',
+        urgency: 'high',
+        alternatives: ['Indoor activities', 'Rescheduling', 'Full refund']
+      });
+    }
+  }
+});
+
+// Service complaint → Auto-escalate
+eventDriven.eventBus.on('customer-complaint', async (complaint) => {
+  // Immediately route to support agent
+  const supportAgent = conciergeTeam.support;
+  await supportAgent.handleComplaint(complaint);
+  
+  // If high-priority, notify human operator
+  if (complaint.severity === 'high') {
+    await operator.notify({
+      type: 'urgent-complaint',
+      customer: complaint.customer,
+      issue: complaint.issue,
+      agent: supportAgent.id
+    });
+  }
+});
+```
+
+### Expected Results
+
+```
+📊 Beach Concierge Services - Daily Report
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🤖 Active Agents:
+   ├─ Default: 3 (ai-build#0, ai-build#1, session#0)
+   ├─ Geo-Fenced: 4 (watersports, food, massage, photo)
+   ├─ Concierge Team: 5 (greeter, activities, vip, support, billing)
+   ├─ Auto-Scaled: 8 (spawned during rush hours)
+   └─ Total: 20 agents
+
+📍 Geographic Coverage:
+   ├─ Primary Zone: 5km radius (South Beach)
+   ├─ Services: 4 categories across 2-5km coverage each
+   └─ Response Time: Avg 18 minutes
+
+👥 Customer Metrics:
+   ├─ Customers Served: 327
+   ├─ Avg Session Duration: 42 minutes
+   ├─ Services per Customer: 2.3
+   ├─ Customer Satisfaction: 4.7/5
+   └─ Repeat Rate: 68%
+
+💰 Revenue:
+   ├─ Equipment Rentals: $6,240
+   ├─ Food Delivery: $4,890
+   ├─ Wellness Services: $3,360
+   ├─ Photography: $2,800
+   ├─ VIP Services: $12,500
+   └─ Total: $29,790
+
+⚡ Performance:
+   ├─ Avg Response Time: 4.2 seconds
+   ├─ Agent Utilization: 73%
+   ├─ Successful Transactions: 99.2%
+   └─ Incident Resolution: 96% first-contact
+
+🔄 Platform Improvements (via ai-build agents):
+   ├─ Code Updates Deployed: 12
+   ├─ Features Added: 3
+   ├─ Bugs Fixed: 7
+   └─ Performance Optimizations: 5
+```
+
+---
+
+## 🚀 Deployment Guide
+
+### Development Mode
+```bash
+npm run start:dev
+# Server at http://localhost:3000
+# Hot reload enabled
+# Debug logging active
+```
+
+### Production Mode
+```bash
+# Build TypeScript
+npm run build
+
+# Start production server
+npm run start:prod
+
+# Or with PM2 for process management
+pm2 start dist/main.js --name npe-beach
+pm2 save
+pm2 startup
+```
+
+### Environment Variables
+```bash
+# .env file
+NODE_ENV=production
+PORT=3000
+SESSION_SECRET=your-strong-secret-key
+LIT_NETWORK=cayenne # or 'datil-test' / 'datil-prod'
+
+# WebAuthn Configuration
+RPID=yourdomain.com
+RPNAME=Your NPE Platform
+ORIGIN=https://yourdomain.com
+```
+
+---
+
+## 📖 Documentation
+
+- **[Session Management](docs/SESSION_MANAGEMENT.md)** - Cookie-based auth architecture
+- **[Testing Guide](docs/TESTING_GUIDE.md)** - Comprehensive test procedures
+- **[Browser Testing](docs/BROWSER_TESTING_GUIDE.md)** - Interactive testing guide
+- **[API Reference](docs/API_REFERENCE.md)** - Complete endpoint documentation
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions to The Beach! Whether you're:
+- 🐛 Fixing bugs
+- ✨ Adding features
+- 📚 Improving documentation
+- 🧪 Writing tests
+- 🎨 Enhancing the XR environment
+- 🤖 Developing new AI agent patterns
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+---
+
+## 📋 Roadmap
+
+### Q1 2025
+- ✅ WebAuthn biometric authentication
+- ✅ Lit Protocol PKP integration
+- ✅ Sub-PKP minting for multi-agent deployment
+- ✅ Tropical XR environment with multiplayer
+- ✅ MVC architecture with session management
+
+### Q2 2025
+- 🔄 Advanced AI agent orchestration
+- 🔄 Agent marketplace for pre-built NPE services
+- 🔄 Enhanced transaction & payment flows
+- 🔄 Multi-language agent support
+- 🔄 Voice interaction for agents
+
+### Q3 2025
+- 🔄 Mobile XR support (iOS/Android)
+- 🔄 Agent-to-agent negotiation protocols
+- 🔄 Decentralized agent reputation system
+- 🔄 Integration with major DeFi protocols
+- 🔄 White-label NPE platform for enterprises
+
+### Q4 2025
+- 🔄 Cross-platform agent portability
+- 🔄 Advanced analytics dashboard
+- 🔄 Agent training & fine-tuning tools
+- 🔄 Regulatory compliance frameworks
+- 🔄 Global NPE marketplace launch
+
+---
+
+## 💡 Why The Beach for NPEs?
+
+### Traditional AI Chatbots
+- ❌ Single agent, limited capabilities
+- ❌ No cryptographic identity
+- ❌ Can't handle payments
+- ❌ No persistent presence
+- ❌ Limited to text chat
+- ❌ No multi-agent coordination
+
+### The Beach NPE Platform
+- ✅ Unlimited specialized agents
+- ✅ Each agent has unique PKP & wallet
+- ✅ Autonomous transaction capabilities
+- ✅ 24/7 persistent XR presence
+- ✅ Immersive 3D environment
+- ✅ Multi-agent swarm intelligence
+
+---
+
+## 📄 License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
-### Third-Party Acknowledgments
-- **Babylon.js**: Licensed under Apache 2.0
-- **Lit Protocol**: Protocol usage under standard terms
-- **SimpleWebAuthn**: Licensed under MIT
-- **Ocean Breeze Track**: Original composition by Jason Sprouse
+---
 
-## 👨‍💻 Author & Contributors
+## 🙏 Acknowledgments
 
-**Jason Sprouse** - *Original Creator & Lead Developer*
-- 🏝️ Tropical environment design and implementation
-- 🔐 WebAuthn + PKP integration architecture
-- 🎵 Original "Ocean Breeze" soundtrack composition
-
-### Contributing Developers
-- Open to community contributions! See [Contributing](#-contributing-to-the-beach) section.
-
-## 🙏 Acknowledgments & Credits
-
-- **Babylon.js Community** - Exceptional 3D engine and comprehensive documentation
-- **Lit Protocol Team** - Revolutionary PKP technology and developer support
-- **WebAuthn Standards** - FIDO Alliance for passwordless authentication standards
-- **NestJS Ecosystem** - Robust TypeScript framework and decorator patterns
-- **Open Source Community** - All contributors who help make The Beach a tropical paradise
-
-## 📞 Support & Community
-
-### Getting Help
-- 🐛 **Bug Reports**: [Open an issue](https://github.com/jasonsprouse/the-beach/issues) with detailed reproduction steps
-- 💡 **Feature Requests**: [Start a discussion](https://github.com/jasonsprouse/the-beach/discussions) for new ideas
-- 📖 **Documentation**: Check [DEPLOY.md](./DEPLOY.md) for deployment guidance
-- 🏗️ **Development**: Review [Babylon.js docs](https://doc.babylonjs.com/) for 3D development
-
-### WebAuthn Debugging
-```javascript
-// Essential debugging commands (paste in browser console):
-debugWebAuthn.checkSupport();           // Verify WebAuthn capability
-debugWebAuthn.getState();               // Current authentication state  
-debugWebAuthn.checkOneToOneMapping();   // Verify 1:1 PKP mapping
-debugWebAuthn.testAuth('username');     // Test complete auth flow
-```
-
-### Community Resources
-- **WebAuthn Guide**: [webauthn.guide](https://webauthn.guide/) - Comprehensive WebAuthn documentation
-- **Lit Protocol Docs**: [litprotocol.com/docs](https://litprotocol.com/docs) - PKP management guides
-- **Babylon.js Playground**: [playground.babylonjs.com](https://playground.babylonjs.com/) - 3D scene testing
-- **WebXR Samples**: [immersiveweb.dev](https://immersiveweb.dev/) - WebXR development resources
+- **Babylon.js** - WebXR rendering engine
+- **Lit Protocol** - PKP cryptographic infrastructure
+- **SimpleWebAuthn** - Biometric authentication
+- **NestJS** - Backend framework
+- **Socket.IO** - Real-time communication
+- **The open source community** - For making this possible
 
 ---
 
 <p align="center">
-  <strong>🏝️ Made with ❤️, 🔐 WebAuthn, and 🌴 tropical vibes by the open source community</strong>
-</p>
-
-<p align="center">
-  <em>Experience the future of passwordless tropical metaverses - where your biometric identity is your key to paradise.</em>
+  <strong>Built with ❤️ for the future of autonomous digital agents</strong><br>
+  🏝️ The Beach - Where NPEs Thrive 🤖
 </p>
