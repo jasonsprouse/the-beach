@@ -9,12 +9,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
-    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://cdn.babylonjs.com/babylon.js" onerror="console.error('Failed to load Babylon.js')"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js" onerror="console.error('Failed to load Babylon.js loaders')"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js" onerror="console.error('Failed to load Babylon.js GUI')"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/webrtc-adapter@8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4" onerror="console.error('Failed to load Socket.IO')"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webrtc-adapter@8" onerror="console.error('Failed to load WebRTC adapter')"></script>
+    <script src="/public/js/voice-control-addon.js" onerror="console.error('Failed to load voice control addon')"></script>
 
     <style>
         body {
@@ -61,9 +62,170 @@
             border-radius: 8px;
             font-size: 0.8em;
         }
+        
+        /* XR Loading Overlay */
+        .xr-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        .xr-loading-overlay.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+        
+        .welcome-content {
+            text-align: center;
+            color: white;
+            max-width: 600px;
+            padding: 2rem;
+        }
+        
+        .welcome-icon {
+            font-size: 5rem;
+            margin-bottom: 2rem;
+            animation: welcome-float 3s ease-in-out infinite;
+        }
+        
+        @keyframes welcome-float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-15px) rotate(2deg);
+            }
+        }
+        
+        .welcome-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #4ECDC4, #44A08D);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .welcome-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .xr-progress-container {
+            width: 400px;
+            margin: 2rem 0;
+        }
+        
+        .xr-progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .xr-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ECDC4, #44A08D);
+            border-radius: 6px;
+            width: 0%;
+            transition: width 0.3s ease;
+            animation: progress-shimmer 2s infinite;
+        }
+        
+        @keyframes progress-shimmer {
+            0% {
+                background-position: -400px 0;
+            }
+            100% {
+                background-position: 400px 0;
+            }
+        }
+        
+        .xr-progress-fill {
+            background: linear-gradient(90deg, #4ECDC4, #ffffff, #44A08D);
+            background-size: 400px 100%;
+        }
+        
+        .xr-status {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        
+        .feature-highlights {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .feature-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .feature-emoji {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-text {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body class="bg-gray-900">
+    <!-- XR Loading Overlay -->
+    <div id="xrLoadingOverlay" class="xr-loading-overlay">
+        <div class="welcome-content">
+            <div class="welcome-icon">🏝️</div>
+            <h1 class="welcome-title">Welcome to Paradise</h1>
+            <p class="welcome-subtitle">Your tropical XR experience is loading...</p>
+            
+            <div class="xr-progress-container">
+                <div class="xr-progress-bar">
+                    <div id="xrProgressFill" class="xr-progress-fill"></div>
+                </div>
+                <div id="xrStatus" class="xr-status">Initializing XR environment...</div>
+            </div>
+            
+            <div class="feature-highlights">
+                <div class="feature-item">
+                    <div class="feature-emoji">🎤</div>
+                    <div class="feature-text">Voice Control</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-emoji">🥽</div>
+                    <div class="feature-text">VR Ready</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-emoji">👥</div>
+                    <div class="feature-text">Multiplayer</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-emoji">🌊</div>
+                    <div class="feature-text">Real-time</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <canvas id="renderCanvas"></canvas>
     <div id="video-container">
         <video id="local-video" class="video-feed local" autoplay muted playsinline></video>
@@ -100,10 +262,76 @@
         // --- 1. Engine and Scene Setup ---
         function initializeBabylonEngine(canvas) {
             console.log("Initializing Babylon Engine...");
-            const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
-            window.addEventListener('resize', () => engine.resize()); // Handle resize
-            console.log("Engine Initialized.");
-            return engine;
+            
+            // Ensure canvas has proper dimensions before creating engine
+            if (!canvas) {
+                throw new Error("Canvas element not found");
+            }
+            
+            // Wait for DOM to be ready and canvas to be rendered
+            const ensureCanvasReady = () => {
+                return new Promise((resolve) => {
+                    const checkCanvas = () => {
+                        const rect = canvas.getBoundingClientRect();
+                        if (rect.width > 0 && rect.height > 0) {
+                            resolve();
+                        } else {
+                            // Set explicit dimensions if not available
+                            canvas.setAttribute('width', window.innerWidth || 1920);
+                            canvas.setAttribute('height', window.innerHeight || 1080);
+                            canvas.style.width = '100%';
+                            canvas.style.height = '100vh';
+                            requestAnimationFrame(checkCanvas);
+                        }
+                    };
+                    checkCanvas();
+                });
+            };
+            
+            return ensureCanvasReady().then(() => {
+                // Force canvas to have minimum dimensions
+                const rect = canvas.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) {
+                    console.log("Canvas has zero dimensions, setting default size...");
+                    // Use setAttribute to avoid read-only property errors
+                    canvas.setAttribute('width', window.innerWidth);
+                    canvas.setAttribute('height', window.innerHeight);
+                    canvas.style.width = '100%';
+                    canvas.style.height = '100vh';
+                }
+                
+                // Log canvas dimensions for debugging
+                console.log(`Canvas dimensions: ${canvas.getAttribute('width') || canvas.width}x${canvas.getAttribute('height') || canvas.height}`);
+                console.log(`Canvas client size: ${canvas.clientWidth}x${canvas.clientHeight}`);
+                
+                // Create engine with error handling
+                let engine;
+                try {
+                    engine = new BABYLON.Engine(canvas, true, { 
+                        preserveDrawingBuffer: true, 
+                        stencil: true,
+                        antialias: true,
+                        failIfMajorPerformanceCaveat: false
+                    });
+                    
+                    // Add resize handler with debouncing
+                    let resizeTimeout;
+                    window.addEventListener('resize', () => {
+                        clearTimeout(resizeTimeout);
+                        resizeTimeout = setTimeout(() => {
+                            if (engine && !engine.isDisposed) {
+                                engine.resize();
+                            }
+                        }, 100);
+                    });
+                    
+                    console.log("Engine Initialized successfully.");
+                    return engine;
+                } catch (error) {
+                    console.error("Failed to create Babylon.js engine:", error);
+                    throw new Error(`Engine creation failed: ${error.message}`);
+                }
+            });
         }
 
         async function createBabylonScene(engine, canvas, xrStatusEl) {
@@ -143,6 +371,13 @@
 
              // --- Input Handling ---
             setupInputHandling(scene, inputMap);
+
+            // --- Voice Control Setup ---
+            if (typeof VoiceEnvironmentModifier !== 'undefined') {
+                window.voiceModifier = new VoiceEnvironmentModifier(scene);
+                addVoiceControlUI();
+                console.log('🎤 Voice control initialized');
+            }
 
             console.log("Scene Created.");
             return { scene, camera, xrHelper }; // Return created objects
@@ -274,17 +509,58 @@
         // --- 3. WebRTC Setup ---
         async function setupWebRTC(localVideoElement) {
             console.log("Setting up WebRTC...");
+            
+            // Check if media devices are available
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.warn("WebRTC not supported in this browser");
+                return null;
+            }
+            
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'user', width: 160, height: 120 },
-                    audio: true,
+                    video: { 
+                        facingMode: 'user', 
+                        width: { ideal: 160, max: 320 }, 
+                        height: { ideal: 120, max: 240 }
+                    },
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true
+                    }
                 });
-                localVideoElement.srcObject = stream;
-                console.log("WebRTC Media Stream acquired.");
-                return stream; // Return the stream
+                
+                if (localVideoElement) {
+                    localVideoElement.srcObject = stream;
+                    
+                    // Handle video element errors
+                    localVideoElement.onerror = (event) => {
+                        console.error("Video element error:", event);
+                    };
+                    
+                    localVideoElement.onloadedmetadata = () => {
+                        console.log("Video metadata loaded successfully");
+                    };
+                }
+                
+                console.log("WebRTC Media Stream acquired successfully.");
+                return stream;
             } catch (error) {
-                console.error("Error accessing media devices.", error);
-                alert("Could not access camera/microphone. Please check permissions.");
+                console.error("Error accessing media devices:", error);
+                
+                // Provide specific error messages
+                let errorMessage = "Could not access camera/microphone.";
+                if (error.name === 'NotAllowedError') {
+                    errorMessage = "Camera/microphone access denied. Please allow permissions and refresh.";
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage = "No camera/microphone found. Video chat will be disabled.";
+                } else if (error.name === 'NotReadableError') {
+                    errorMessage = "Camera/microphone is busy or unavailable.";
+                } else if (error.name === 'OverconstrainedError') {
+                    errorMessage = "Camera/microphone constraints not supported.";
+                }
+                
+                console.warn(errorMessage);
+                // Don't show alert immediately, let the app continue
                 return null;
             }
         }
@@ -608,45 +884,194 @@
 
 
         // --- 8. Main Application Initialization ---
+        let initializationAbortController = null;
+        
         async function main() {
             console.log("Starting Application Initialization...");
+            
+            // Create abort controller for this initialization
+            initializationAbortController = new AbortController();
+            const signal = initializationAbortController.signal;
+            
+            // Start XR loading progress
+            startXRLoadingProgress();
+            
             try {
-                // Initialize core components
-                engine = initializeBabylonEngine(canvas);
-                localStream = await setupWebRTC(localVideo); // Get media first
+                // Check for abort before each step
+                if (signal.aborted) throw new Error("Initialization aborted");
+                
+                updateXRProgress(20, "Initializing Babylon.js engine...");
+                // Initialize core components with validation
+                if (!canvas) {
+                    throw new Error("Canvas element not found");
+                }
+                engine = await initializeBabylonEngine(canvas);
+                
+                if (signal.aborted) throw new Error("Initialization aborted");
+                
+                updateXRProgress(40, "Setting up WebRTC media...");
+                // WebRTC setup with timeout and error handling
+                try {
+                    localStream = await Promise.race([
+                        setupWebRTC(localVideo),
+                        new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error("WebRTC setup timeout")), 10000)
+                        )
+                    ]);
+                } catch (webrtcError) {
+                    console.warn("WebRTC setup failed, continuing without video:", webrtcError);
+                    localStream = null; // Continue without video
+                }
 
+                if (signal.aborted) throw new Error("Initialization aborted");
+                
+                updateXRProgress(60, "Creating XR environment...");
                 // Create scene (which includes XR setup)
                 const sceneResult = await createBabylonScene(engine, canvas, debugElements.xrStatus);
                 scene = sceneResult.scene;
                 // camera and xrHelper are now globally assigned within createBabylonScene/setupWebXR
 
+                if (signal.aborted) throw new Error("Initialization aborted");
+                
+                updateXRProgress(75, "Connecting to multiplayer server...");
                 // Initialize networking *after* core components are ready
                 socket = setupSocketIO(debugElements);
 
+                if (signal.aborted) throw new Error("Initialization aborted");
+                
+                updateXRProgress(85, "Initializing voice controls...");
                 // Setup signaling listeners (needs socket and localStream)
-                // Delay slightly or wait for socket connection? For simplicity, assume connection happens quickly.
-                // A more robust approach would wait for the 'connect' event before setting up signaling.
                 if (localStream) {
                      setupWebRTCSignaling(socket, localStream, peerConnections, peerVideos, videoContainer, peerAvatars, scene, debugElements);
                 } else {
                     console.warn("Local stream not available, WebRTC signaling disabled.");
-                    alert("Webcam/Microphone not available. Video chat will be disabled.");
+                    // Don't show alert, just continue
                 }
 
-
+                if (signal.aborted) throw new Error("Initialization aborted");
+                
+                updateXRProgress(95, "Starting render loop...");
                 // Start the rendering loop
                 startRenderLoop(engine, scene, socket, debugElements);
+
+                updateXRProgress(100, "🏝️ Welcome to Paradise!");
+                
+                // Hide loading overlay after a brief pause
+                setTimeout(() => {
+                    if (!signal.aborted) {
+                        hideXRLoadingOverlay();
+                    }
+                }, 1000);
 
                 console.log("Application Initialization Complete.");
 
             } catch (error) {
                 console.error("Initialization failed:", error);
-                alert(`Initialization failed: ${error.message}`);
+                
+                // Clean up on error
+                if (engine && !engine.isDisposed) {
+                    engine.dispose();
+                }
+                
+                if (error.message === "Initialization aborted") {
+                    console.log("Initialization was aborted");
+                    return;
+                }
+                
+                updateXRProgress(0, "❌ Initialization failed: " + error.message);
+                setTimeout(() => {
+                    hideXRLoadingOverlay();
+                    // Show user-friendly error message
+                    const errorMsg = error.message.includes("Canvas") ? 
+                        "Graphics initialization failed. Please refresh the page." :
+                        "Failed to load the application. Please refresh and try again.";
+                    alert(errorMsg);
+                }, 2000);
+            } finally {
+                // Clean up abort controller
+                initializationAbortController = null;
             }
         }
 
         // --- Start the application ---
-        main();
+        
+        // Global error handlers
+        window.addEventListener('error', (event) => {
+            console.error('Global error caught:', event.error);
+            // Prevent script errors from breaking the app
+            if (event.error && event.error.message === 'Script error.') {
+                event.preventDefault();
+                return true;
+            }
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+            
+            // Handle common abort errors gracefully
+            if (event.reason && event.reason.name === 'AbortError') {
+                console.log('Ignoring AbortError from cancelled operation');
+                event.preventDefault();
+                return;
+            }
+            
+            // Handle canvas-related errors
+            if (event.reason && event.reason.message && 
+                (event.reason.message.includes('getImageData') || 
+                 event.reason.message.includes('width is 0') ||
+                 event.reason.message.includes('Cannot set property id'))) {
+                console.log('Ignoring canvas/DOM error:', event.reason.message);
+                event.preventDefault();
+                return;
+            }
+            
+            // Handle script loading errors
+            if (event.reason && event.reason.message && 
+                event.reason.message.includes('Loading CSS chunk')) {
+                console.log('Ignoring CSS chunk loading error');
+                event.preventDefault();
+                return;
+            }
+        });
+
+        // Ensure DOM is loaded before starting
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', main);
+        } else {
+            main();
+        }
+
+        // XR Loading Progress Functions
+        function startXRLoadingProgress() {
+            const overlay = document.getElementById('xrLoadingOverlay');
+            const progressFill = document.getElementById('xrProgressFill');
+            const status = document.getElementById('xrStatus');
+            
+            // Ensure overlay is visible
+            overlay.classList.remove('hidden');
+            progressFill.style.width = '0%';
+            status.textContent = 'Initializing XR environment...';
+        }
+        
+        function updateXRProgress(percentage, statusText) {
+            const progressFill = document.getElementById('xrProgressFill');
+            const status = document.getElementById('xrStatus');
+            
+            progressFill.style.width = percentage + '%';
+            status.textContent = statusText;
+            
+            console.log(`XR Loading: ${percentage}% - ${statusText}`);
+        }
+        
+        function hideXRLoadingOverlay() {
+            const overlay = document.getElementById('xrLoadingOverlay');
+            overlay.classList.add('hidden');
+            
+            // Remove completely after transition
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 800);
+        }
 
     </script>
 </body>

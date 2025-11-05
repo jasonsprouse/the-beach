@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎤 Voice Control XR Demo - Tropical Paradise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="public/js/voice-control-addon.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow-x: hidden;
+        }
+        #renderCanvas {
+            width: 100%;
+            height: 70vh;
+            display: block;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .controls-panel {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .voice-button {
+            background: linear-gradient(45deg, #4ECDC4, #44A08D);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+        }
+        .voice-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.6);
+        }
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .command-card {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .command-card:hover {
+            transform: scale(1.05);
+        }
+        #voice-status {
+            background: rgba(78, 205, 196, 0.1);
+            border: 2px solid #4ECDC4;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .demo-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ECDC4;
+        }
+        .scene-info {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="text-center mb-6">
+            <h1 class="text-4xl font-bold text-white mb-2">🎤 Voice-Controlled XR Paradise</h1>
+            <p class="text-xl text-gray-200">Speak to modify your tropical environment in real-time!</p>
+        </div>
+
+        <div class="relative">
+            <canvas id="renderCanvas"></canvas>
+            <div class="scene-info" id="scene-info">
+                🏝️ Tropical Paradise Demo<br>
+                Objects Created: <span id="object-count">3</span><br>
+                FPS: <span id="fps-counter">60</span>
+            </div>
+        </div>
+
+        <div class="controls-panel">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Voice Control Section -->
+                <div class="flex-1">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">🎤 Voice Control</h3>
+                    <button id="voiceControlBtn" class="voice-button w-full mb-3">
+                        🎤 Start Voice Control
+                    </button>
+                    <p class="text-sm text-gray-600">Click button, allow microphone, then speak commands</p>
+                </div>
+
+                <!-- Text Control Section -->
+                <div class="flex-1">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">💬 Text Commands</h3>
+                    <div class="flex gap-2 mb-3">
+                        <input 
+                            type="text" 
+                            id="textCommandInput" 
+                            placeholder="Type: add palm tree, make it stormy..." 
+                            class="flex-1 px-3 py-2 border-2 border-teal-400 rounded-lg focus:outline-none focus:border-teal-600"
+                        />
+                        <button 
+                            id="textControlBtn" 
+                            class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors"
+                        >
+                            ➤ Execute
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-600">Type commands and press Enter or click Execute</p>
+                </div>
+
+                <!-- Stats Section -->
+                <div class="demo-stats lg:w-64">
+                    <div class="stat-card">
+                        <div class="stat-number" id="commands-executed">0</div>
+                        <div class="text-sm text-gray-600">Commands</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="objects-created">0</div>
+                        <div class="text-sm text-gray-600">Objects</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="voice-accuracy">100%</div>
+                        <div class="text-sm text-gray-600">Success Rate</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="voice-status" class="pulse">
+                🎤💬 Voice & Text control ready - Use microphone or type commands above
+            </div>
+
+            <!-- Command History Section -->
+            <div class="flex gap-3 mt-4">
+                <button id="historyBtn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm">
+                    📜 Command History
+                </button>
+                <button id="clearHistoryBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors text-sm">
+                    🗑️ Clear History
+                </button>
+                <div class="flex-1 text-right">
+                    <span class="text-sm text-gray-600">
+                        Last Command: <span id="last-command" class="font-semibold text-teal-600">None</span>
+                    </span>
+                </div>
+            </div>
+
+            <h4 class="text-lg font-semibold text-gray-800 mt-6 mb-3">⚡ Quick Commands (Click to Execute)</h4>
+            <div class="command-grid">
+                <div class="command-card" onclick="executeQuickCommand('Add palm tree')">
+                    <div class="text-lg">🌴</div>
+                    <div>"Add palm tree"</div>
+                </div>
+                <div class="command-card" onclick="executeQuickCommand('Make it stormy')">
+                    <div class="text-lg">⛈️</div>
+                    <div>"Make it stormy"</div>
+                </div>
+                <div class="command-card" onclick="executeQuickCommand('Add rocks')">
+                    <div class="text-lg">🪨</div>
+                    <div>"Add rocks"</div>
+                </div>
+                <div class="command-card" onclick="executeQuickCommand('Add flowers')">
+                    <div class="text-lg">🌺</div>
+                    <div>"Add flowers"</div>
+                </div>
+                <div class="command-card" onclick="executeQuickCommand('Make it night')">
+                    <div class="text-lg">🌙</div>
+                    <div>"Make it night"</div>
+                </div>
+                <div class="command-card" onclick="executeQuickCommand('Add fish')">
+                    <div class="text-lg">🐠</div>
+                    <div>"Add fish"</div>
+                </div>
+                <div class="command-card" onclick="executeQuickCommand('Make it sunny')">
+                    <div class="text-lg">☀️</div>
+                    <div>"Make it sunny"</div>
+                </div>
+                <div class="command-card" onclick="executeQuickCommand('Make it day')">
+                    <div class="text-lg">🌅</div>
+                    <div>"Make it day"</div>
+                </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h4 class="font-semibold text-blue-800">🔮 What You're Experiencing:</h4>
+                <div class="grid md:grid-cols-2 gap-4 mt-3">
+                    <ul class="text-sm text-blue-700 list-disc list-inside space-y-1">
+                        <li><strong>Voice Commands:</strong> Speak naturally to create 3D objects</li>
+                        <li><strong>Text Commands:</strong> Type the same commands for accessibility</li>
+                        <li><strong>Real-time Creation:</strong> Instant 3D geometry generation</li>
+                        <li><strong>Interactive Scene:</strong> WASD movement, mouse look</li>
+                    </ul>
+                    <ul class="text-sm text-blue-700 list-disc list-inside space-y-1">
+                        <li><strong>Command History:</strong> Track all executed commands</li>
+                        <li><strong>Quick Buttons:</strong> One-click command execution</li>
+                        <li><strong>VR Ready:</strong> WebXR compatible environment</li>
+                        <li><strong>AI Foundation:</strong> Ready for GPT integration</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let engine, scene, camera;
+        let objectCount = 3;
+        let commandsExecuted = 0;
+        let objectsCreated = 0;
+        let voiceAccuracy = 100;
+
+        // Enhanced voice control with demo features
+        class DemoVoiceEnvironmentModifier extends VoiceEnvironmentModifier {
+            constructor(scene) {
+                super(scene);
+                this.commandHistory = [];
+            }
+
+            processVoiceCommand(command) {
+                super.processVoiceCommand(command);
+                this.updateDemoStats(command, 'voice');
+            }
+
+            processTextCommand(command) {
+                super.processTextCommand(command);
+                this.updateDemoStats(command, 'text');
+            }
+
+            updateDemoStats(command, source) {
+                this.commandHistory.push({
+                    command: command,
+                    timestamp: Date.now(),
+                    source: source,
+                    success: true
+                });
+                
+                // Update demo stats
+                commandsExecuted++;
+                document.getElementById('commands-executed').textContent = commandsExecuted;
+                
+                // Update last command
+                document.getElementById('last-command').textContent = `[${source.toUpperCase()}] ${command}`;
+                
+                // Simulate accuracy calculation
+                voiceAccuracy = Math.max(85, 100 - (commandsExecuted * 2));
+                document.getElementById('voice-accuracy').textContent = voiceAccuracy + '%';
+            }
+
+            addPalmTree() {
+                super.addPalmTree();
+                objectsCreated += 7; // trunk + 6 leaves
+                this.updateObjectCount();
+            }
+
+            addRocks() {
+                super.addRocks();
+                objectsCreated += 5;
+                this.updateObjectCount();
+            }
+
+            addTropicalFlowers() {
+                super.addTropicalFlowers();
+                objectsCreated += 10;
+                this.updateObjectCount();
+            }
+
+            addSwimmingFish() {
+                super.addSwimmingFish();
+                objectsCreated += 8;
+                this.updateObjectCount();
+            }
+
+            updateObjectCount() {
+                document.getElementById('objects-created').textContent = objectsCreated;
+                document.getElementById('object-count').textContent = objectCount + objectsCreated;
+            }
+        }
+
+        // Initialize the demo scene
+        async function initializeDemo() {
+            const canvas = document.getElementById("renderCanvas");
+            
+            // Create engine
+            engine = new BABYLON.Engine(canvas, true, { antialias: true });
+            
+            // Create scene
+            scene = new BABYLON.Scene(engine);
+            scene.clearColor = new BABYLON.Color3(0.53, 0.81, 0.92); // Sky blue
+            
+            // Create camera
+            camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(0, 2, -10), scene);
+            camera.setTarget(BABYLON.Vector3.Zero());
+            camera.attachControl(canvas, true);
+            
+            // Add lighting
+            const light = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(0, 1, 0), scene);
+            light.intensity = 0.8;
+            
+            const dirLight = new BABYLON.DirectionalLight("dirLight", new BABYLON.Vector3(-1, -2, -1), scene);
+            dirLight.intensity = 0.5;
+            
+            // Create basic tropical scene
+            createBasicTropicalScene();
+            
+            // Initialize voice control
+            window.voiceModifier = new DemoVoiceEnvironmentModifier(scene);
+            setupDemoUI();
+            
+            // Start render loop
+            engine.runRenderLoop(() => {
+                scene.render();
+                updateFPS();
+            });
+            
+            // Handle resize
+            window.addEventListener("resize", () => {
+                engine.resize();
+            });
+            
+            console.log("🏝️ Demo scene initialized with voice control!");
+        }
+
+        function createBasicTropicalScene() {
+            // Create ground (ocean)
+            const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 100, height: 100 }, scene);
+            const groundMaterial = new BABYLON.StandardMaterial("groundMat", scene);
+            groundMaterial.diffuseColor = new BABYLON.Color3(0.2, 0.6, 0.8);
+            groundMaterial.specularColor = new BABYLON.Color3(0.8, 0.8, 1);
+            ground.material = groundMaterial;
+            
+            // Add initial island
+            const island = BABYLON.MeshBuilder.CreateCylinder("island", { 
+                height: 0.5, 
+                diameterTop: 20, 
+                diameterBottom: 15 
+            }, scene);
+            island.position.y = 0.25;
+            const islandMaterial = new BABYLON.StandardMaterial("islandMat", scene);
+            islandMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.7, 0.5);
+            island.material = islandMaterial;
+            
+            // Add one initial palm tree
+            const trunk = BABYLON.MeshBuilder.CreateCylinder("initialTrunk", {
+                height: 6,
+                diameterTop: 0.6,
+                diameterBottom: 1
+            }, scene);
+            trunk.position.y = 3.5;
+            const trunkMaterial = new BABYLON.StandardMaterial("initialTrunkMat", scene);
+            trunkMaterial.diffuseColor = new BABYLON.Color3(0.6, 0.4, 0.2);
+            trunk.material = trunkMaterial;
+            
+            // Add leaves
+            for (let i = 0; i < 6; i++) {
+                const leaf = BABYLON.MeshBuilder.CreateBox("initialLeaf", {
+                    width: 0.3,
+                    height: 0.1,
+                    depth: 3
+                }, scene);
+                leaf.position.y = 6.5;
+                leaf.rotation.y = (Math.PI * 2 / 6) * i;
+                leaf.rotation.x = -0.2;
+                const leafMaterial = new BABYLON.StandardMaterial("initialLeafMat", scene);
+                leafMaterial.diffuseColor = new BABYLON.Color3(0.2, 0.8, 0.2);
+                leaf.material = leafMaterial;
+            }
+        }
+
+        function setupDemoUI() {
+            // Voice button
+            const voiceButton = document.getElementById('voiceControlBtn');
+            voiceButton.addEventListener('click', () => {
+                if (window.voiceModifier) {
+                    window.voiceModifier.startListening();
+                    voiceButton.textContent = '🎤 Listening...';
+                    voiceButton.classList.add('pulse');
+                    
+                    setTimeout(() => {
+                        voiceButton.textContent = '🎤 Start Voice Control';
+                        voiceButton.classList.remove('pulse');
+                    }, 3000);
+                }
+            });
+
+            // Text input functionality
+            const textInput = document.getElementById('textCommandInput');
+            const textButton = document.getElementById('textControlBtn');
+
+            function executeTextCommand() {
+                const command = textInput.value.trim();
+                if (command && window.voiceModifier) {
+                    window.voiceModifier.processTextCommand(command);
+                    textInput.value = '';
+                    textInput.focus();
+                    
+                    // Visual feedback
+                    textButton.textContent = '✅ Executed';
+                    setTimeout(() => {
+                        textButton.textContent = '➤ Execute';
+                    }, 1000);
+                } else if (!command) {
+                    textInput.focus();
+                    textInput.placeholder = 'Please enter a command first!';
+                    setTimeout(() => {
+                        textInput.placeholder = 'Type: add palm tree, make it stormy...';
+                    }, 2000);
+                }
+            }
+
+            textButton.addEventListener('click', executeTextCommand);
+            textInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    executeTextCommand();
+                }
+            });
+
+            // History functionality
+            const historyBtn = document.getElementById('historyBtn');
+            const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+            historyBtn.addEventListener('click', () => {
+                if (window.voiceModifier && window.voiceModifier.commandHistory) {
+                    const history = window.voiceModifier.commandHistory;
+                    if (history.length === 0) {
+                        alert('No commands executed yet');
+                    } else {
+                        const historyText = history.map((cmd, index) => 
+                            `${index + 1}. [${cmd.source.toUpperCase()}] ${cmd.command}\n   ${new Date(cmd.timestamp).toLocaleString()}`
+                        ).join('\n\n');
+                        alert(`Command History (${history.length} commands):\n\n${historyText}`);
+                    }
+                }
+            });
+
+            clearHistoryBtn.addEventListener('click', () => {
+                if (window.voiceModifier) {
+                    window.voiceModifier.commandHistory = [];
+                    document.getElementById('last-command').textContent = 'None';
+                    document.getElementById('commands-executed').textContent = '0';
+                    commandsExecuted = 0;
+                    
+                    // Visual feedback
+                    const statusElement = document.getElementById('voice-status');
+                    statusElement.textContent = '🗑️ Command history cleared';
+                    statusElement.style.background = 'rgba(245, 101, 101, 0.2)';
+                    statusElement.style.borderColor = '#F56565';
+                    
+                    setTimeout(() => {
+                        statusElement.textContent = '🎤💬 Voice & Text control ready - Use microphone or type commands above';
+                        statusElement.style.background = 'rgba(78, 205, 196, 0.1)';
+                        statusElement.style.borderColor = '#4ECDC4';
+                    }, 2000);
+                }
+            });
+
+            // Focus text input on page load
+            textInput.focus();
+        }
+
+        // Execute command via quick buttons
+        function executeQuickCommand(command) {
+            if (window.voiceModifier) {
+                window.voiceModifier.processTextCommand(command.toLowerCase());
+                
+                // Visual feedback
+                const statusElement = document.getElementById('voice-status');
+                statusElement.textContent = `⚡ Quick Command: "${command}"`;
+                statusElement.style.background = 'rgba(139, 92, 246, 0.2)';
+                statusElement.style.borderColor = '#8B5CF6';
+                
+                setTimeout(() => {
+                    statusElement.textContent = '🎤💬 Voice & Text control ready - Use microphone or type commands above';
+                    statusElement.style.background = 'rgba(78, 205, 196, 0.1)';
+                    statusElement.style.borderColor = '#4ECDC4';
+                }, 2000);
+            }
+        }
+
+        let frameCount = 0;
+        let lastTime = performance.now();
+
+        function updateFPS() {
+            frameCount++;
+            const currentTime = performance.now();
+            
+            if (currentTime - lastTime >= 1000) {
+                const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+                document.getElementById('fps-counter').textContent = fps;
+                frameCount = 0;
+                lastTime = currentTime;
+            }
+        }
+
+        // Start the demo
+        initializeDemo();
+    </script>
+</body>
+</html>

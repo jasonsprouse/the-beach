@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Babylon.js XR Environment</title>
+    <title>🏝️ Tropical XR Paradise - PKP Protected</title>
     <style>
         html, body {
             overflow: hidden;
@@ -11,14 +11,22 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            background-color: #000;
-            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #87CEEB 0%, #E0F6FF 50%, #FFE4B5 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background 0.5s ease;
         }
         
         #renderCanvas {
             width: 100%;
             height: 100%;
             touch-action: none;
+            display: block;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        
+        #renderCanvas.loaded {
+            opacity: 1;
         }
         
         #ui {
@@ -27,27 +35,127 @@
             left: 20px;
             z-index: 100;
             color: white;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 12px;
             font-size: 14px;
-            max-width: 300px;
+            max-width: 350px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        #ui:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1);
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         .controls {
-            margin-top: 10px;
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-width: 140px;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        button:disabled::before {
+            display: none;
+        }
+        
+        #loadParadise {
+            background: linear-gradient(45deg, #FF6B6B 0%, #FF8E53 100%);
+            font-size: 14px;
+            font-weight: bold;
+            min-width: 160px;
+        }
+        
+        #loadParadise:hover {
+            background: linear-gradient(45deg, #FF8E53 0%, #FF6B6B 100%);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
         }
         
         .audio-controls {
             margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #444;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .audio-info {
             font-size: 12px;
-            color: #aaa;
-            margin-bottom: 8px;
+            color: #4ECDC4;
+            margin-bottom: 10px;
+            text-align: center;
+            font-style: italic;
+        }
         }
         
         .volume-control {
@@ -75,31 +183,239 @@
             cursor: pointer;
         }
         
-        button {
-            background: #0078d4;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            margin: 5px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        
-        button:hover {
-            background: #106ebe;
-        }
-        
-        button:disabled {
-            background: #666;
-            cursor: not-allowed;
+        input[type="range"] {
+            width: 100%;
+            margin: 8px 0;
+            accent-color: #4ECDC4;
         }
         
         #status {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(76, 175, 80, 0.2);
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+            font-size: 13px;
+            line-height: 1.4;
+            transition: all 0.3s ease;
+        }
+        
+        #status.loading {
+            background: rgba(255, 193, 7, 0.2);
+            border-left-color: #FFC107;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        #status.error {
+            background: rgba(244, 67, 54, 0.2);
+            border-left-color: #F44336;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .loading-content {
+            text-align: center;
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid #4ECDC4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .auth-status {
+            font-size: 12px;
+            color: #FFE4B5;
             margin-top: 10px;
-            padding: 5px;
-            background: rgba(0, 100, 0, 0.3);
+            padding: 8px;
+            background: rgba(255, 228, 181, 0.1);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 228, 181, 0.2);
+        }
+        
+        .pkp-info {
+            font-size: 11px;
+            color: #87CEEB;
+            margin-top: 8px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            #ui {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                max-width: none;
+                padding: 15px;
+            }
+            
+            .control-group {
+                flex-direction: column;
+                gap: 6px;
+            }
+            
+            button {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3>🏝️ Initializing Paradise</h3>
+            <p>Preparing your tropical XR experience...</p>
+            <div id="loadingProgress">Setting up WebAuthn PKP authentication...</div>
+        </div>
+    </div>
+
+    <canvas id="renderCanvas"></canvas>
+    
+    <div id="ui">
+        <div class="title">🏝️ Tropical XR Paradise</div>
+        
+        <div class="auth-status" id="authStatus">
+            🔐 WebAuthn PKP Authentication Ready
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <button id="loadParadise">🌴 Load Paradise</button>
+            </div>
+            <div class="control-group">
+                <button id="enterXR">🥽 Enter VR</button>
+                <button id="resetScene">🔄 Reset View</button>
+            </div>
+        </div>
+
+        /* WebAuthn Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal:not(.hidden) {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #333;
+            border-radius: 12px;
+            width: 400px;
+            max-width: 90%;
+            text-align: center;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: #0078d4;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #333;
+            border-radius: 6px;
+            background-color: #2a2a2a;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #0078d4;
+        }
+
+        .modal-content .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .modal-content button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            min-width: 120px;
+        }
+
+        .modal-content button.primary {
+            background: #0078d4;
+        }
+
+        .modal-content button.secondary {
+            background: #6c757d;
+        }
+
+        .modal-error {
+            color: #ff4444;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 68, 68, 0.1);
             border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .modal-error.hidden {
+            display: none;
         }
     </style>
 </head>
@@ -124,6 +440,21 @@
             </div>
         </div>
         <div id="status">Welcome to Paradise - Click 'Load Paradise' to begin your tropical adventure</div>
+    </div>
+    
+    <!-- WebAuthn Authentication Modal -->
+    <div id="webauthnModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>🔐 Paradise Access</h3>
+            <p>Please login with WebAuthn to access the tropical paradise:</p>
+            <input type="text" id="username" placeholder="Enter your username" maxlength="50">
+            <div class="button-group">
+                <button id="modalRegisterBtn" class="primary">Register</button>
+                <button id="modalLoginBtn" class="primary">Login</button>
+                <button id="modalCancelBtn" class="secondary">Cancel</button>
+            </div>
+            <div id="modalError" class="modal-error hidden"></div>
+        </div>
     </div>
     
     <canvas id="renderCanvas"></canvas>
@@ -151,15 +482,93 @@
             src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/jason-sprouse/oceanbreeze&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true">
     </iframe>
     
-    <script src="/js/useWagmi.js"></script>
-    <script src="/js/useLit.js"></script>
+    
+    <!-- WebAuthn and Lit Protocol Integration -->
+    <script src="./js/useLit.js"></script>
+    
+    <!-- XR Scene Implementation -->
     <script src="./js/xr-scene.js"></script>
+    
     <script>
-        const wagmi = window.useWagmi();
-        const lit = window.useLit();
-
-        // Initialize Lit Protocol
-        lit.initializeLit();
+        // Enhanced page initialization with smooth transitions
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🏝️ Tropical XR Paradise - Initializing...');
+            
+            // Smooth fade-in effect
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+            
+            // Initialize scene with enhanced transitions
+            try {
+                new BabylonXRScene();
+                console.log('✅ BabylonXRScene initialized successfully');
+            } catch (error) {
+                console.error('❌ Failed to initialize XR scene:', error);
+                updateStatus('Failed to initialize XR environment: ' + error.message, 'error');
+            }
+        });
+        
+        // Enhanced status update function with visual feedback
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.className = `status ${type}`;
+                
+                // Auto-clear loading states after 10 seconds
+                if (type === 'loading') {
+                    setTimeout(() => {
+                        if (statusEl.className.includes('loading')) {
+                            statusEl.className = 'status';
+                        }
+                    }, 10000);
+                }
+            }
+            console.log(`Status [${type}]: ${message}`);
+        }
+        
+        // Loading overlay management
+        function showLoadingOverlay(message = 'Loading...') {
+            const overlay = document.getElementById('loadingOverlay');
+            const progress = document.getElementById('loadingProgress');
+            if (overlay && progress) {
+                progress.textContent = message;
+                overlay.style.display = 'flex';
+            }
+        }
+        
+        function hideLoadingOverlay() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+        
+        // Scene transition effects
+        function enableSceneTransition() {
+            const canvas = document.getElementById('renderCanvas');
+            if (canvas) {
+                canvas.classList.add('loaded');
+            }
+        }
+        
+        // Make functions globally available
+        window.updateStatus = updateStatus;
+        window.showLoadingOverlay = showLoadingOverlay;
+        window.hideLoadingOverlay = hideLoadingOverlay;
+        window.enableSceneTransition = enableSceneTransition;
+        
+        // Enhanced error handling
+        window.addEventListener('error', (event) => {
+            console.error('Global error:', event.error);
+            updateStatus('Application error: ' + event.error.message, 'error');
+        });
+        
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+            updateStatus('Promise rejection: ' + event.reason.message, 'error');
+        });
     </script>
 </body>
 </html>

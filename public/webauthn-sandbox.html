@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAuthn Sandbox Frame</title>
+    <meta http-equiv="Permissions-Policy" content="publickey-credentials-create=*, publickey-credentials-get=*">
+    <style>
+        body { font-family: system-ui, sans-serif; padding: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 3px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h3>Sandboxed WebAuthn Frame</h3>
+    <input type="text" id="iframeUsername" placeholder="Username" value="test-iframe">
+    <button class="btn-primary" onclick="testSandboxWebAuthn()">Test in Sandbox</button>
+    <div id="iframeStatus"></div>
+    <div id="iframeLogs"></div>
+
+    <script>
+        function postToParent(type, message, status = 'info') {
+            window.parent.postMessage({
+                type: type,
+                message: message,
+                status: status
+            }, '*');
+        }
+        
+        function logToParent(message) {
+            postToParent('webauthn-log', message);
+            console.log(message);
+        }
+        
+        function showStatusToParent(message, type = 'info') {
+            postToParent('webauthn-status', message, type);
+            
+            const statusDiv = document.getElementById('iframeStatus');
+            statusDiv.className = 'status ' + type;
+            statusDiv.textContent = message;
+        }
+
+        async function testSandboxWebAuthn() {
+            logToParent('🏖️ Testing WebAuthn in iframe sandbox...');
+            showStatusToParent('Testing sandbox WebAuthn...', 'info');
+            
+            // Check basic WebAuthn support
+            if (!window.PublicKeyCredential) {
+                logToParent('❌ [IFRAME] PublicKeyCredential not available');
+                showStatusToParent('WebAuthn not supported in iframe', 'error');
+                return;
+            }
+            
+            if (!navigator.credentials) {
+                logToParent('❌ [IFRAME] navigator.credentials not available');
+                showStatusToParent('Credentials API not available in iframe', 'error');
+                return;
+            }
+            
+            logToParent('✅ [IFRAME] WebAuthn APIs available in iframe');
+            
+            // Check permissions
+            if (document.featurePolicy) {
+                const createAllowed = document.featurePolicy.allowsFeature('publickey-credentials-create');
+                const getAllowed = document.featurePolicy.allowsFeature('publickey-credentials-get');
+                logToParent('🔐 [IFRAME] WebAuthn create allowed: ' + createAllowed);
+                logToParent('🔐 [IFRAME] WebAuthn get allowed: ' + getAllowed);
+            }
+            
+            try {
+                // Test credential creation in iframe
+                logToParent('🔑 [IFRAME] Testing credential creation in sandbox...');
+                
+                // Use our actual backend for this test
+                const username = document.getElementById('iframeUsername').value;
+                
+                // Get registration options from our server
+                const optionsResponse = await fetch('/lit/webauthn/register-options', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ username }),
+                });
+                
+                if (!optionsResponse.ok) {
+                    throw new Error('Failed to get registration options: ' + optionsResponse.status);
+                }
+                
+                const options = await optionsResponse.json();
+                logToParent('📝 [IFRAME] Registration options received from server');
+                
+                // Convert base64url to Uint8Array
+                const challenge = new Uint8Array(atob(options.challenge.replace(/-/g, '+').replace(/_/g, '/')).split('').map(char => char.charCodeAt(0)));
+                const userId = new Uint8Array(atob(options.user.id.replace(/-/g, '+').replace(/_/g, '/')).split('').map(char => char.charCodeAt(0)));
+                
+                const publicKeyOptions = {
+                    ...options,
+                    challenge: challenge,
+                    user: {
+                        ...options.user,
+                        id: userId,
+                    },
+                    excludeCredentials: options.excludeCredentials?.map(cred => ({
+                        ...cred,
+                        id: new Uint8Array(atob(cred.id.replace(/-/g, '+').replace(/_/g, '/')).split('').map(char => char.charCodeAt(0))),
+                    })),
+                };
+                
+                logToParent('🛡️ [IFRAME] Creating WebAuthn credential in iframe...');
+                
+                const credential = await navigator.credentials.create({
+                    publicKey: publicKeyOptions
+                });
+                
+                if (credential) {
+                    logToParent('✅ [IFRAME] Credential creation successful in iframe!');
+                    logToParent('📝 [IFRAME] Credential ID: ' + credential.id);
+                    showStatusToParent('Iframe WebAuthn creation successful!', 'success');
+                } else {
+                    logToParent('❌ [IFRAME] No credential returned');
+                    showStatusToParent('Iframe credential creation failed', 'error');
+                }
+                
+            } catch (error) {
+                logToParent('💥 [IFRAME] WebAuthn error: ' + error.message);
+                showStatusToParent('Iframe WebAuthn failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Auto-run test when loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            logToParent('🏖️ Iframe sandbox loaded, ready for WebAuthn testing');
+        });
+    </script>
+</body>
+</html>

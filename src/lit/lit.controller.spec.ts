@@ -91,7 +91,7 @@ describe('LitController', () => {
       const mockReq = { hostname: 'localhost', protocol: 'http', get: () => 'localhost' };
 
       await expect(
-        controller.generateAuthenticateOptions({ username: 'testuser' }, mockSession, mockReq as any),
+        controller.generateAuthenticateOptions({ username: 'nonexistent_user' }, mockSession, mockReq as any),
       ).rejects.toThrow();
     });
   });

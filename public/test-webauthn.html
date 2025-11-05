@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Permissions-Policy" content="publickey-credentials-create=*, publickey-credentials-get=*">
+    <title>WebAuthn Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <iframe src="about:blank" allow="publickey-credentials-create *; publickey-credentials-get *" style="display: none;"></iframe>
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
+        <h1 class="text-2xl font-bold mb-6 text-center">WebAuthn Registration Test</h1>
+        
+        <div class="mb-4">
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+            <input 
+                type="text" 
+                id="username" 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter username"
+                value="testuser"
+            />
+        </div>
+        
+        <button 
+            id="registerBtn" 
+            class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4">
+            🔐 Register with WebAuthn
+        </button>
+        
+        <button 
+            id="loginBtn" 
+            class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 mb-4">
+            🔓 Login with WebAuthn
+        </button>
+        
+        <div id="status" class="mt-4 p-3 rounded-md text-sm hidden"></div>
+        <div id="logs" class="mt-4 p-3 bg-gray-50 rounded-md text-xs font-mono max-h-64 overflow-y-auto hidden"></div>
+    </div>
+
+    <script>
+        // Force enable WebAuthn feature policy
+        if (document.featurePolicy) {
+            console.log('Feature Policy available');
+            console.log('WebAuthn create allowed:', document.featurePolicy.allowsFeature('publickey-credentials-create'));
+            console.log('WebAuthn get allowed:', document.featurePolicy.allowsFeature('publickey-credentials-get'));
+        }
+        
+        // Try to detect and workaround permissions issues
+        if (!navigator.credentials || !navigator.credentials.create) {
+            console.error('WebAuthn not supported in this browser');
+        }
+        
+        const statusDiv = document.getElementById('status');
+        const logsDiv = document.getElementById('logs');
+        const usernameInput = document.getElementById('username');
+        
+        function log(message) {
+            console.log(message);
+            logsDiv.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            logsDiv.classList.remove('hidden');
+        }
+        
+        function showStatus(message, type = 'info') {
+            statusDiv.className = `mt-4 p-3 rounded-md text-sm ${type === 'error' ? 'bg-red-100 text-red-700' : type === 'success' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`;
+            statusDiv.textContent = message;
+            statusDiv.classList.remove('hidden');
+        }
+
+        // Test if WebAuthn is available
+        function testWebAuthnSupport() {
+            log('🔍 Testing WebAuthn support...');
+            
+            if (!window.PublicKeyCredential) {
+                log('❌ PublicKeyCredential not available');
+                return false;
+            }
+            
+            if (!navigator.credentials) {
+                log('❌ navigator.credentials not available');
+                return false;
+            }
+            
+            log('✅ WebAuthn APIs available');
+            return true;
+        }
+
+        async function registerWebAuthn() {
+            const username = usernameInput.value.trim();
+            if (!username) {
+                showStatus('Please enter a username', 'error');
+                return;
+            }
+
+            if (!testWebAuthnSupport()) {
+                showStatus('WebAuthn not supported in this browser', 'error');
+                return;
+            }
+
+            try {
+                log('🔐 Starting WebAuthn registration for: ' + username);
+                showStatus('Starting registration...', 'info');
+                
+                // Step 1: Get registration options
+                log('📡 Requesting registration options from server...');
+                const optionsResponse = await fetch('/lit/webauthn/register-options', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username }),
+                });
+                
+                log('📡 Options response status: ' + optionsResponse.status);
+                
+                if (!optionsResponse.ok) {
+                    const errorText = await optionsResponse.text();
+                    log('❌ Options request failed: ' + errorText);
+                    throw new Error(`Failed to get registration options: ${optionsResponse.status}`);
+                }
+                
+                const options = await optionsResponse.json();
+                log('📝 Registration options received');
+                log('📝 Challenge length: ' + options.challenge.length);
+                log('📝 User ID: ' + options.user.id);
+                
+                // Step 2: Create WebAuthn credential with better error handling
+                log('🛡️ Creating WebAuthn credential...');
+                showStatus('Creating credential...', 'info');
+                
+                // Check if we can create credentials
+                if (!PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
+                    log('⚠️ Platform authenticator availability check not supported');
+                } else {
+                    const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                    log('📱 Platform authenticator available: ' + available);
+                }
+                
+                const credential = await navigator.credentials.create({
+                    publicKey: {
+                        ...options,
+                        challenge: new Uint8Array(atob(options.challenge.replace(/-/g, '+').replace(/_/g, '/')).split('').map(char => char.charCodeAt(0))),
+                        user: {
+                            ...options.user,
+                            id: new Uint8Array(atob(options.user.id.replace(/-/g, '+').replace(/_/g, '/')).split('').map(char => char.charCodeAt(0))),
+                        },
+                        excludeCredentials: options.excludeCredentials?.map(cred => ({
+                            ...cred,
+                            id: new Uint8Array(atob(cred.id.replace(/-/g, '+').replace(/_/g, '/')).split('').map(char => char.charCodeAt(0))),
+                        })),
+                    },
+                });
+                
+                log('✅ WebAuthn credential created successfully');
+                log('📝 Credential ID: ' + credential.id);
+                
+                if (!credential) {
+                    log('❌ No credential returned from WebAuthn');
+                    throw new Error('Failed to create credential');
+                }
+                
+                // Step 3: Convert and send for verification
+                log('🔄 Converting credential to JSON format...');
+                const credentialJSON = {
+                    id: credential.id,
+                    rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
+                    response: {
+                        clientDataJSON: btoa(String.fromCharCode(...new Uint8Array(credential.response.clientDataJSON))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
+                        attestationObject: btoa(String.fromCharCode(...new Uint8Array(credential.response.attestationObject))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
+                        transports: credential.response.getTransports ? credential.response.getTransports() : [],
+                    },
+                    type: credential.type,
+                };
+                
+                log('📤 Sending credential for verification...');
+                showStatus('Verifying credential...', 'info');
+                
+                const verifyResponse = await fetch('/lit/webauthn/verify-registration', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(credentialJSON),
+                });
+                
+                log('📡 Verification response status: ' + verifyResponse.status);
+                
+                if (!verifyResponse.ok) {
+                    const errorText = await verifyResponse.text();
+                    log('❌ Verification failed: ' + errorText);
+                    throw new Error('Registration verification failed');
+                }
+                
+                const result = await verifyResponse.json();
+                log('📋 Verification result: ' + JSON.stringify(result));
+                
+                if (!result.success) {
+                    log('❌ Registration failed: ' + result.message);
+                    throw new Error('Registration failed: ' + (result.message || 'Unknown error'));
+                }
+                
+                log('✅ Registration successful!');
+                showStatus('Registration successful! You can now try logging in.', 'success');
+                
+            } catch (error) {
+                log('💥 Registration error: ' + error.message);
+                showStatus('Registration failed: ' + error.message, 'error');
+                
+                // Special handling for permissions policy errors
+                if (error.message.includes('publickey-credentials-create')) {
+                    log('🔧 Permissions Policy issue detected');
+                    showStatus('WebAuthn permissions not enabled. This might be a browser security setting.', 'error');
+                }
+            }
+        }
+
+        async function loginWebAuthn() {
+            const username = usernameInput.value.trim();
+            if (!username) {
+                showStatus('Please enter a username', 'error');
+                return;
+            }
+
+            try {
+                log('🔓 Starting WebAuthn authentication for: ' + username);
+                showStatus('Starting authentication...', 'info');
+                
+                const authResponse = await fetch('/lit/webauthn/authenticate-options', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username }),
+                });
+                
+                log('📡 Auth options response status: ' + authResponse.status);
+                
+                if (!authResponse.ok) {
+                    const errorText = await authResponse.text();
+                    log('❌ Auth options failed: ' + errorText);
+                    throw new Error(`Authentication failed: ${authResponse.status}`);
+                }
+                
+                const authOptions = await authResponse.json();
+                log('📝 Authentication options received');
+                
+                // Continue with authentication flow...
+                showStatus('Authentication options received', 'success');
+                
+            } catch (error) {
+                log('💥 Authentication error: ' + error.message);
+                showStatus('Authentication failed: ' + error.message, 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('registerBtn').addEventListener('click', registerWebAuthn);
+            document.getElementById('loginBtn').addEventListener('click', loginWebAuthn);
+            
+            // Test support on load
+            setTimeout(() => {
+                testWebAuthnSupport();
+            }, 100);
+        });
+    </script>
+</body>
+</html>
