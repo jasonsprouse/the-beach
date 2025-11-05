@@ -4,7 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import session = require('express-session');
 import { createClient } from '@vercel/kv';
-import RedisStore from 'connect-redis';
+import { RedisStore } from 'connect-redis';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -20,8 +20,7 @@ async function bootstrap() {
     });
     
     sessionStore = new RedisStore({
-      // @ts-ignore - RedisStore expects a different client type but works with Vercel KV
-      client: redisClient,
+      client: redisClient as any,
       prefix: 'sess:',
       ttl: 24 * 60 * 60, // 24 hours in seconds
     });
