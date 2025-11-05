@@ -21,17 +21,29 @@ async function bootstrap() {
     }),
   );
 
-  // Add Permissions Policy headers for WebAuthn support
+  // Add comprehensive security and permissions headers
   app.use((req, res, next) => {
+    // WebAuthn permissions
     res.setHeader('Permissions-Policy', 
-      'publickey-credentials-create=*, publickey-credentials-get=*'
+      'publickey-credentials-create=*, publickey-credentials-get=*, encrypted-media=*, microphone=*, camera=*'
     );
     res.setHeader('Feature-Policy', 
-      'publickey-credentials-create *; publickey-credentials-get *'
+      'publickey-credentials-create *; publickey-credentials-get *; encrypted-media *; microphone *; camera *'
     );
+    
+    // CORS and security headers
     res.setHeader('Access-Control-Allow-Headers', 
       'Origin, X-Requested-With, Content-Type, Accept, Authorization'
     );
+    res.setHeader('Access-Control-Allow-Methods', 
+      'GET, POST, PUT, DELETE, OPTIONS'
+    );
+    
+    // Content Security Policy for SoundCloud embeds
+    res.setHeader('Content-Security-Policy',
+      "frame-src 'self' https://w.soundcloud.com; media-src 'self' https://*.soundcloud.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://w.soundcloud.com;"
+    );
+    
     console.log('Setting WebAuthn permissions headers');
     next();
   });

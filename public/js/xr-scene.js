@@ -18,6 +18,25 @@ class BabylonXRScene {
         this.initializeBasics();
     }
     
+    resizeCanvas(canvas) {
+        // Ensure canvas has proper dimensions
+        const parent = canvas.parentElement;
+        if (parent) {
+            const rect = parent.getBoundingClientRect();
+            canvas.width = rect.width || window.innerWidth;
+            canvas.height = rect.height || window.innerHeight;
+        } else {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        // Ensure minimum dimensions to prevent zero-width errors
+        canvas.width = Math.max(canvas.width, 100);
+        canvas.height = Math.max(canvas.height, 100);
+        
+        console.log(`Canvas resized to: ${canvas.width}x${canvas.height}`);
+    }
+    
     initializeBasics() {
         // Just setup the canvas and basic UI, don't load the full scene yet
         const canvas = document.getElementById("renderCanvas");
@@ -71,6 +90,12 @@ class BabylonXRScene {
             if (!canvas) {
                 throw new Error("Canvas not found!");
             }
+            
+            // Ensure canvas has proper dimensions before creating engine
+            this.resizeCanvas(canvas);
+            
+            // Add resize listener to handle window changes
+            window.addEventListener('resize', () => this.resizeCanvas(canvas));
             
             this.engine = new BABYLON.Engine(canvas, true, { 
                 preserveDrawingBuffer: true, 

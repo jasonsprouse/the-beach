@@ -18,6 +18,8 @@ import {
   type AuthenticatorTransportFuture,
 } from '@simplewebauthn/server';
 import { Request } from 'express';
+import * as fs from 'fs';
+import * as path from 'path';
 
 interface UserSession {
   currentChallenge?: string;
@@ -31,6 +33,15 @@ interface UserSession {
   }>;
 }
 
+interface StoredAuthenticator {
+  credentialID: string;
+  credentialPublicKey: string; // Base64 encoded for JSON storage
+  counter: number;
+  credentialDeviceType: string;
+  credentialBackedUp: boolean;
+  transports: string[];
+}
+
 @Controller('lit')
 export class LitController {
   private readonly rpName = 'The Beach';
@@ -42,8 +53,60 @@ export class LitController {
     credentialBackedUp: boolean;
     transports: string[];
   }>>();
+  private readonly storageFile = path.join(process.cwd(), 'webauthn-users.json');
 
-  constructor(private readonly litService: LitService) {}
+  constructor(private readonly litService: LitService) {
+    // Load existing users on startup
+    this.loadUsersFromFile();
+  }
+
+  private loadUsersFromFile() {
+    try {
+      if (fs.existsSync(this.storageFile)) {
+        const data = fs.readFileSync(this.storageFile, 'utf8');
+        const storedUsers: Record<string, StoredAuthenticator[]> = JSON.parse(data);
+        
+        // Convert stored data back to in-memory format
+        for (const [username, authenticators] of Object.entries(storedUsers)) {
+          const convertedAuthenticators = authenticators.map(auth => ({
+            credentialID: auth.credentialID,
+            credentialPublicKey: Buffer.from(auth.credentialPublicKey, 'base64'),
+            counter: auth.counter,
+            credentialDeviceType: auth.credentialDeviceType,
+            credentialBackedUp: auth.credentialBackedUp,
+            transports: auth.transports,
+          }));
+          this.userAuthenticators.set(username, convertedAuthenticators);
+        }
+        console.log(`🔄 Loaded ${this.userAuthenticators.size} users from storage`);
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not load users from file:', error.message);
+    }
+  }
+
+  private saveUsersToFile() {
+    try {
+      const storedUsers: Record<string, StoredAuthenticator[]> = {};
+      
+      // Convert in-memory data to JSON-serializable format
+      for (const [username, authenticators] of this.userAuthenticators.entries()) {
+        storedUsers[username] = authenticators.map(auth => ({
+          credentialID: auth.credentialID,
+          credentialPublicKey: Buffer.from(auth.credentialPublicKey).toString('base64'),
+          counter: auth.counter,
+          credentialDeviceType: auth.credentialDeviceType,
+          credentialBackedUp: auth.credentialBackedUp,
+          transports: auth.transports,
+        }));
+      }
+      
+      fs.writeFileSync(this.storageFile, JSON.stringify(storedUsers, null, 2));
+      console.log(`💾 Saved ${this.userAuthenticators.size} users to storage`);
+    } catch (error) {
+      console.warn('⚠️ Could not save users to file:', error.message);
+    }
+  }
 
   private getExpectedOrigin(): string {
     return process.env.NODE_ENV === 'production' 
@@ -169,6 +232,9 @@ export class LitController {
         if (userAuthenticators) {
           userAuthenticators.push(newAuthenticator);
         }
+
+        // Save to persistent storage
+        this.saveUsersToFile();
 
         console.log('✅ Registration successful for:', session.username);
         console.log('Total authenticators:', this.userAuthenticators.get(session.username)?.length || 0);

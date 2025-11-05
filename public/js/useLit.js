@@ -420,14 +420,37 @@ const useLit = () => {
           localStorage.setItem('webauthn_username', defaultUsername);
           return defaultUsername;
         } catch (error) {
-          console.log('Default username failed, will need to show modal:', error.message);
-          // If default username fails, we need to show modal (breaks gesture chain)
-          const username = await showLoginModal();
-          if (username) {
-            await authenticateWebAuthn(username);
-            return username;
+          console.log('Default username failed, need to register first:', error.message);
+          
+          // If no user exists, auto-register with default username
+          if (error.message.includes('No authenticators registered')) {
+            console.log('🔐 Auto-registering default user to maintain gesture chain');
+            try {
+              await registerWebAuthn('testuser');
+              // After successful registration, try authentication again
+              await authenticateWebAuthn('testuser');
+              localStorage.setItem('webauthn_username', 'testuser');
+              return 'testuser';
+            } catch (regError) {
+              console.log('Auto-registration failed, will need to show modal:', regError.message);
+              // Fall back to modal if auto-registration fails
+              const username = await showLoginModal();
+              if (username) {
+                await authenticateWebAuthn(username);
+                return username;
+              } else {
+                return null;
+              }
+            }
           } else {
-            return null;
+            // For other errors, try modal
+            const username = await showLoginModal();
+            if (username) {
+              await authenticateWebAuthn(username);
+              return username;
+            } else {
+              return null;
+            }
           }
         }
       }
