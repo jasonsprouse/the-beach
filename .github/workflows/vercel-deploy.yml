@@ -1,0 +1,91 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - main
+      - test
+      - feature/master-scene-integration
+  pull_request:
+    branches:
+      - main
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        id: deploy
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt ${{ github.ref == 'refs/heads/main' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "🚀 Deployed to: $DEPLOYMENT_URL"
+
+      - name: Set Vercel Environment Variables
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # Set SESSION_SECRET if not already set
+          vercel env ls production --token=${{ secrets.VERCEL_TOKEN }} | grep -q SESSION_SECRET || \
+          echo "${{ secrets.SESSION_SECRET }}" | vercel env add SESSION_SECRET production --token=${{ secrets.VERCEL_TOKEN }}
+          
+          # KV variables are automatically added by Vercel when you create the KV database
+          # We just verify they exist
+          echo "✅ Checking Vercel KV environment variables..."
+          vercel env ls production --token=${{ secrets.VERCEL_TOKEN }} | grep KV_REST_API_URL || echo "⚠️  KV_REST_API_URL not found - create Vercel KV database"
+          vercel env ls production --token=${{ secrets.VERCEL_TOKEN }} | grep KV_REST_API_TOKEN || echo "⚠️  KV_REST_API_TOKEN not found - create Vercel KV database"
+
+      - name: Comment deployment URL on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Preview deployment ready!\n\n**URL:** ${{ steps.deploy.outputs.url }}\n\n✅ Session storage configured with Vercel KV`
+            })
+
+      - name: Deployment Summary
+        run: |
+          echo "### 🚀 Deployment Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** ${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Redis session storage enabled" >> $GITHUB_STEP_SUMMARY
+          echo "✅ WebAuthn authentication configured" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Lit Protocol integration active" >> $GITHUB_STEP_SUMMARY

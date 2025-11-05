@@ -42,6 +42,23 @@ lerna-debug.log*
 .env.production.local
 .env.local
 
+# Vercel
+.vercel
+.vercel/**/*
+
+# Secrets and sensitive files
+**/secrets.json
+**/*-secret.json
+**/*-secrets.json
+**/credentials.json
+**/*.pem
+**/*.key
+**/*.crt
+
+# Session storage (local development)
+sessions/
+*.session
+
 # temp directory
 .temp
 .tmp
