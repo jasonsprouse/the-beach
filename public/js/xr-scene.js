@@ -161,6 +161,10 @@ class BabylonXRScene {
             console.log("Babylon.js initialization complete!");
             this.sceneLoaded = true;
             this.enableSceneTransition();
+            
+            // Display authentication state
+            this.displayAuthState();
+            
             this.updateStatus("🏝️ Paradise Ready! Use WASD to explore. VR ready. Ocean Breeze soundtrack available! 🎵");
             
             // Auto-play ambient music at low volume if user interacted
@@ -761,6 +765,37 @@ class BabylonXRScene {
                 position: { x: position.x, y: position.y, z: position.z },
                 rotation: { x: rotation.x, y: rotation.y, z: rotation.z, w: rotation.w }
             });
+        }
+    }
+    
+    displayAuthState() {
+        try {
+            if (window.useLit) {
+                const litInstance = window.useLit();
+                const authState = litInstance.getAuthenticationState();
+                const walletState = litInstance.getWalletState();
+                
+                console.log('🔐 Authentication State:', authState);
+                console.log('💼 Wallet State:', walletState);
+                
+                if (authState.currentUser) {
+                    console.log(`✅ Authenticated as: ${authState.currentUser}`);
+                    
+                    // Try to get PKP info from localStorage
+                    const pkpAddress = localStorage.getItem('pkp_primary_address');
+                    if (pkpAddress) {
+                        console.log(`🔑 Primary PKP: ${pkpAddress}`);
+                        const subCount = localStorage.getItem('pkp_sub_count') || '0';
+                        console.log(`🔧 Sub-PKPs: ${subCount}`);
+                    }
+                } else {
+                    console.log('⚠️ No authenticated user found');
+                }
+            } else {
+                console.log('⚠️ useLit not available');
+            }
+        } catch (error) {
+            console.error('❌ Error displaying auth state:', error);
         }
     }
     
