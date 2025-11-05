@@ -1,8 +1,8 @@
 {
   "testuser": [
     {
-      "credentialID": "_3B388k7kvq9hivNRO-1APct91bKmTpQPpRpc_sEM4Y",
-      "credentialPublicKey": "pQECAyYgASFYIA4d521vnr6OEP2pRBlkA3bBlK35BluBKBj2IXkvWEJcIlggMCW8FhRu+lNH5nFo5+x1Fa/9ejhL9D6GwuMZjDvrBWg=",
+      "credentialID": "Z_WCjdRjlfg65XuKSEC1ADrciOHzqYDb2E7EHQSrPQo",
+      "credentialPublicKey": "pQECAyYgASFYIEhXDF0WmcqbCsFDkbp9WJ/Fg+vQ3hku2pYkCe+o4DAVIlggnMqRz2loz3w+eqPWkLqPREYEe+NR+7eZXr5HRjYrKw4=",
       "counter": 0,
       "credentialDeviceType": "singleDevice",
       "credentialBackedUp": false,

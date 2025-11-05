@@ -131,29 +131,33 @@ const useLit = () => {
       console.log('🎯 Starting optimized WebAuthn registration for username:', username);
       console.log('🔐 User gesture verified, proceeding with registration...');
       
-      // OPTIMIZATION: Use Promise.all to run async operations in parallel while preserving gesture
+      // ULTRA-OPTIMIZATION: Fetch AND parse JSON in a single promise to minimize gesture loss
       const startTime = performance.now();
       
-      // Fetch options and initialize Lit in parallel to minimize delay
-      const [optionsResponse, _] = await Promise.all([
-        fetch('/lit/webauthn/register-options', {
+      const fetchAndParseOptions = async () => {
+        const response = await fetch('/lit/webauthn/register-options', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify({ username }),
-        }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to get registration options from server');
+        }
+        
+        return response.json();
+      };
+      
+      // OPTIMIZATION: Run EVERYTHING in parallel - options fetch+parse AND Lit init
+      const [options, _] = await Promise.all([
+        fetchAndParseOptions(),
         // Initialize Lit if needed (but don't wait for it to complete)
         !isInitialized ? initializeLit().catch(err => {
           console.warn('Lit initialization failed during registration:', err);
           return null;
         }) : Promise.resolve()
       ]);
-
-      if (!optionsResponse.ok) {
-        throw new Error('Failed to get registration options from server');
-      }
-
-      const options = await optionsResponse.json();
       
       // Check how much time elapsed and verify gesture is still active
       const elapsed = performance.now() - startTime;
@@ -297,27 +301,32 @@ const useLit = () => {
       
       const startTime = performance.now();
       
-      // OPTIMIZATION: Run Lit initialization and options fetch in parallel
-      const [optionsResponse, _] = await Promise.all([
-        fetch('/lit/webauthn/authenticate-options', {
+      // ULTRA-OPTIMIZATION: Fetch AND parse JSON in a single promise to minimize gesture loss
+      const fetchAndParseOptions = async () => {
+        const response = await fetch('/lit/webauthn/authenticate-options', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify({ username }),
-        }),
+        });
+        
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(error || 'Failed to get authentication options. Please register first.');
+        }
+        
+        return response.json();
+      };
+      
+      // OPTIMIZATION: Run EVERYTHING in parallel - options fetch+parse AND Lit init
+      const [options, _] = await Promise.all([
+        fetchAndParseOptions(),
         // Initialize Lit in parallel if needed
         !isInitialized ? initializeLit().catch(err => {
           console.warn('Lit initialization failed during auth:', err);
           return null;
         }) : Promise.resolve()
       ]);
-
-      if (!optionsResponse.ok) {
-        const error = await optionsResponse.text();
-        throw new Error(error || 'Failed to get authentication options. Please register first.');
-      }
-      
-      const options = await optionsResponse.json();
       
       // Check timing and gesture preservation
       const elapsed = performance.now() - startTime;

@@ -381,28 +381,8 @@
                     </div>
                 `;
                 document.getElementById('visitParadise').addEventListener('click', () => {
-                    // Start the page transition
-                    startParadiseTransition();
-                    
-                    const token = JSON.stringify(wagmi.state.sessionSigs);
-                    fetch('/xr', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    }).then(res => {
-                        if (res.ok) {
-                            // Continue the transition and navigate
-                            completeParadiseTransition();
-                        } else {
-                            // Handle error and hide transition
-                            hideParadiseTransition();
-                            alert('Authentication failed');
-                        }
-                    }).catch(error => {
-                        console.error('Error:', error);
-                        hideParadiseTransition();
-                        alert('Connection failed');
-                    });
+                    // Navigate to paradise VR scene
+                    window.location.href = '/paradise';
                 });
                 document.getElementById('signOut').addEventListener('click', () => {
                     lit.signOut();
@@ -432,9 +412,9 @@
                             📊 View Analytics
                         </button>
                         <a
-                            href="/xr"
+                            href="/paradise"
                             class="bg-indigo-700 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-200 border-2 border-white">
-                            🌴 Enter Paradise (Guest)
+                            🌴 Enter Paradise
                         </a>
                     </div>
                     <div id="authStatus" class="mt-6 text-indigo-100 font-medium"></div>

@@ -30,6 +30,13 @@ export class XrController {
     return res.sendFile(join(process.cwd(), 'public', 'xr-environment.html'));
   }
 
+  @Get('paradise')
+  getParadise(@Res() res: Response) {
+    // Serve the paradise VR scene (master branch architecture)
+    // This is the "Load Paradise" experience
+    return res.sendFile(join(process.cwd(), 'public', 'paradise.html'));
+  }
+
   @Post('load-paradise')
   @UseGuards(WebAuthnAuthGuard)
   loadParadise(
