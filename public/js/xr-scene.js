@@ -518,10 +518,50 @@ class BabylonXRScene {
             if (!this.sceneLoaded) {
                 // Check authentication before loading
                 const wagmi = window.useWagmi();
+                const lit = window.useLit();
+                
                 if (!wagmi || !wagmi.state.isAuthenticated) {
-                    alert('Authentication required! Please return to the home page and login with WebAuthn to load paradise.');
-                    window.location.href = '/';
-                    return;
+                    this.updateStatus("🔐 Authentication required! Please login to access Paradise...");
+                    
+                    // Show authentication options instead of automatically triggering WebAuthn
+                    const shouldAuthenticate = confirm(
+                        "Paradise access requires authentication.\n\n" +
+                        "Would you like to login with WebAuthn biometric authentication?\n\n" +
+                        "✓ Click OK to proceed with biometric login\n" +
+                        "✗ Click Cancel to return to main page"
+                    );
+                    
+                    if (!shouldAuthenticate) {
+                        this.updateStatus("❌ Authentication required for Paradise access.");
+                        return;
+                    }
+                    
+                    // Now trigger authentication with proper user gesture
+                    try {
+                        this.updateStatus("🔐 Please complete biometric authentication...");
+                        const username = await lit.login();
+                        if (username) {
+                            this.updateStatus("✅ Authentication successful! Loading Paradise...");
+                        } else {
+                            this.updateStatus("❌ Authentication cancelled. Paradise access denied.");
+                            return;
+                        }
+                    } catch (error) {
+                        console.error('Authentication failed:', error);
+                        this.updateStatus("❌ Authentication failed: " + error.message);
+                        
+                        // Offer alternative or retry
+                        const retry = confirm(
+                            "Authentication failed: " + error.message + "\n\n" +
+                            "Would you like to try again or return to the main page?"
+                        );
+                        
+                        if (retry) {
+                            // Recursive call to try again
+                            document.getElementById('loadParadise').click();
+                        }
+                        return;
+                    }
                 }
                 
                 // Load the scene for the first time
@@ -530,7 +570,7 @@ class BabylonXRScene {
                 document.getElementById('loadParadise').disabled = true;
                 
                 try {
-                    // Verify authentication with backend before loading
+                    // Verify authentication with backend before loading using LitService
                     const token = JSON.stringify(wagmi.state.sessionSigs);
                     const authResponse = await fetch('/xr/load-paradise', {
                         method: 'POST',
@@ -543,7 +583,7 @@ class BabylonXRScene {
                     if (!authResponse.ok) {
                         const status = authResponse.status;
                         if (status === 401) {
-                            throw new Error('Authentication failed: Your session has expired or is invalid. Please return to the home page and login again.');
+                            throw new Error('Authentication failed: Your session has expired or is invalid. Please login again.');
                         } else if (status === 403) {
                             throw new Error('Authorization denied: You do not have permission to load Paradise. Please verify your account.');
                         } else {
@@ -560,9 +600,10 @@ class BabylonXRScene {
                     await this.init();
                     document.getElementById('loadParadise').textContent = "Paradise Loaded ✅";
                     document.getElementById('loadParadise').disabled = true;
+                    this.updateStatus("🏝️ Welcome to Paradise! Enjoy your tropical adventure with Ocean Breeze 🎵");
                 } catch (error) {
                     console.error("Failed to load scene:", error);
-                    this.updateStatus("Failed to load scene: " + error.message);
+                    this.updateStatus("❌ Failed to load Paradise: " + error.message);
                     document.getElementById('loadParadise').textContent = "Retry Load";
                     document.getElementById('loadParadise').disabled = false;
                 }

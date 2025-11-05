@@ -152,10 +152,15 @@ const useLit = () => {
       
       const options = await optionsResponse.json();
       
-      // Use WebAuthn browser API to get assertion
+      // Add enhanced logging for debugging
+      console.log('📝 Authentication options received:', options);
+      
+      // Use WebAuthn browser API to get assertion with improved timeout and logging
+      console.log('🛡️ Starting WebAuthn assertion...');
       const assertion = await navigator.credentials.get({
         publicKey: {
           ...options,
+          timeout: 120000, // 2 minutes timeout to prevent timeout errors
           challenge: Uint8Array.from(atob(options.challenge.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)),
           allowCredentials: options.allowCredentials?.map(cred => ({
             ...cred,
@@ -164,8 +169,10 @@ const useLit = () => {
         },
       });
       
+      console.log('✅ WebAuthn assertion created successfully:', assertion);
+      
       if (!assertion) {
-        throw new Error('Failed to get assertion');
+        throw new Error('Authentication was cancelled or failed');
       }
       
       // Convert assertion to JSON format for sending to backend
@@ -220,9 +227,22 @@ const useLit = () => {
       });
       
       console.log('WebAuthn authentication successful');
+      return username;
     } catch (error) {
-      console.error('WebAuthn authentication error:', error);
-      throw error;
+      console.error('💥 WebAuthn authentication error:', error.name, error.message);
+      
+      // Provide specific error messages for common WebAuthn errors
+      if (error.name === 'NotAllowedError') {
+        throw new Error('Authentication cancelled. Please try again and complete the biometric verification when prompted.');
+      } else if (error.name === 'SecurityError') {
+        throw new Error('Security error during authentication. Please ensure you are on a secure connection.');
+      } else if (error.name === 'InvalidStateError') {
+        throw new Error('Invalid authentication state. Please register first or try again.');
+      } else if (error.name === 'NotSupportedError') {
+        throw new Error('WebAuthn is not supported on this device or browser.');
+      } else {
+        throw error;
+      }
     }
   };
 
