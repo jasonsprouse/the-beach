@@ -333,4 +333,131 @@ export class PKPController {
       count: tasks.length,
     };
   }
+
+  /**
+   * Get all available tools
+   * GET /npe/pkp/tools
+   */
+  @Get('tools')
+  getAvailableTools() {
+    const tools = this.pkpTaskManager.getAvailableTools();
+
+    return {
+      success: true,
+      data: tools,
+      count: tools.length,
+    };
+  }
+
+  /**
+   * Get tools by category
+   * GET /npe/pkp/tools/category/:category
+   */
+  @Get('tools/category/:category')
+  getToolsByCategory(@Param('category') category: string) {
+    const tools = this.pkpTaskManager.getToolsByCategory(category);
+
+    return {
+      success: true,
+      data: tools,
+      count: tools.length,
+    };
+  }
+
+  /**
+   * Execute a tool for a task
+   * POST /npe/pkp/tasks/:id/execute-tool
+   */
+  @Post('tasks/:id/execute-tool')
+  async executeTool(
+    @Param('id') id: number,
+    @Body() body: { toolId: string; params: any },
+  ) {
+    const result = await this.pkpTaskManager.executeTool(
+      id,
+      body.toolId,
+      body.params,
+    );
+    return {
+      success: true,
+      message: 'Tool executed successfully',
+      data: result,
+    };
+  }
+
+  // ============================================================================
+  // VR Workspace Endpoints
+  // ============================================================================
+
+  @Get('vr/workspaces')
+  async getVRWorkspaces() {
+    const { vrWorkspaceManager } = require('./agents/pkp-vr-tools');
+    const workspaces = vrWorkspaceManager.listWorkspaces();
+    return {
+      success: true,
+      count: workspaces.length,
+      workspaces: workspaces.map(w => ({
+        id: w.id,
+        name: w.name,
+        scene: w.scene,
+        agents: w.agents.length,
+        objects: w.objects.length,
+        created: w.created,
+        lastActive: w.lastActive,
+      })),
+    };
+  }
+
+  @Post('vr/workspaces')
+  async createVRWorkspace(
+    @Body() body: { name: string; sceneType: string },
+  ) {
+    // Use task 1 as default for VR operations
+    const result = await this.pkpTaskManager.executeTool(1, 'vr-environment', {
+      action: 'create',
+      workspaceName: body.name,
+      sceneType: body.sceneType,
+    });
+    return {
+      success: result.success,
+      message: result.output,
+      data: result.metadata,
+    };
+  }
+
+  @Post('vr/workspaces/:id/join')
+  async joinVRWorkspace(
+    @Param('id') workspaceId: string,
+    @Body() body: { agentId: string; agentName: string },
+  ) {
+    const result = await this.pkpTaskManager.executeTool(1, 'vr-environment', {
+      action: 'join',
+      workspaceId,
+      agentId: body.agentId,
+      agentName: body.agentName,
+    });
+    return {
+      success: result.success,
+      message: result.output,
+      data: result.metadata,
+    };
+  }
+
+  @Get('vr/workspaces/:id')
+  async getVRWorkspace(@Param('id') id: string) {
+    const { vrWorkspaceManager } = require('./agents/pkp-vr-tools');
+    const workspace = vrWorkspaceManager.getWorkspace(id);
+    
+    if (!workspace) {
+      return {
+        success: false,
+        error: 'Workspace not found',
+      };
+    }
+
+    return {
+      success: true,
+      data: workspace,
+    };
+  }
 }

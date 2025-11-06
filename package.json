@@ -26,6 +26,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.41",
+    "@ai-sdk/openai": "^2.0.63",
     "@babylonjs/core": "^8.34.0",
     "@babylonjs/gui": "^8.34.0",
     "@babylonjs/loaders": "^8.34.0",
@@ -40,11 +42,13 @@
     "@nestjs/schedule": "^6.0.1",
     "@nestjs/websockets": "^11.0.17",
     "@types/ioredis": "^4.28.10",
+    "ai": "^5.0.88",
     "axios": "^1.13.2",
     "ethers": "^6.15.0",
     "ioredis": "^5.8.2",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

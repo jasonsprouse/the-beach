@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { PKPAuthService } from './services/pkp-auth.service';
 
 /**
  * Game Manager Service
@@ -7,8 +8,10 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
  * Central orchestrator for all NPE agents in The Beach platform.
  * Manages agent lifecycle, service routing, load balancing, and session coordination.
  * 
- * Based on The Beach architecture - handles multiple AI agents with cryptographic identity,
- * autonomous operations, and immersive XR environments.
+ * Now integrated with PKPAuthService:
+ * - Main PKPs are human-authenticated via WebAuthn/Social login
+ * - Sub-PKPs are AI agents that do autonomous work
+ * - All agents must be verified through PKP hierarchy
  */
 
 export interface Agent {
@@ -105,12 +108,19 @@ export class GameManagerService {
 
   constructor(
     private readonly eventEmitter: EventEmitter2,
+    private readonly pkpAuthService: PKPAuthService,
   ) {
-    this.logger.log('🎮 Game Manager initialized');
+    this.logger.log('🎮 Game Manager initialized with PKP authentication');
   }
 
   /**
    * Register a new agent with the system
+   * 
+   * IMPORTANT: All agents must be either:
+   * 1. Main PKPs (human-authenticated via PKPAuthService)
+   * 2. Sub-PKPs (delegated from main PKPs)
+   * 
+   * This ensures all agents have proper authorization
    */
   async registerAgent(
     agentPKP: { address: string; publicKey: string },
@@ -118,6 +128,20 @@ export class GameManagerService {
     capabilities: string[],
     options?: Partial<Agent>,
   ): Promise<Agent> {
+    // Verify PKP is authenticated (main or sub-PKP)
+    const isMain = this.pkpAuthService.isMainPKP(agentPKP.address);
+    const isSub = this.pkpAuthService.isSubPKP(agentPKP.address);
+
+    if (!isMain && !isSub) {
+      this.logger.warn(`⚠️ Registering unauthenticated PKP: ${agentPKP.address} (${purpose})`);
+      this.logger.warn('   → This PKP should be authenticated via /pkp/auth/login first');
+    } else if (isSub) {
+      const parentPKP = this.pkpAuthService.getParentPKP(agentPKP.address);
+      this.logger.log(`🤖 Registering sub-PKP: ${agentPKP.address} (parent: ${parentPKP})`);
+    } else {
+      this.logger.log(`👤 Registering main PKP: ${agentPKP.address} (human-owned)`);
+    }
+
     const agent: Agent = {
       id: agentPKP.address,
       pkp: agentPKP,
@@ -131,7 +155,11 @@ export class GameManagerService {
       serviceArea: options?.serviceArea,
       performanceScore: 100,
       lastActivity: Date.now(),
-      metadata: options?.metadata || {},
+      metadata: {
+        ...options?.metadata,
+        pkpType: isMain ? 'main' : isSub ? 'sub' : 'unverified',
+        parentPKP: isSub ? this.pkpAuthService.getParentPKP(agentPKP.address) : undefined,
+      },
     };
 
     this.agents.set(agent.id, agent);

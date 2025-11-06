@@ -392,6 +392,87 @@ async function listTasksByBranch(branch) {
   }
 }
 
+async function listTools() {
+  try {
+    log('\n🛠️  Available PKP Tools\n', 'bright');
+    
+    const response = await axios.get(`${API_BASE}/npe/pkp/tools`);
+    const tools = response.data.data;
+
+    if (tools.length === 0) {
+      log('No tools found', 'yellow');
+      return;
+    }
+
+    const toolsByCategory = {};
+    tools.forEach(tool => {
+      if (!toolsByCategory[tool.category]) {
+        toolsByCategory[tool.category] = [];
+      }
+      toolsByCategory[tool.category].push(tool);
+    });
+
+    Object.keys(toolsByCategory).forEach(category => {
+      log(`\n📦 ${category.toUpperCase()}`, 'bright');
+      toolsByCategory[category].forEach(tool => {
+        log(`  ${colors.cyan}${tool.id}${colors.reset} - ${tool.name}`);
+        log(`    ${tool.description}`, 'reset');
+        if (tool.requiredPermissions.length > 0) {
+          log(`    Permissions: ${tool.requiredPermissions.join(', ')}`, 'yellow');
+        }
+      });
+    });
+
+    log(`\nTotal: ${tools.length} tools available\n`, 'bright');
+  } catch (error) {
+    log(`\nError: ${error.response?.data?.message || error.message}\n`, 'red');
+  }
+}
+
+async function executeTool(taskId, toolId, paramsJson) {
+  try {
+    let params = {};
+    if (paramsJson) {
+      try {
+        params = JSON.parse(paramsJson);
+      } catch (e) {
+        log(`Error parsing params JSON: ${e.message}`, 'red');
+        log('Params should be valid JSON, e.g.: \'{"action":"lint","path":"src"}\'', 'yellow');
+        return;
+      }
+    }
+
+    log(`\n⚙️  Executing tool ${toolId} for Task #${taskId}...\n`, 'bright');
+    
+    const response = await axios.post(`${API_BASE}/npe/pkp/tasks/${taskId}/execute-tool`, {
+      toolId,
+      params,
+    });
+
+    const result = response.data.data;
+
+    if (result.success) {
+      log(`✅ Tool execution successful!\n`, 'green');
+      log(`Output: ${result.output}`);
+      if (result.executionTime) {
+        log(`Execution Time: ${result.executionTime}ms`, 'cyan');
+      }
+      if (result.metadata) {
+        log(`\nMetadata:`, 'bright');
+        Object.keys(result.metadata).forEach(key => {
+          log(`  ${key}: ${JSON.stringify(result.metadata[key])}`);
+        });
+      }
+    } else {
+      log(`❌ Tool execution failed!\n`, 'red');
+      log(`Error: ${result.error}`);
+    }
+    log('');
+  } catch (error) {
+    log(`\nError: ${error.response?.data?.message || error.message}\n`, 'red');
+  }
+}
+
 function showHelp() {
   log('\n📚 PKP Task Manager CLI\n', 'bright');
   log('Task Management:');
@@ -407,6 +488,9 @@ function showHelp() {
   log('  set-pr <taskId> <prUrl>                    Set PR URL');
   log('  git-status <taskId>                        Show Git status for task');
   log('  list-by-branch <branch>                    List tasks on a branch');
+  log('\nAgent Tools:');
+  log('  list-tools                                 List all available tools');
+  log('  execute-tool <taskId> <toolId> [params]    Execute a tool');
   log('\nExamples:');
   log('  node scripts/pkp-task-manager.js list-tasks');
   log('  node scripts/pkp-task-manager.js assign 1');
@@ -414,7 +498,10 @@ function showHelp() {
   log('  node scripts/pkp-task-manager.js record-commit 1 abc123def');
   log('  node scripts/pkp-task-manager.js git-status 1');
   log('  node scripts/pkp-task-manager.js set-pr 1 https://github.com/user/repo/pull/123');
-  log('  node scripts/pkp-task-manager.js list-by-branch feature/pkp-playwright\n');
+  log('  node scripts/pkp-task-manager.js list-by-branch feature/pkp-playwright');
+  log('  node scripts/pkp-task-manager.js list-tools');
+  log('  node scripts/pkp-task-manager.js execute-tool 1 git-operations \'{"action":"commit"}\'');
+  log('  node scripts/pkp-task-manager.js execute-tool 1 testing \'{"action":"unit","coverage":true}\'\n');
 }
 
 // Main CLI logic
@@ -500,6 +587,17 @@ async function main() {
         return;
       }
       await listTasksByBranch(args[1]);
+      break;
+    case 'list-tools':
+      await listTools();
+      break;
+    case 'execute-tool':
+      if (!args[1] || !args[2]) {
+        log('Error: Task ID and tool ID required', 'red');
+        log('Usage: node scripts/pkp-task-manager.js execute-tool <taskId> <toolId> [params]');
+        return;
+      }
+      await executeTool(args[1], args[2], args[3]);
       break;
     default:
       log(`Unknown command: ${command}`, 'red');

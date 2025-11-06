@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { PKPToolRegistry, ToolExecutionResult } from './agents/pkp-agent-tools';
 
 /**
  * PKP Task Status
@@ -95,8 +96,10 @@ export class PKPTaskManagerService {
   private readonly logger = new Logger(PKPTaskManagerService.name);
   private tasks: Map<number, PKPTask> = new Map();
   private agents: Map<PKPAgentType, PKPAgent> = new Map();
+  private toolRegistry: PKPToolRegistry;
 
   constructor() {
+    this.toolRegistry = new PKPToolRegistry();
     this.initializeAgents();
     this.initializeTasks();
   }
@@ -742,6 +745,100 @@ export class PKPTaskManagerService {
   getTasksWithGitContext(): PKPTask[] {
     return Array.from(this.tasks.values()).filter(
       (task) => task.gitContext !== undefined,
+    );
+  }
+
+  /**
+   * Get all available tools
+   */
+  getAvailableTools() {
+    return this.toolRegistry.getAll().map((tool) => ({
+      id: tool.id,
+      name: tool.name,
+      category: tool.category,
+      description: tool.description,
+      requiredPermissions: tool.requiredPermissions,
+    }));
+  }
+
+  /**
+   * Get tools by category
+   */
+  getToolsByCategory(category: string) {
+    return this.toolRegistry.getByCategory(category as any);
+  }
+
+  /**
+   * Execute a tool for a task
+   */
+  async executeTool(
+    taskId: number,
+    toolId: string,
+    params: any,
+  ): Promise<ToolExecutionResult> {
+    const task = this.tasks.get(taskId);
+    if (!task) {
+      throw new Error(`Task ${taskId} not found`);
+    }
+
+    this.logger.log(
+      `Executing tool ${toolId} for task ${taskId} by ${task.assignedAgent}`,
+    );
+
+    const result = await this.toolRegistry.executeTool(toolId, params);
+
+    // Log the result
+    if (result.success) {
+      this.logger.log(
+        `Tool ${toolId} completed successfully in ${result.executionTime}ms`,
+      );
+    } else {
+      this.logger.error(`Tool ${toolId} failed: ${result.error}`);
+    }
+
+    return result;
+  }
+
+  /**
+   * Get active tasks for a main PKP
+   */
+  getActiveTasksForPKP(mainPKP: string): PKPTask[] {
+    return Array.from(this.tasks.values()).filter(
+      (task) => task.status === PKPTaskStatus.IN_PROGRESS,
+    );
+  }
+
+  /**
+   * Get active tasks for a sub-PKP
+   */
+  getActiveTasksForSubPKP(subPKP: string): PKPTask[] {
+    // In a real implementation, we'd track which sub-PKP is handling which task
+    // For now, return tasks based on agent type assignment
+    return Array.from(this.tasks.values()).filter(
+      (task) => task.status === PKPTaskStatus.IN_PROGRESS,
+    );
+  }
+
+  /**
+   * Assign task to a specific agent
+   */
+  assignTaskToAgent(taskId: number, agentType: PKPAgentType): void {
+    const task = this.tasks.get(taskId);
+    if (!task) {
+      throw new Error(`Task ${taskId} not found`);
+    }
+
+    const agent = this.agents.get(agentType);
+    if (!agent) {
+      throw new Error(`Agent ${agentType} not found`);
+    }
+
+    task.assignedAgent = agentType;
+    task.status = PKPTaskStatus.NOT_STARTED; // Mark as ready to start
+    agent.currentTask = taskId;
+
+    this.logger.log(
+      `Task ${taskId} assigned to agent ${agentType} by task authorization system`,
     );
   }
 

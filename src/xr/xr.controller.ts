@@ -55,4 +55,9 @@ export class XrController {
       },
     };
   }
+
+  @Get('pkp-workspace')
+  getPKPWorkspace(@Res() res: Response) {
+    return res.sendFile(join(process.cwd(), 'public', 'pkp-vr-workspace.html'));
+  }
 }

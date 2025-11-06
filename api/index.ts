@@ -3,9 +3,9 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// Import AppModule - in Vercel, this resolves to the built dist folder
-// Vercel's build process makes the dist folder available for serverless functions
-import { AppModule } from '../dist/app.module';
+// Import AppModule from source for development
+// For production Vercel deployment, this will be built to dist
+import { AppModule } from '../src/app.module';
 
 let app: NestExpressApplication | null = null;
 
