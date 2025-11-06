@@ -1,10 +1,15 @@
 import { Controller, Get, Param, Query, Logger } from '@nestjs/common';
-import { TierProductsService, TierProduct, AddonProduct, FeatureCategory } from './tier-products.service';
+import {
+  TierProductsService,
+  TierProduct,
+  AddonProduct,
+  FeatureCategory,
+} from './tier-products.service';
 import { NPETier } from './npe-tier-manager.service';
 
 /**
  * Tier Products Controller
- * 
+ *
  * REST API for accessing tier products, pricing, and feature comparisons
  */
 @Controller('npe/products')
@@ -23,7 +28,7 @@ export class TierProductsController {
     comparison: any;
   } {
     this.logger.log('📦 Getting all tier products');
-    
+
     return {
       products: this.productsService.getAllTierProducts(),
       comparison: this.productsService.getPricingComparison(),
@@ -37,7 +42,7 @@ export class TierProductsController {
   @Get(':tier')
   getProduct(@Param('tier') tier: string): TierProduct {
     this.logger.log(`📦 Getting product for tier: ${tier}`);
-    
+
     const tierEnum = tier.toUpperCase() as NPETier;
     return this.productsService.getTierProduct(tierEnum);
   }
@@ -58,11 +63,13 @@ export class TierProductsController {
    */
   @Get('features/comparison')
   getFeatureComparison(@Query('category') category?: string) {
-    this.logger.log(`🔍 Getting feature comparison${category ? ` for category: ${category}` : ''}`);
-    
+    this.logger.log(
+      `🔍 Getting feature comparison${category ? ` for category: ${category}` : ''}`,
+    );
+
     const categoryEnum = category?.toUpperCase() as FeatureCategory | undefined;
     const comparison = this.productsService.compareFeatures(categoryEnum);
-    
+
     return {
       category: category || 'all',
       features: Object.fromEntries(comparison),
@@ -76,7 +83,7 @@ export class TierProductsController {
   @Get(':tier/addons')
   getAvailableAddons(@Param('tier') tier: string): AddonProduct[] {
     this.logger.log(`🧩 Getting addons for tier: ${tier}`);
-    
+
     const tierEnum = tier.toUpperCase() as NPETier;
     return this.productsService.getAvailableAddons(tierEnum);
   }
@@ -96,19 +103,26 @@ export class TierProductsController {
     totalPrice: number;
     currency: string;
   } {
-    this.logger.log(`💵 Calculating price for tier: ${tier} with addons: ${addons}`);
-    
+    this.logger.log(
+      `💵 Calculating price for tier: ${tier} with addons: ${addons}`,
+    );
+
     const tierEnum = tier.toUpperCase() as NPETier;
-    const addonIds = addons ? addons.split(',').map(a => a.trim()) : [];
-    
+    const addonIds = addons ? addons.split(',').map((a) => a.trim()) : [];
+
     const product = this.productsService.getTierProduct(tierEnum);
-    const totalPrice = this.productsService.calculateTotalPrice(tierEnum, addonIds);
-    
-    const addonDetails = addonIds.map(id => {
-      const addon = this.productsService.getAddon(id);
-      return addon ? { id, name: addon.name, price: addon.price } : null;
-    }).filter(Boolean) as { id: string; name: string; price: number }[];
-    
+    const totalPrice = this.productsService.calculateTotalPrice(
+      tierEnum,
+      addonIds,
+    );
+
+    const addonDetails = addonIds
+      .map((id) => {
+        const addon = this.productsService.getAddon(id);
+        return addon ? { id, name: addon.name, price: addon.price } : null;
+      })
+      .filter(Boolean) as { id: string; name: string; price: number }[];
+
     return {
       tier,
       basePrice: product.pricing.monthly,
@@ -128,15 +142,15 @@ export class TierProductsController {
     @Param('category') category: string,
   ) {
     this.logger.log(`🏷️ Getting ${category} features for tier: ${tier}`);
-    
+
     const tierEnum = tier.toUpperCase() as NPETier;
     const categoryEnum = category.toUpperCase() as FeatureCategory;
     const product = this.productsService.getTierProduct(tierEnum);
-    
+
     return {
       tier,
       category,
-      features: product.features.filter(f => f.category === categoryEnum),
+      features: product.features.filter((f) => f.category === categoryEnum),
     };
   }
 
@@ -147,10 +161,10 @@ export class TierProductsController {
   @Get(':tier/quotas')
   getQuotas(@Param('tier') tier: string) {
     this.logger.log(`📊 Getting quotas for tier: ${tier}`);
-    
+
     const tierEnum = tier.toUpperCase() as NPETier;
     const product = this.productsService.getTierProduct(tierEnum);
-    
+
     return {
       tier,
       quotas: product.quotas,
@@ -164,10 +178,10 @@ export class TierProductsController {
   @Get(':tier/marketing')
   getMarketing(@Param('tier') tier: string) {
     this.logger.log(`📢 Getting marketing info for tier: ${tier}`);
-    
+
     const tierEnum = tier.toUpperCase() as NPETier;
     const product = this.productsService.getTierProduct(tierEnum);
-    
+
     return {
       tier,
       name: product.name,
@@ -186,9 +200,9 @@ export class TierProductsController {
   @Get('categories/list')
   getCategories() {
     this.logger.log('📑 Getting all feature categories');
-    
+
     return {
-      categories: Object.values(FeatureCategory).map(cat => ({
+      categories: Object.values(FeatureCategory).map((cat) => ({
         id: cat,
         name: cat.charAt(0).toUpperCase() + cat.slice(1),
       })),

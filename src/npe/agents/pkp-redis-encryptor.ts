@@ -1,9 +1,9 @@
 /**
  * PKP Agent: Redis Config Encryptor
- * 
+ *
  * This agent uses Lit Protocol to encrypt Redis configuration credentials
  * for secure storage and sharing between The Beach and Y8 App.
- * 
+ *
  * Use Case: Encrypt sensitive Redis Vercel KV credentials so they can be:
  * 1. Safely stored in version control (encrypted)
  * 2. Shared between team members
@@ -39,7 +39,7 @@ export class PKPRedisConfigEncryptor {
   private litNodeClient: LitNodeClient;
   private pkpPublicKey: string;
   private authSig: any;
-  
+
   constructor(pkpPublicKey: string) {
     this.pkpPublicKey = pkpPublicKey;
     this.litNodeClient = new LitNodeClient({
@@ -114,7 +114,7 @@ export class PKPRedisConfigEncryptor {
    * Requires valid PKP authentication
    */
   async decryptRedisConfig(
-    encryptedData: EncryptionResult
+    encryptedData: EncryptionResult,
   ): Promise<RedisConfig> {
     console.log('🔓 PKP Agent: Decrypting Redis configuration...');
 
@@ -132,7 +132,9 @@ export class PKPRedisConfigEncryptor {
     });
 
     // Convert back to JSON
-    const decryptedString = new TextDecoder().decode(decryptedData.decryptedData as Uint8Array);
+    const decryptedString = new TextDecoder().decode(
+      decryptedData.decryptedData,
+    );
     const config: RedisConfig = JSON.parse(decryptedString);
 
     console.log('✅ Redis config decrypted successfully!');
@@ -190,7 +192,7 @@ ${config.kvRestApiReadOnlyToken ? `KV_REST_API_READ_ONLY_TOKEN=${config.kvRestAp
    */
   async saveEncryptedConfig(
     encryptedData: EncryptionResult,
-    filepath: string
+    filepath: string,
   ): Promise<void> {
     const fs = await import('fs/promises');
     await fs.writeFile(filepath, JSON.stringify(encryptedData, null, 2));
@@ -226,7 +228,7 @@ async function main() {
   // Step 1: Initialize PKP Agent
   const pkpPublicKey = process.env.PKP_PUBLIC_KEY || '0xYourPKPWalletAddress';
   const agent = new PKPRedisConfigEncryptor(pkpPublicKey);
-  
+
   await agent.init();
 
   // Step 2: Define Redis configuration (REPLACE WITH REAL VALUES)
@@ -246,10 +248,7 @@ async function main() {
   const encrypted = await agent.encryptRedisConfig(redisConfig);
 
   // Step 4: Save encrypted config
-  await agent.saveEncryptedConfig(
-    encrypted,
-    './redis-config.encrypted.json'
-  );
+  await agent.saveEncryptedConfig(encrypted, './redis-config.encrypted.json');
 
   console.log('\n📋 Encrypted Redis Config:');
   console.log(JSON.stringify(encrypted, null, 2));

@@ -1,5 +1,20 @@
-import { Controller, Post, Get, Body, Param, Query, Headers, UnauthorizedException } from '@nestjs/common';
-import { PKPAuthService, AuthProvider, AuthenticatedUser, SubPKP, ApprovalRequest } from './services/pkp-auth.service';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Param,
+  Query,
+  Headers,
+  UnauthorizedException,
+} from '@nestjs/common';
+import {
+  PKPAuthService,
+  AuthProvider,
+  AuthenticatedUser,
+  SubPKP,
+  ApprovalRequest,
+} from './services/pkp-auth.service';
 
 /**
  * PKP Authentication Controller
@@ -12,20 +27,23 @@ export class PKPAuthController {
   /**
    * Authenticate user via social login or WebAuthn
    * POST /pkp/auth/login
-   * 
+   *
    * Integration with Y8 App:
    * - User logs in via Lit Protocol auth (Google, Discord, etc.)
    * - Y8 App sends auth details to this endpoint
    * - Returns main PKP for the user
    */
   @Post('auth/login')
-  async login(@Body() body: {
-    provider: AuthProvider;
-    providerId: string;
-    email?: string;
-    name?: string;
-    accessToken?: string;
-  }): Promise<{ user: AuthenticatedUser; message: string }> {
+  async login(
+    @Body()
+    body: {
+      provider: AuthProvider;
+      providerId: string;
+      email?: string;
+      name?: string;
+      accessToken?: string;
+    },
+  ): Promise<{ user: AuthenticatedUser; message: string }> {
     const user = await this.pkpAuthService.authenticateUser({
       provider: body.provider,
       providerId: body.providerId,
@@ -36,9 +54,10 @@ export class PKPAuthController {
 
     return {
       user,
-      message: user.createdAt.getTime() === user.lastLogin.getTime()
-        ? 'Welcome! Your main PKP has been created.'
-        : 'Welcome back!',
+      message:
+        user.createdAt.getTime() === user.lastLogin.getTime()
+          ? 'Welcome! Your main PKP has been created.'
+          : 'Welcome back!',
     };
   }
 
@@ -47,7 +66,9 @@ export class PKPAuthController {
    * GET /pkp/auth/me
    */
   @Get('auth/me')
-  async getMe(@Headers('x-pkp-address') pkpAddress: string): Promise<AuthenticatedUser> {
+  async getMe(
+    @Headers('x-pkp-address') pkpAddress: string,
+  ): Promise<AuthenticatedUser> {
     const user = this.pkpAuthService.getUserByPKP(pkpAddress);
     if (!user) {
       throw new UnauthorizedException('Not authenticated');
@@ -58,13 +79,14 @@ export class PKPAuthController {
   /**
    * Create a sub-PKP for autonomous work
    * POST /pkp/sub
-   * 
+   *
    * This allows main PKP to delegate work to AI agents
    */
   @Post('sub')
   async createSubPKP(
     @Headers('x-pkp-address') mainPKPAddress: string,
-    @Body() body: {
+    @Body()
+    body: {
       purpose: string;
       capabilities: string[];
       autonomy?: 'low' | 'medium' | 'high';
@@ -114,27 +136,30 @@ export class PKPAuthController {
   ): Promise<SubPKP> {
     const subPKPs = this.pkpAuthService.getSubPKPs(mainPKPAddress);
     const subPKP = subPKPs.find((s) => s.address === subPKPAddress);
-    
+
     if (!subPKP) {
       throw new UnauthorizedException('Sub-PKP not found or not owned by you');
     }
-    
+
     return subPKP;
   }
 
   /**
    * Request approval for sub-PKP action
    * POST /pkp/approval/request
-   * 
+   *
    * Sub-PKPs use this when they need permission
    */
   @Post('approval/request')
-  async requestApproval(@Body() body: {
-    subPKPAddress: string;
-    action: string;
-    details: Record<string, any>;
-    ttlMinutes?: number;
-  }): Promise<{ request: ApprovalRequest; message: string }> {
+  async requestApproval(
+    @Body()
+    body: {
+      subPKPAddress: string;
+      action: string;
+      details: Record<string, any>;
+      ttlMinutes?: number;
+    },
+  ): Promise<{ request: ApprovalRequest; message: string }> {
     const request = await this.pkpAuthService.requestApproval({
       subPKPAddress: body.subPKPAddress,
       action: body.action,
@@ -151,7 +176,7 @@ export class PKPAuthController {
   /**
    * Respond to approval request
    * POST /pkp/approval/:requestId/respond
-   * 
+   *
    * Main PKP approves or rejects sub-PKP actions
    */
   @Post('approval/:requestId/respond')
@@ -179,7 +204,9 @@ export class PKPAuthController {
    * GET /pkp/approval/pending
    */
   @Get('approval/pending')
-  async getPendingApprovals(@Headers('x-pkp-address') mainPKPAddress: string): Promise<{
+  async getPendingApprovals(
+    @Headers('x-pkp-address') mainPKPAddress: string,
+  ): Promise<{
     approvals: ApprovalRequest[];
     count: number;
   }> {
@@ -234,7 +261,9 @@ export class PKPAuthController {
    * GET /pkp/hierarchy
    */
   @Get('hierarchy')
-  async getHierarchy(@Headers('x-pkp-address') mainPKPAddress: string): Promise<{
+  async getHierarchy(
+    @Headers('x-pkp-address') mainPKPAddress: string,
+  ): Promise<{
     mainPKP: string;
     owner: AuthenticatedUser;
     subPKPs: SubPKP[];

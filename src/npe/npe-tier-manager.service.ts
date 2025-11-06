@@ -2,12 +2,12 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 
 /**
  * NPE Tier Manager Service
- * 
+ *
  * Manages tiered NPE deployments following The Beach's business model:
  * - Freemium: 3 NPEs, 5 custom fields, 1 location, 1km radius
- * - Base ($10/month): 25 NPEs, 25 custom fields, 5 locations, 10km radius  
+ * - Base ($10/month): 25 NPEs, 25 custom fields, 5 locations, 10km radius
  * - Premium ($50/month): Unlimited NPEs, unlimited fields, unlimited locations, global radius
- * 
+ *
  * Based on Y8's NPE Manager tiered approach.
  */
 
@@ -33,12 +33,12 @@ export interface NPESchema {
   // Core Identity (read-only)
   pkpAddress: string;
   publicKey: string;
-  
+
   // Metadata
   name: string;
   type: string; // 'service-provider', 'development', 'custom'
   category: string; // 'hospitality', 'technical', 'sales', etc.
-  
+
   // Capabilities (extensible)
   capabilities: {
     languages?: string[];
@@ -47,7 +47,7 @@ export interface NPESchema {
     operatingHours?: string;
     maxConcurrentSessions?: number;
   };
-  
+
   // Geographic Configuration
   location?: {
     lat: number;
@@ -55,14 +55,14 @@ export interface NPESchema {
     timezone?: string;
     serviceRadius?: number;
   };
-  
+
   // Business Logic
   pricing?: {
     model: 'per-transaction' | 'subscription' | 'custom';
     baseRate?: number;
     commission?: number;
   };
-  
+
   // Performance Metrics
   analytics?: {
     totalSessions: number;
@@ -74,17 +74,17 @@ export interface NPESchema {
       thisMonth: number;
     };
   };
-  
+
   // Lit Actions Configuration
   litActions?: {
     onCustomerRequest?: string; // IPFS CID
     onPaymentReceived?: string;
     onEmergency?: string;
   };
-  
+
   // Custom Fields (user-defined, tier-limited)
   customFields: Record<string, any>;
-  
+
   // Tier Information
   tierInfo: {
     tier: NPETier;
@@ -103,11 +103,11 @@ export interface TierInfo {
 @Injectable()
 export class NPETierManagerService {
   private readonly logger = new Logger(NPETierManagerService.name);
-  
+
   // User tier storage (in production, this would be in a database)
   private userTiers = new Map<string, NPETier>();
   private userNPEs = new Map<string, string[]>(); // userId -> npeIds[]
-  
+
   constructor() {
     this.logger.log('🎭 NPE Tier Manager initialized');
   }
@@ -234,7 +234,7 @@ export class NPETierManagerService {
     const tier = this.getUserTier(userId);
     const limits = this.getTierLimits(tier);
     const currentCount = this.getCurrentNPECount(userId);
-    
+
     return currentCount < limits.maxNPEs;
   }
 
@@ -248,7 +248,10 @@ export class NPETierManagerService {
   /**
    * Create a new NPE (with tier validation)
    */
-  async createNPE(userId: string, npeConfig: Partial<NPESchema>): Promise<NPESchema> {
+  async createNPE(
+    userId: string,
+    npeConfig: Partial<NPESchema>,
+  ): Promise<NPESchema> {
     const tier = this.getUserTier(userId);
     const limits = this.getTierLimits(tier);
 
@@ -276,7 +279,10 @@ export class NPETierManagerService {
     }
 
     // Validate service radius
-    if (npeConfig.location?.serviceRadius && npeConfig.location.serviceRadius > limits.serviceRadius) {
+    if (
+      npeConfig.location?.serviceRadius &&
+      npeConfig.location.serviceRadius > limits.serviceRadius
+    ) {
       throw new BadRequestException(
         `Service radius (${npeConfig.location.serviceRadius}m) exceeds tier limit (${limits.serviceRadius}m). Upgrade for larger coverage.`,
       );
@@ -314,7 +320,9 @@ export class NPETierManagerService {
     }
     this.userNPEs.get(userId)!.push(npe.pkpAddress);
 
-    this.logger.log(`✅ NPE created: ${npe.name} (${tier} tier) for user ${userId}`);
+    this.logger.log(
+      `✅ NPE created: ${npe.name} (${tier} tier) for user ${userId}`,
+    );
 
     return npe;
   }
@@ -341,7 +349,10 @@ export class NPETierManagerService {
     }
 
     // Validate service radius
-    if (updates.location?.serviceRadius && updates.location.serviceRadius > limits.serviceRadius) {
+    if (
+      updates.location?.serviceRadius &&
+      updates.location.serviceRadius > limits.serviceRadius
+    ) {
       throw new BadRequestException(
         `Service radius (${updates.location.serviceRadius}m) exceeds tier limit (${limits.serviceRadius}m).`,
       );
@@ -359,16 +370,18 @@ export class NPETierManagerService {
    */
   async upgradeTier(userId: string, newTier: NPETier): Promise<void> {
     const currentTier = this.getUserTier(userId);
-    
+
     if (currentTier === newTier) {
       this.logger.warn(`User ${userId} already on ${newTier} tier`);
       return;
     }
 
-    this.logger.log(`⬆️ Upgrading user ${userId} from ${currentTier} to ${newTier}`);
-    
+    this.logger.log(
+      `⬆️ Upgrading user ${userId} from ${currentTier} to ${newTier}`,
+    );
+
     await this.setUserTier(userId, newTier);
-    
+
     // Unlock tier features
     await this.unlockTierFeatures(userId, newTier);
   }
@@ -376,9 +389,12 @@ export class NPETierManagerService {
   /**
    * Unlock features for a specific tier
    */
-  private async unlockTierFeatures(userId: string, tier: NPETier): Promise<void> {
+  private async unlockTierFeatures(
+    userId: string,
+    tier: NPETier,
+  ): Promise<void> {
     const limits = this.getTierLimits(tier);
-    
+
     this.logger.log(`🔓 Unlocking ${tier} tier features for user ${userId}:`);
     this.logger.log(`   - Max NPEs: ${limits.maxNPEs}`);
     this.logger.log(`   - Max Schema Fields: ${limits.maxSchemaFields}`);
@@ -386,15 +402,15 @@ export class NPETierManagerService {
     this.logger.log(`   - Service Radius: ${limits.serviceRadius}m`);
     this.logger.log(`   - Lit Actions: ${limits.litActions}`);
     this.logger.log(`   - Support: ${limits.support}`);
-    
+
     if (limits.apiAccess) {
       this.logger.log(`   - API Access: Enabled ✅`);
     }
-    
+
     if (limits.analytics === 'advanced') {
       this.logger.log(`   - Advanced Analytics: Enabled ✅`);
     }
-    
+
     if (limits.xrNetworking) {
       this.logger.log(`   - XR Networking: Enabled ✅`);
     }
@@ -406,11 +422,11 @@ export class NPETierManagerService {
   getNextTier(currentTier: NPETier): NPETier | null {
     const tiers = [NPETier.FREEMIUM, NPETier.BASE, NPETier.PREMIUM];
     const currentIndex = tiers.indexOf(currentTier);
-    
+
     if (currentIndex === -1 || currentIndex === tiers.length - 1) {
       return null;
     }
-    
+
     return tiers[currentIndex + 1];
   }
 
@@ -431,7 +447,7 @@ export class NPETierManagerService {
   requiresUpgrade(userId: string, feature: keyof TierLimits): boolean {
     const tier = this.getUserTier(userId);
     const limits = this.getTierLimits(tier);
-    
+
     // Check specific feature requirements
     switch (feature) {
       case 'apiAccess':
@@ -463,7 +479,7 @@ export class NPETierManagerService {
   async deleteNPE(userId: string, npeId: string): Promise<void> {
     const userNPEs = this.userNPEs.get(userId) || [];
     const index = userNPEs.indexOf(npeId);
-    
+
     if (index !== -1) {
       userNPEs.splice(index, 1);
       this.logger.log(`🗑️ NPE deleted: ${npeId} for user ${userId}`);
@@ -497,7 +513,8 @@ export class NPETierManagerService {
           tierInfo: {
             tier: this.getUserTier(userId),
             maxNPEs: this.getTierLimits(this.getUserTier(userId)).maxNPEs,
-            maxSchemaFields: this.getTierLimits(this.getUserTier(userId)).maxSchemaFields,
+            maxSchemaFields: this.getTierLimits(this.getUserTier(userId))
+              .maxSchemaFields,
           },
           userId, // Store userId for later use
         } as any;
@@ -509,7 +526,10 @@ export class NPETierManagerService {
   /**
    * Update NPE (simplified - would update database in production)
    */
-  async updateNPE(npeId: string, updates: Partial<NPESchema>): Promise<NPESchema> {
+  async updateNPE(
+    npeId: string,
+    updates: Partial<NPESchema>,
+  ): Promise<NPESchema> {
     const npe = await this.getNPE(npeId);
     if (!npe) {
       throw new BadRequestException('NPE not found');

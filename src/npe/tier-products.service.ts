@@ -68,7 +68,7 @@ export interface TierProduct {
   name: string;
   tagline: string;
   description: string;
-  
+
   // Pricing
   pricing: {
     monthly: number;
@@ -76,16 +76,16 @@ export interface TierProduct {
     currency: 'USD';
     billingCycle: 'monthly' | 'yearly';
   };
-  
+
   // Limits
   limits: TierLimits;
-  
+
   // Usage Quotas
   quotas: UsageQuota[];
-  
+
   // Features (organized by category)
   features: ProductFeature[];
-  
+
   // Marketing
   marketing: {
     popularBadge?: boolean;
@@ -98,16 +98,16 @@ export interface TierProduct {
       company: string;
     };
   };
-  
+
   // Call to Action
   cta: {
     primary: string; // "Start Free", "Subscribe Now", "Contact Sales"
     secondary?: string;
   };
-  
+
   // Available Add-ons
   availableAddons: string[]; // addon IDs
-  
+
   // Trial Information
   trial?: {
     enabled: boolean;
@@ -118,73 +118,94 @@ export interface TierProduct {
 
 /**
  * Tier Products Service
- * 
+ *
  * Manages product definitions, pricing, and feature sets for all tiers
  */
 @Injectable()
 export class TierProductsService {
   private readonly logger = new Logger(TierProductsService.name);
-  
+
   // Available add-ons
   private readonly addons: Map<string, AddonProduct> = new Map([
-    ['extra-npes-10', {
-      id: 'extra-npes-10',
-      name: '+10 NPE Agents',
-      description: 'Add 10 additional NPE agents to your plan',
-      price: 5,
-      billingPeriod: 'monthly',
-      applicableTiers: [NPETier.FREEMIUM, NPETier.BASE],
-      quotaIncrease: { quota: 'maxNPEs', amount: 10 },
-    }],
-    ['extra-locations-5', {
-      id: 'extra-locations-5',
-      name: '+5 Locations',
-      description: 'Add 5 additional XR environment locations',
-      price: 3,
-      billingPeriod: 'monthly',
-      applicableTiers: [NPETier.FREEMIUM, NPETier.BASE],
-      quotaIncrease: { quota: 'maxLocations', amount: 5 },
-    }],
-    ['priority-support', {
-      id: 'priority-support',
-      name: 'Priority Support',
-      description: '24/7 priority email and chat support',
-      price: 15,
-      billingPeriod: 'monthly',
-      applicableTiers: [NPETier.FREEMIUM, NPETier.BASE],
-    }],
-    ['advanced-analytics', {
-      id: 'advanced-analytics',
-      name: 'Advanced Analytics',
-      description: 'Deep insights, custom reports, and data export',
-      price: 10,
-      billingPeriod: 'monthly',
-      applicableTiers: [NPETier.FREEMIUM, NPETier.BASE],
-    }],
-    ['white-label', {
-      id: 'white-label',
-      name: 'White Label',
-      description: 'Remove The Beach branding and use your own',
-      price: 25,
-      billingPeriod: 'monthly',
-      applicableTiers: [NPETier.BASE, NPETier.PREMIUM],
-    }],
-    ['custom-domain', {
-      id: 'custom-domain',
-      name: 'Custom Domain',
-      description: 'Host your XR environments on your own domain',
-      price: 5,
-      billingPeriod: 'monthly',
-      applicableTiers: [NPETier.BASE, NPETier.PREMIUM],
-    }],
-    ['sla-guarantee', {
-      id: 'sla-guarantee',
-      name: '99.9% SLA Guarantee',
-      description: 'Service level agreement with uptime guarantee',
-      price: 50,
-      billingPeriod: 'monthly',
-      applicableTiers: [NPETier.PREMIUM],
-    }],
+    [
+      'extra-npes-10',
+      {
+        id: 'extra-npes-10',
+        name: '+10 NPE Agents',
+        description: 'Add 10 additional NPE agents to your plan',
+        price: 5,
+        billingPeriod: 'monthly',
+        applicableTiers: [NPETier.FREEMIUM, NPETier.BASE],
+        quotaIncrease: { quota: 'maxNPEs', amount: 10 },
+      },
+    ],
+    [
+      'extra-locations-5',
+      {
+        id: 'extra-locations-5',
+        name: '+5 Locations',
+        description: 'Add 5 additional XR environment locations',
+        price: 3,
+        billingPeriod: 'monthly',
+        applicableTiers: [NPETier.FREEMIUM, NPETier.BASE],
+        quotaIncrease: { quota: 'maxLocations', amount: 5 },
+      },
+    ],
+    [
+      'priority-support',
+      {
+        id: 'priority-support',
+        name: 'Priority Support',
+        description: '24/7 priority email and chat support',
+        price: 15,
+        billingPeriod: 'monthly',
+        applicableTiers: [NPETier.FREEMIUM, NPETier.BASE],
+      },
+    ],
+    [
+      'advanced-analytics',
+      {
+        id: 'advanced-analytics',
+        name: 'Advanced Analytics',
+        description: 'Deep insights, custom reports, and data export',
+        price: 10,
+        billingPeriod: 'monthly',
+        applicableTiers: [NPETier.FREEMIUM, NPETier.BASE],
+      },
+    ],
+    [
+      'white-label',
+      {
+        id: 'white-label',
+        name: 'White Label',
+        description: 'Remove The Beach branding and use your own',
+        price: 25,
+        billingPeriod: 'monthly',
+        applicableTiers: [NPETier.BASE, NPETier.PREMIUM],
+      },
+    ],
+    [
+      'custom-domain',
+      {
+        id: 'custom-domain',
+        name: 'Custom Domain',
+        description: 'Host your XR environments on your own domain',
+        price: 5,
+        billingPeriod: 'monthly',
+        applicableTiers: [NPETier.BASE, NPETier.PREMIUM],
+      },
+    ],
+    [
+      'sla-guarantee',
+      {
+        id: 'sla-guarantee',
+        name: '99.9% SLA Guarantee',
+        description: 'Service level agreement with uptime guarantee',
+        price: 50,
+        billingPeriod: 'monthly',
+        applicableTiers: [NPETier.PREMIUM],
+      },
+    ],
   ]);
 
   constructor() {
@@ -219,8 +240,8 @@ export class TierProductsService {
    * Get available add-ons for a tier
    */
   getAvailableAddons(tier: NPETier): AddonProduct[] {
-    return Array.from(this.addons.values()).filter(addon =>
-      addon.applicableTiers.includes(tier)
+    return Array.from(this.addons.values()).filter((addon) =>
+      addon.applicableTiers.includes(tier),
     );
   }
 
@@ -240,7 +261,7 @@ export class TierProductsService {
       const addon = this.addons.get(id);
       return sum + (addon ? addon.price : 0);
     }, 0);
-    
+
     return product.pricing.monthly + addonsPrice;
   }
 
@@ -252,14 +273,15 @@ export class TierProductsService {
       tier: NPETier.FREEMIUM,
       name: 'Freemium',
       tagline: 'Start building AI agents for free',
-      description: 'Perfect for experimenting with AI agents, building prototypes, and learning The Beach platform. No credit card required.',
-      
+      description:
+        'Perfect for experimenting with AI agents, building prototypes, and learning The Beach platform. No credit card required.',
+
       pricing: {
         monthly: 0,
         currency: 'USD',
         billingCycle: 'monthly',
       },
-      
+
       limits: {
         maxNPEs: 3,
         maxSchemaFields: 5,
@@ -271,7 +293,7 @@ export class TierProductsService {
         analytics: 'basic',
         xrNetworking: false,
       },
-      
+
       quotas: [
         {
           name: 'NPE Agents',
@@ -316,7 +338,7 @@ export class TierProductsService {
           resetPeriod: 'never',
         },
       ],
-      
+
       features: [
         // Agents
         {
@@ -341,7 +363,7 @@ export class TierProductsService {
           value: 'Standard',
           highlighted: true,
         },
-        
+
         // Customization
         {
           category: FeatureCategory.CUSTOMIZATION,
@@ -363,7 +385,7 @@ export class TierProductsService {
           description: 'The Beach branding included',
           value: 'Standard',
         },
-        
+
         // Geography
         {
           category: FeatureCategory.GEOGRAPHY,
@@ -386,7 +408,7 @@ export class TierProductsService {
           description: 'Basic geographic routing',
           value: 'Basic',
         },
-        
+
         // Automation
         {
           category: FeatureCategory.AUTOMATION,
@@ -408,7 +430,7 @@ export class TierProductsService {
           description: 'HTTP webhooks for events',
           value: false,
         },
-        
+
         // Support
         {
           category: FeatureCategory.SUPPORT,
@@ -431,7 +453,7 @@ export class TierProductsService {
           value: true,
           icon: '📚',
         },
-        
+
         // Integration
         {
           category: FeatureCategory.INTEGRATION,
@@ -452,7 +474,7 @@ export class TierProductsService {
           description: 'Client SDKs for development',
           value: 'Read-only',
         },
-        
+
         // Analytics
         {
           category: FeatureCategory.ANALYTICS,
@@ -474,7 +496,7 @@ export class TierProductsService {
           description: 'Export analytics data',
           value: false,
         },
-        
+
         // Networking
         {
           category: FeatureCategory.NETWORKING,
@@ -489,7 +511,7 @@ export class TierProductsService {
           description: 'Concurrent users per session',
           value: 5,
         },
-        
+
         // Security
         {
           category: FeatureCategory.SECURITY,
@@ -510,7 +532,7 @@ export class TierProductsService {
           description: 'Security audit logging',
           value: '7 days',
         },
-        
+
         // Performance
         {
           category: FeatureCategory.PERFORMANCE,
@@ -531,7 +553,7 @@ export class TierProductsService {
           value: '10/min',
         },
       ],
-      
+
       marketing: {
         targetAudience: [
           'Developers exploring AI agents',
@@ -548,24 +570,25 @@ export class TierProductsService {
           'Experiment with PKP authentication',
         ],
         testimonial: {
-          quote: "The freemium tier let me build and test my first AI agent in minutes. It's perfect for learning!",
+          quote:
+            "The freemium tier let me build and test my first AI agent in minutes. It's perfect for learning!",
           author: 'Alex Chen',
           company: 'Indie Developer',
         },
       },
-      
+
       cta: {
         primary: 'Start Free',
         secondary: 'No credit card required',
       },
-      
+
       availableAddons: [
         'extra-npes-10',
         'extra-locations-5',
         'priority-support',
         'advanced-analytics',
       ],
-      
+
       trial: {
         enabled: false,
         durationDays: 0,
@@ -582,15 +605,16 @@ export class TierProductsService {
       tier: NPETier.BASE,
       name: 'Basic',
       tagline: 'Scale your AI agent fleet',
-      description: 'Perfect for small to medium businesses deploying production AI agents. Full API access, multiple locations, and email support.',
-      
+      description:
+        'Perfect for small to medium businesses deploying production AI agents. Full API access, multiple locations, and email support.',
+
       pricing: {
         monthly: 10,
         yearly: 100, // 2 months free
         currency: 'USD',
         billingCycle: 'monthly',
       },
-      
+
       limits: {
         maxNPEs: 25,
         maxSchemaFields: 25,
@@ -602,7 +626,7 @@ export class TierProductsService {
         analytics: 'basic',
         xrNetworking: false,
       },
-      
+
       quotas: [
         {
           name: 'NPE Agents',
@@ -673,7 +697,7 @@ export class TierProductsService {
           },
         },
       ],
-      
+
       features: [
         // Agents
         {
@@ -704,7 +728,7 @@ export class TierProductsService {
           description: 'Agents can work together',
           value: true,
         },
-        
+
         // Customization
         {
           category: FeatureCategory.CUSTOMIZATION,
@@ -732,7 +756,7 @@ export class TierProductsService {
           description: 'Build custom agent workflows',
           value: true,
         },
-        
+
         // Geography
         {
           category: FeatureCategory.GEOGRAPHY,
@@ -761,7 +785,7 @@ export class TierProductsService {
           description: 'Deploy across multiple regions',
           value: true,
         },
-        
+
         // Automation
         {
           category: FeatureCategory.AUTOMATION,
@@ -789,7 +813,7 @@ export class TierProductsService {
           description: 'Custom event-based automation',
           value: true,
         },
-        
+
         // Support
         {
           category: FeatureCategory.SUPPORT,
@@ -818,7 +842,7 @@ export class TierProductsService {
           description: 'Guided onboarding session',
           value: true,
         },
-        
+
         // Integration
         {
           category: FeatureCategory.INTEGRATION,
@@ -846,7 +870,7 @@ export class TierProductsService {
           description: 'Full SDK access (JS, Python, Go)',
           value: 'Full',
         },
-        
+
         // Analytics
         {
           category: FeatureCategory.ANALYTICS,
@@ -874,7 +898,7 @@ export class TierProductsService {
           description: 'Build custom reports',
           value: false,
         },
-        
+
         // Networking
         {
           category: FeatureCategory.NETWORKING,
@@ -895,7 +919,7 @@ export class TierProductsService {
           description: 'Real-time bidirectional communication',
           value: true,
         },
-        
+
         // Security
         {
           category: FeatureCategory.SECURITY,
@@ -922,7 +946,7 @@ export class TierProductsService {
           description: 'Restrict access by IP',
           value: true,
         },
-        
+
         // Performance
         {
           category: FeatureCategory.PERFORMANCE,
@@ -949,7 +973,7 @@ export class TierProductsService {
           value: true,
         },
       ],
-      
+
       marketing: {
         popularBadge: true,
         targetAudience: [
@@ -967,17 +991,18 @@ export class TierProductsService {
           'Production deployments',
         ],
         testimonial: {
-          quote: "The Basic tier gave us everything we needed to deploy 20 customer service agents across our locations. API access was crucial!",
+          quote:
+            'The Basic tier gave us everything we needed to deploy 20 customer service agents across our locations. API access was crucial!',
           author: 'Sarah Johnson',
           company: 'Retail Chain Manager',
         },
       },
-      
+
       cta: {
         primary: 'Start 14-Day Trial',
         secondary: 'Cancel anytime',
       },
-      
+
       availableAddons: [
         'extra-npes-10',
         'extra-locations-5',
@@ -986,7 +1011,7 @@ export class TierProductsService {
         'white-label',
         'custom-domain',
       ],
-      
+
       trial: {
         enabled: true,
         durationDays: 14,
@@ -1003,15 +1028,16 @@ export class TierProductsService {
       tier: NPETier.PREMIUM,
       name: 'Professional',
       tagline: 'Enterprise-grade AI agent infrastructure',
-      description: 'For large businesses and enterprises requiring unlimited agents, global reach, priority support, and advanced features.',
-      
+      description:
+        'For large businesses and enterprises requiring unlimited agents, global reach, priority support, and advanced features.',
+
       pricing: {
         monthly: 50,
         yearly: 500, // 2 months free
         currency: 'USD',
         billingCycle: 'monthly',
       },
-      
+
       limits: {
         maxNPEs: Infinity,
         maxSchemaFields: Infinity,
@@ -1023,7 +1049,7 @@ export class TierProductsService {
         analytics: 'advanced',
         xrNetworking: true,
       },
-      
+
       quotas: [
         {
           name: 'NPE Agents',
@@ -1078,7 +1104,7 @@ export class TierProductsService {
           resetPeriod: 'monthly',
         },
       ],
-      
+
       features: [
         // Agents
         {
@@ -1115,7 +1141,7 @@ export class TierProductsService {
           description: 'Sell your agents on marketplace',
           value: true,
         },
-        
+
         // Customization
         {
           category: FeatureCategory.CUSTOMIZATION,
@@ -1149,7 +1175,7 @@ export class TierProductsService {
           description: 'Fully customizable interface',
           value: true,
         },
-        
+
         // Geography
         {
           category: FeatureCategory.GEOGRAPHY,
@@ -1184,7 +1210,7 @@ export class TierProductsService {
           description: 'Deploy to edge locations',
           value: true,
         },
-        
+
         // Automation
         {
           category: FeatureCategory.AUTOMATION,
@@ -1218,7 +1244,7 @@ export class TierProductsService {
           description: 'Deploy custom serverless functions',
           value: true,
         },
-        
+
         // Support
         {
           category: FeatureCategory.SUPPORT,
@@ -1259,7 +1285,7 @@ export class TierProductsService {
           description: 'Private Slack support channel',
           value: true,
         },
-        
+
         // Integration
         {
           category: FeatureCategory.INTEGRATION,
@@ -1293,7 +1319,7 @@ export class TierProductsService {
           description: 'Salesforce, SAP, Oracle, etc.',
           value: true,
         },
-        
+
         // Analytics
         {
           category: FeatureCategory.ANALYTICS,
@@ -1333,7 +1359,7 @@ export class TierProductsService {
           description: 'AI-powered predictions',
           value: true,
         },
-        
+
         // Networking
         {
           category: FeatureCategory.NETWORKING,
@@ -1367,7 +1393,7 @@ export class TierProductsService {
           description: 'Advanced load balancing',
           value: 'Advanced',
         },
-        
+
         // Security
         {
           category: FeatureCategory.SECURITY,
@@ -1406,7 +1432,7 @@ export class TierProductsService {
           description: 'SOC 2, GDPR, HIPAA',
           value: true,
         },
-        
+
         // Performance
         {
           category: FeatureCategory.PERFORMANCE,
@@ -1440,7 +1466,7 @@ export class TierProductsService {
           value: true,
         },
       ],
-      
+
       marketing: {
         bestValue: true,
         targetAudience: [
@@ -1458,23 +1484,20 @@ export class TierProductsService {
           'Mission-critical applications',
         ],
         testimonial: {
-          quote: "Professional tier powers our global network of 500+ AI agents across 50 countries. The dedicated support and 99.9% SLA are critical for our business.",
+          quote:
+            'Professional tier powers our global network of 500+ AI agents across 50 countries. The dedicated support and 99.9% SLA are critical for our business.',
           author: 'Michael Rodriguez',
           company: 'Global Retail Corp',
         },
       },
-      
+
       cta: {
         primary: 'Start 30-Day Trial',
         secondary: 'Talk to sales',
       },
-      
-      availableAddons: [
-        'white-label',
-        'custom-domain',
-        'sla-guarantee',
-      ],
-      
+
+      availableAddons: ['white-label', 'custom-domain', 'sla-guarantee'],
+
       trial: {
         enabled: true,
         durationDays: 30,
@@ -1486,29 +1509,36 @@ export class TierProductsService {
   /**
    * Compare features across tiers
    */
-  compareFeatures(category?: FeatureCategory): Map<string, { freemium: any; basic: any; professional: any }> {
+  compareFeatures(
+    category?: FeatureCategory,
+  ): Map<string, { freemium: any; basic: any; professional: any }> {
     const freemium = this.getFreemiumProduct();
     const basic = this.getBasicProduct();
     const professional = this.getProfessionalProduct();
-    
-    const comparison = new Map<string, { freemium: any; basic: any; professional: any }>();
-    
+
+    const comparison = new Map<
+      string,
+      { freemium: any; basic: any; professional: any }
+    >();
+
     // Filter by category if specified
-    const freemiumFeatures = category 
-      ? freemium.features.filter(f => f.category === category)
+    const freemiumFeatures = category
+      ? freemium.features.filter((f) => f.category === category)
       : freemium.features;
-    
-    freemiumFeatures.forEach(feature => {
-      const basicFeature = basic.features.find(f => f.name === feature.name);
-      const professionalFeature = professional.features.find(f => f.name === feature.name);
-      
+
+    freemiumFeatures.forEach((feature) => {
+      const basicFeature = basic.features.find((f) => f.name === feature.name);
+      const professionalFeature = professional.features.find(
+        (f) => f.name === feature.name,
+      );
+
       comparison.set(feature.name, {
         freemium: feature.value,
         basic: basicFeature?.value ?? false,
         professional: professionalFeature?.value ?? false,
       });
     });
-    
+
     return comparison;
   }
 
@@ -1523,18 +1553,19 @@ export class TierProductsService {
     const freemium = this.getFreemiumProduct();
     const basic = this.getBasicProduct();
     const professional = this.getProfessionalProduct();
-    
+
     return {
       freemium: freemium.pricing.monthly,
       basic: {
         monthly: basic.pricing.monthly,
         yearly: basic.pricing.yearly! / 12,
-        yearlySavings: (basic.pricing.monthly * 12) - basic.pricing.yearly!,
+        yearlySavings: basic.pricing.monthly * 12 - basic.pricing.yearly!,
       },
       professional: {
         monthly: professional.pricing.monthly,
         yearly: professional.pricing.yearly! / 12,
-        yearlySavings: (professional.pricing.monthly * 12) - professional.pricing.yearly!,
+        yearlySavings:
+          professional.pricing.monthly * 12 - professional.pricing.yearly!,
       },
     };
   }

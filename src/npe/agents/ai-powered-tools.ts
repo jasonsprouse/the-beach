@@ -1,11 +1,15 @@
 /**
  * AI-Powered PKP Agent Tools
- * 
+ *
  * Enhanced tools using Vercel AI SDK for intelligent automation
  */
 
 import { AIAgentService } from '../services/ai-agent.service';
-import { PKPTool, PKPToolCategory, ToolExecutionResult } from './pkp-agent-tools';
+import {
+  PKPTool,
+  PKPToolCategory,
+  ToolExecutionResult,
+} from './pkp-agent-tools';
 
 /**
  * AI Code Generation Tool
@@ -27,10 +31,10 @@ export class AICodeGenerationTool implements PKPTool {
     style?: 'functional' | 'oop' | 'mixed';
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       const result = await this.aiService.generateCode(params);
-      
+
       return {
         success: true,
         output: result,
@@ -69,10 +73,10 @@ export class AICodeReviewTool implements PKPTool {
     context?: string;
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       const result = await this.aiService.reviewCode(params);
-      
+
       return {
         success: true,
         output: result,
@@ -80,7 +84,8 @@ export class AICodeReviewTool implements PKPTool {
         metadata: {
           score: result.score,
           issueCount: result.issues.length,
-          criticalIssues: result.issues.filter(i => i.severity === 'critical').length,
+          criticalIssues: result.issues.filter((i) => i.severity === 'critical')
+            .length,
         },
       };
     } catch (error) {
@@ -113,17 +118,18 @@ export class AITaskPlanningTool implements PKPTool {
     constraints?: string[];
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       const result = await this.aiService.generateTaskPlan(params);
-      
+
       return {
         success: true,
         output: result,
         executionTime: Date.now() - startTime,
         metadata: {
           taskCount: result.tasks.length,
-          highPriorityTasks: result.tasks.filter(t => t.priority === 'high').length,
+          highPriorityTasks: result.tasks.filter((t) => t.priority === 'high')
+            .length,
           riskCount: result.risks.length,
         },
       };
@@ -156,10 +162,10 @@ export class AIDocumentationTool implements PKPTool {
     format: 'markdown' | 'jsdoc' | 'api' | 'readme';
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       const result = await this.aiService.generateDocumentation(params);
-      
+
       return {
         success: true,
         output: result,
@@ -197,10 +203,10 @@ export class AIRequirementsAnalyzerTool implements PKPTool {
     projectType?: string;
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       const result = await this.aiService.analyzeRequirements(params);
-      
+
       return {
         success: true,
         output: result,
@@ -241,10 +247,10 @@ export class AICodeOptimizerTool implements PKPTool {
     goals: string[];
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       const result = await this.aiService.optimizeCode(params);
-      
+
       return {
         success: true,
         output: result,
@@ -283,10 +289,10 @@ export class AITechnicalAssistantTool implements PKPTool {
     agentRole?: string;
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       const result = await this.aiService.answerQuestion(params);
-      
+
       return {
         success: true,
         output: result,
@@ -324,10 +330,10 @@ export class AIChatTool implements PKPTool {
     agentRole?: string;
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       const result = await this.aiService.chat(params);
-      
+
       return {
         success: true,
         output: result,
@@ -369,7 +375,7 @@ export class AIToolRegistry {
       new AIChatTool(this.aiService),
     ];
 
-    tools.forEach(tool => this.tools.set(tool.id, tool));
+    tools.forEach((tool) => this.tools.set(tool.id, tool));
   }
 
   getTool(id: string): PKPTool | undefined {
@@ -381,7 +387,7 @@ export class AIToolRegistry {
   }
 
   getToolsByCategory(category: PKPToolCategory): PKPTool[] {
-    return this.getAllTools().filter(tool => tool.category === category);
+    return this.getAllTools().filter((tool) => tool.category === category);
   }
 
   registerTool(tool: PKPTool): void {
@@ -390,7 +396,7 @@ export class AIToolRegistry {
 
   async executeTool(toolId: string, params: any): Promise<ToolExecutionResult> {
     const tool = this.getTool(toolId);
-    
+
     if (!tool) {
       return {
         success: false,

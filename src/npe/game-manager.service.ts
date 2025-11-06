@@ -4,10 +4,10 @@ import { PKPAuthService } from './services/pkp-auth.service';
 
 /**
  * Game Manager Service
- * 
+ *
  * Central orchestrator for all NPE agents in The Beach platform.
  * Manages agent lifecycle, service routing, load balancing, and session coordination.
- * 
+ *
  * Now integrated with PKPAuthService:
  * - Main PKPs are human-authenticated via WebAuthn/Social login
  * - Sub-PKPs are AI agents that do autonomous work
@@ -34,7 +34,7 @@ export interface Agent {
   performanceScore?: number;
   lastActivity?: number;
   metadata?: Record<string, any>;
-  
+
   // Analytics fields
   sessionsHandled?: number;
   sessionsCompleted?: number;
@@ -88,7 +88,11 @@ export interface ServiceRequest {
 }
 
 export interface RoutingStrategy {
-  strategy: 'least-load' | 'nearest-location' | 'highest-rating' | 'round-robin';
+  strategy:
+    | 'least-load'
+    | 'nearest-location'
+    | 'highest-rating'
+    | 'round-robin';
   location?: { lat: number; lng: number };
   priority?: string;
 }
@@ -96,13 +100,13 @@ export interface RoutingStrategy {
 @Injectable()
 export class GameManagerService {
   private readonly logger = new Logger(GameManagerService.name);
-  
+
   // Core registries
   private agents = new Map<string, Agent>();
   private agentPools = new Map<string, Agent[]>();
   private sessions = new Map<string, Session>();
   private activeServices = new Map<string, any>();
-  
+
   // Round-robin counter
   private roundRobinIndex = 0;
 
@@ -115,11 +119,11 @@ export class GameManagerService {
 
   /**
    * Register a new agent with the system
-   * 
+   *
    * IMPORTANT: All agents must be either:
    * 1. Main PKPs (human-authenticated via PKPAuthService)
    * 2. Sub-PKPs (delegated from main PKPs)
-   * 
+   *
    * This ensures all agents have proper authorization
    */
   async registerAgent(
@@ -133,13 +137,21 @@ export class GameManagerService {
     const isSub = this.pkpAuthService.isSubPKP(agentPKP.address);
 
     if (!isMain && !isSub) {
-      this.logger.warn(`⚠️ Registering unauthenticated PKP: ${agentPKP.address} (${purpose})`);
-      this.logger.warn('   → This PKP should be authenticated via /pkp/auth/login first');
+      this.logger.warn(
+        `⚠️ Registering unauthenticated PKP: ${agentPKP.address} (${purpose})`,
+      );
+      this.logger.warn(
+        '   → This PKP should be authenticated via /pkp/auth/login first',
+      );
     } else if (isSub) {
       const parentPKP = this.pkpAuthService.getParentPKP(agentPKP.address);
-      this.logger.log(`🤖 Registering sub-PKP: ${agentPKP.address} (parent: ${parentPKP})`);
+      this.logger.log(
+        `🤖 Registering sub-PKP: ${agentPKP.address} (parent: ${parentPKP})`,
+      );
     } else {
-      this.logger.log(`👤 Registering main PKP: ${agentPKP.address} (human-owned)`);
+      this.logger.log(
+        `👤 Registering main PKP: ${agentPKP.address} (human-owned)`,
+      );
     }
 
     const agent: Agent = {
@@ -158,7 +170,9 @@ export class GameManagerService {
       metadata: {
         ...options?.metadata,
         pkpType: isMain ? 'main' : isSub ? 'sub' : 'unverified',
-        parentPKP: isSub ? this.pkpAuthService.getParentPKP(agentPKP.address) : undefined,
+        parentPKP: isSub
+          ? this.pkpAuthService.getParentPKP(agentPKP.address)
+          : undefined,
       },
     };
 
@@ -166,7 +180,7 @@ export class GameManagerService {
     this.addToPool(purpose, agent);
 
     this.logger.log(`✅ Agent registered: ${agent.id} (${purpose})`);
-    
+
     // Emit event for monitoring
     this.eventEmitter.emit('agent.registered', { agent });
 
@@ -200,7 +214,7 @@ export class GameManagerService {
     };
 
     const capabilities = this.getDefaultCapabilities(purpose);
-    
+
     return this.registerAgent(subPKP, purpose, capabilities, {
       location,
       role: `Dynamic ${purpose} agent`,
@@ -212,11 +226,11 @@ export class GameManagerService {
    */
   private getDefaultCapabilities(purpose: string): string[] {
     const capabilityMap: Record<string, string[]> = {
-      'sales': ['product-presentation', 'negotiation', 'closing'],
-      'support': ['troubleshooting', 'refunds', 'escalation'],
-      'concierge': ['booking', 'recommendations', 'coordination'],
-      'development': ['code-generation', 'testing', 'deployment'],
-      'analytics': ['data-collection', 'reporting', 'insights'],
+      sales: ['product-presentation', 'negotiation', 'closing'],
+      support: ['troubleshooting', 'refunds', 'escalation'],
+      concierge: ['booking', 'recommendations', 'coordination'],
+      development: ['code-generation', 'testing', 'deployment'],
+      analytics: ['data-collection', 'reporting', 'insights'],
     };
 
     // Try to match purpose to category
@@ -234,7 +248,7 @@ export class GameManagerService {
    */
   async decommissionAgent(agentId: string): Promise<void> {
     const agent = this.agents.get(agentId);
-    
+
     if (!agent) {
       this.logger.warn(`Agent ${agentId} not found for decommission`);
       return;
@@ -252,7 +266,7 @@ export class GameManagerService {
     // Remove from pool
     const pool = this.agentPools.get(agent.purpose);
     if (pool) {
-      const index = pool.findIndex(a => a.id === agentId);
+      const index = pool.findIndex((a) => a.id === agentId);
       if (index !== -1) {
         pool.splice(index, 1);
       }
@@ -266,10 +280,13 @@ export class GameManagerService {
    * Migrate active sessions from one agent to others
    */
   private async migrateActiveSessions(fromAgentId: string): Promise<void> {
-    const sessionsToMigrate = Array.from(this.sessions.values())
-      .filter(s => s.agentId === fromAgentId && s.status === 'active');
+    const sessionsToMigrate = Array.from(this.sessions.values()).filter(
+      (s) => s.agentId === fromAgentId && s.status === 'active',
+    );
 
-    this.logger.log(`🔀 Migrating ${sessionsToMigrate.length} sessions from ${fromAgentId}`);
+    this.logger.log(
+      `🔀 Migrating ${sessionsToMigrate.length} sessions from ${fromAgentId}`,
+    );
 
     for (const session of sessionsToMigrate) {
       const fromAgent = this.agents.get(fromAgentId);
@@ -279,7 +296,12 @@ export class GameManagerService {
       });
 
       if (toAgent && fromAgent) {
-        await this.handoffSession(session.id, fromAgent, toAgent, 'agent-decommission');
+        await this.handoffSession(
+          session.id,
+          fromAgent,
+          toAgent,
+          'agent-decommission',
+        );
       }
     }
   }
@@ -292,7 +314,7 @@ export class GameManagerService {
 
     // Get agents capable of handling this service
     const capableAgents = Array.from(this.agents.values()).filter(
-      agent =>
+      (agent) =>
         agent.capabilities.includes(service) &&
         agent.status === 'active' &&
         agent.currentLoad < agent.maxLoad,
@@ -300,7 +322,9 @@ export class GameManagerService {
 
     if (capableAgents.length === 0) {
       // No available agents - spawn new one
-      this.logger.log(`⚡ No agents available for ${service}, spawning new agent`);
+      this.logger.log(
+        `⚡ No agents available for ${service}, spawning new agent`,
+      );
       return await this.spawnAgent(service, location);
     }
 
@@ -338,8 +362,8 @@ export class GameManagerService {
         return this.findNearestAgent(agents, options.location);
 
       case 'highest-rating':
-        return agents.sort((a, b) =>
-          (b.performanceScore || 0) - (a.performanceScore || 0),
+        return agents.sort(
+          (a, b) => (b.performanceScore || 0) - (a.performanceScore || 0),
         )[0];
 
       case 'round-robin':
@@ -359,7 +383,7 @@ export class GameManagerService {
     agents: Agent[],
     location: { lat: number; lng: number },
   ): Agent {
-    const agentsWithLocation = agents.filter(a => a.location);
+    const agentsWithLocation = agents.filter((a) => a.location);
 
     if (agentsWithLocation.length === 0) {
       return agents[0];
@@ -367,7 +391,10 @@ export class GameManagerService {
 
     return agentsWithLocation.reduce((nearest, agent) => {
       const distanceToAgent = this.calculateDistance(location, agent.location!);
-      const distanceToNearest = this.calculateDistance(location, nearest.location!);
+      const distanceToNearest = this.calculateDistance(
+        location,
+        nearest.location!,
+      );
       return distanceToAgent < distanceToNearest ? agent : nearest;
     });
   }
@@ -414,7 +441,9 @@ export class GameManagerService {
 
     this.sessions.set(session.id, session);
 
-    this.logger.log(`🆕 Session created: ${session.id} (${customer.id} → ${agent.id})`);
+    this.logger.log(
+      `🆕 Session created: ${session.id} (${customer.id} → ${agent.id})`,
+    );
     this.eventEmitter.emit('session.created', { session });
 
     return session;
@@ -445,8 +474,15 @@ export class GameManagerService {
     fromAgent.currentLoad = Math.max(0, fromAgent.currentLoad - 1);
     toAgent.currentLoad++;
 
-    this.logger.log(`🔀 Session ${sessionId} handed off: ${fromAgent.id} → ${toAgent.id} (${reason})`);
-    this.eventEmitter.emit('session.handoff', { session, fromAgent, toAgent, reason });
+    this.logger.log(
+      `🔀 Session ${sessionId} handed off: ${fromAgent.id} → ${toAgent.id} (${reason})`,
+    );
+    this.eventEmitter.emit('session.handoff', {
+      session,
+      fromAgent,
+      toAgent,
+      reason,
+    });
   }
 
   /**
@@ -467,7 +503,9 @@ export class GameManagerService {
    * Get network statistics
    */
   getActiveSessions(): Session[] {
-    return Array.from(this.sessions.values()).filter(s => s.status === 'active');
+    return Array.from(this.sessions.values()).filter(
+      (s) => s.status === 'active',
+    );
   }
 
   /**
@@ -486,13 +524,18 @@ export class GameManagerService {
 
     return {
       totalAgents: agents.length,
-      activeAgents: agents.filter(a => a.status === 'active').length,
-      idleAgents: agents.filter(a => a.status === 'active' && a.currentLoad === 0).length,
-      busyAgents: agents.filter(a => a.currentLoad > 0).length,
+      activeAgents: agents.filter((a) => a.status === 'active').length,
+      idleAgents: agents.filter(
+        (a) => a.status === 'active' && a.currentLoad === 0,
+      ).length,
+      busyAgents: agents.filter((a) => a.currentLoad > 0).length,
       totalSessions: this.sessions.size,
       activeSessions: activeSessions.length,
-      avgLoad: agents.reduce((sum, a) => sum + a.currentLoad, 0) / agents.length || 0,
-      avgPerformance: agents.reduce((sum, a) => sum + (a.performanceScore || 0), 0) / agents.length || 0,
+      avgLoad:
+        agents.reduce((sum, a) => sum + a.currentLoad, 0) / agents.length || 0,
+      avgPerformance:
+        agents.reduce((sum, a) => sum + (a.performanceScore || 0), 0) /
+          agents.length || 0,
       purposes: Array.from(this.agentPools.keys()),
     };
   }
@@ -520,13 +563,13 @@ export class GameManagerService {
    */
   async completeSession(sessionId: string): Promise<void> {
     const session = this.sessions.get(sessionId);
-    
+
     if (!session) {
       return;
     }
 
     session.status = 'completed';
-    
+
     const agent = this.agents.get(session.agentId);
     if (agent) {
       agent.currentLoad = Math.max(0, agent.currentLoad - 1);

@@ -51,7 +51,7 @@ interface WorkerState {
 
 /**
  * PKP Workers VR Scene
- * 
+ *
  * Visualizes sub-PKP agents performing their assigned tasks in VR
  */
 export class PKPWorkersVRScene {
@@ -59,7 +59,7 @@ export class PKPWorkersVRScene {
   private engine: Engine;
   private workers: Map<string, WorkerState> = new Map();
   private workStations: Map<string, TransformNode> = new Map();
-  
+
   private readonly API_BASE = window.location.origin;
   private mainPKP: string;
 
@@ -82,7 +82,11 @@ export class PKPWorkersVRScene {
     camera.attachControl(this.engine.getRenderingCanvas()!, true);
 
     // Lighting
-    const ambient = new HemisphericLight('ambient', new Vector3(0, 1, 0), scene);
+    const ambient = new HemisphericLight(
+      'ambient',
+      new Vector3(0, 1, 0),
+      scene,
+    );
     ambient.intensity = 0.5;
 
     const mainLight = new PointLight('mainLight', new Vector3(0, 5, 0), scene);
@@ -106,7 +110,11 @@ export class PKPWorkersVRScene {
    */
   private createEnvironment(): void {
     // Floor
-    const floor = MeshBuilder.CreateGround('floor', { width: 30, height: 30 }, this.scene);
+    const floor = MeshBuilder.CreateGround(
+      'floor',
+      { width: 30, height: 30 },
+      this.scene,
+    );
     const floorMat = new PBRMaterial('floorMat', this.scene);
     floorMat.albedoColor = new Color3(0.1, 0.1, 0.15);
     floorMat.metallic = 0.2;
@@ -121,9 +129,12 @@ export class PKPWorkersVRScene {
       const lineX = MeshBuilder.CreateLines(
         `gridX${i}`,
         {
-          points: [new Vector3(i, 0.01, -gridSize / 2), new Vector3(i, 0.01, gridSize / 2)],
+          points: [
+            new Vector3(i, 0.01, -gridSize / 2),
+            new Vector3(i, 0.01, gridSize / 2),
+          ],
         },
-        this.scene
+        this.scene,
       );
       lineX.color = new Color3(0.2, 0.3, 0.5);
 
@@ -131,9 +142,12 @@ export class PKPWorkersVRScene {
       const lineZ = MeshBuilder.CreateLines(
         `gridZ${i}`,
         {
-          points: [new Vector3(-gridSize / 2, 0.01, i), new Vector3(gridSize / 2, 0.01, i)],
+          points: [
+            new Vector3(-gridSize / 2, 0.01, i),
+            new Vector3(gridSize / 2, 0.01, i),
+          ],
         },
-        this.scene
+        this.scene,
       );
       lineZ.color = new Color3(0.2, 0.3, 0.5);
     }
@@ -142,7 +156,7 @@ export class PKPWorkersVRScene {
     const platform = MeshBuilder.CreateCylinder(
       'platform',
       { diameter: 8, height: 0.2 },
-      this.scene
+      this.scene,
     );
     platform.position.y = 0.1;
     const platformMat = new PBRMaterial('platformMat', this.scene);
@@ -159,7 +173,11 @@ export class PKPWorkersVRScene {
    * Create title hologram
    */
   private createTitleHologram(): void {
-    const titlePlane = MeshBuilder.CreatePlane('titlePlane', { width: 6, height: 1 }, this.scene);
+    const titlePlane = MeshBuilder.CreatePlane(
+      'titlePlane',
+      { width: 6, height: 1 },
+      this.scene,
+    );
     titlePlane.position = new Vector3(0, 3.5, 0);
 
     const titleMat = new StandardMaterial('titleMat', this.scene);
@@ -181,7 +199,7 @@ export class PKPWorkersVRScene {
       'rotation.y',
       30,
       Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CYCLE
+      Animation.ANIMATIONLOOPMODE_CYCLE,
     );
     rotateAnimation.setKeys([
       { frame: 0, value: 0 },
@@ -260,7 +278,7 @@ export class PKPWorkersVRScene {
     const base = MeshBuilder.CreateBox(
       `base_${config.type}`,
       { width: 3, height: 0.2, depth: 3 },
-      this.scene
+      this.scene,
     );
     base.position.y = 0.1;
     base.parent = station;
@@ -301,7 +319,7 @@ export class PKPWorkersVRScene {
    */
   private createWorkerVisualization(
     config: { type: WorkerTaskType; color: Color3 },
-    parent: TransformNode
+    parent: TransformNode,
   ): void {
     switch (config.type) {
       case WorkerTaskType.REDIS_ENCRYPTOR:
@@ -328,16 +346,23 @@ export class PKPWorkersVRScene {
   /**
    * Redis Encryptor: Lock/key animation with data packets
    */
-  private createEncryptorVisualization(parent: TransformNode, color: Color3): void {
+  private createEncryptorVisualization(
+    parent: TransformNode,
+    color: Color3,
+  ): void {
     // Lock icon
-    const lockBody = MeshBuilder.CreateBox('lockBody', { width: 0.6, height: 0.8, depth: 0.3 }, this.scene);
+    const lockBody = MeshBuilder.CreateBox(
+      'lockBody',
+      { width: 0.6, height: 0.8, depth: 0.3 },
+      this.scene,
+    );
     lockBody.position = new Vector3(0, 1.5, 0);
     lockBody.parent = parent;
 
     const lockShackle = MeshBuilder.CreateTorus(
       'lockShackle',
       { diameter: 0.6, thickness: 0.1 },
-      this.scene
+      this.scene,
     );
     lockShackle.position = new Vector3(0, 2.1, 0);
     lockShackle.rotation.x = Math.PI / 2;
@@ -355,7 +380,12 @@ export class PKPWorkersVRScene {
     this.createDataPackets(parent, color);
 
     // Pulsing animation
-    const pulseAnim = new Animation('lockPulse', 'scaling', 30, Animation.ANIMATIONTYPE_VECTOR3);
+    const pulseAnim = new Animation(
+      'lockPulse',
+      'scaling',
+      30,
+      Animation.ANIMATIONTYPE_VECTOR3,
+    );
     pulseAnim.setKeys([
       { frame: 0, value: new Vector3(1, 1, 1) },
       { frame: 15, value: new Vector3(1.1, 1.1, 1.1) },
@@ -368,12 +398,15 @@ export class PKPWorkersVRScene {
   /**
    * Test Runner: Checklist with animated checks
    */
-  private createTestRunnerVisualization(parent: TransformNode, color: Color3): void {
+  private createTestRunnerVisualization(
+    parent: TransformNode,
+    color: Color3,
+  ): void {
     // Clipboard/checklist
     const clipboard = MeshBuilder.CreateBox(
       'clipboard',
       { width: 1, height: 1.4, depth: 0.1 },
-      this.scene
+      this.scene,
     );
     clipboard.position = new Vector3(0, 1.5, 0);
     clipboard.parent = parent;
@@ -389,7 +422,7 @@ export class PKPWorkersVRScene {
       const check = MeshBuilder.CreateBox(
         `check_${i}`,
         { width: 0.15, height: 0.15, depth: 0.05 },
-        this.scene
+        this.scene,
       );
       check.position = new Vector3(-0.3, 1.9 - i * 0.25, 0.1);
       check.parent = parent;
@@ -400,7 +433,12 @@ export class PKPWorkersVRScene {
 
       // Animated appearance
       const delay = i * 20;
-      const appearAnim = new Animation('checkAppear', 'scaling', 30, Animation.ANIMATIONTYPE_VECTOR3);
+      const appearAnim = new Animation(
+        'checkAppear',
+        'scaling',
+        30,
+        Animation.ANIMATIONTYPE_VECTOR3,
+      );
       appearAnim.setKeys([
         { frame: delay, value: new Vector3(0, 0, 0) },
         { frame: delay + 10, value: new Vector3(1, 1, 1) },
@@ -414,9 +452,16 @@ export class PKPWorkersVRScene {
   /**
    * Code Reviewer: Code lines scrolling with highlights
    */
-  private createCodeReviewerVisualization(parent: TransformNode, color: Color3): void {
+  private createCodeReviewerVisualization(
+    parent: TransformNode,
+    color: Color3,
+  ): void {
     // Monitor screen
-    const screen = MeshBuilder.CreateBox('screen', { width: 1.5, height: 1.2, depth: 0.05 }, this.scene);
+    const screen = MeshBuilder.CreateBox(
+      'screen',
+      { width: 1.5, height: 1.2, depth: 0.05 },
+      this.scene,
+    );
     screen.position = new Vector3(0, 1.5, 0);
     screen.parent = parent;
 
@@ -431,7 +476,7 @@ export class PKPWorkersVRScene {
       const line = MeshBuilder.CreateBox(
         `codeLine_${i}`,
         { width: 1.2, height: 0.08, depth: 0.02 },
-        this.scene
+        this.scene,
       );
       line.position = new Vector3(0, 1.9 - i * 0.15, 0.05);
       line.parent = parent;
@@ -442,7 +487,12 @@ export class PKPWorkersVRScene {
       line.material = lineMat;
 
       // Scrolling animation
-      const scrollAnim = new Animation('codeScroll', 'position.y', 30, Animation.ANIMATIONTYPE_FLOAT);
+      const scrollAnim = new Animation(
+        'codeScroll',
+        'position.y',
+        30,
+        Animation.ANIMATIONTYPE_FLOAT,
+      );
       scrollAnim.setKeys([
         { frame: 0, value: line.position.y },
         { frame: 100, value: line.position.y + 1.2 },
@@ -455,9 +505,16 @@ export class PKPWorkersVRScene {
   /**
    * Metrics Collector: Graphs and charts
    */
-  private createMetricsCollectorVisualization(parent: TransformNode, color: Color3): void {
+  private createMetricsCollectorVisualization(
+    parent: TransformNode,
+    color: Color3,
+  ): void {
     // Chart background
-    const chartBg = MeshBuilder.CreateBox('chartBg', { width: 1.5, height: 1.2, depth: 0.05 }, this.scene);
+    const chartBg = MeshBuilder.CreateBox(
+      'chartBg',
+      { width: 1.5, height: 1.2, depth: 0.05 },
+      this.scene,
+    );
     chartBg.position = new Vector3(0, 1.5, 0);
     chartBg.parent = parent;
 
@@ -472,7 +529,7 @@ export class PKPWorkersVRScene {
       const bar = MeshBuilder.CreateBox(
         `bar_${i}`,
         { width: 0.15, height, depth: 0.05 },
-        this.scene
+        this.scene,
       );
       bar.position = new Vector3(-0.6 + i * 0.25, 1.2 + height / 2, 0.05);
       bar.parent = parent;
@@ -482,7 +539,12 @@ export class PKPWorkersVRScene {
       bar.material = barMat;
 
       // Growing animation
-      const growAnim = new Animation('barGrow', 'scaling.y', 30, Animation.ANIMATIONTYPE_FLOAT);
+      const growAnim = new Animation(
+        'barGrow',
+        'scaling.y',
+        30,
+        Animation.ANIMATIONTYPE_FLOAT,
+      );
       growAnim.setKeys([
         { frame: 0, value: 0 },
         { frame: 30 + i * 5, value: 1 },
@@ -496,12 +558,15 @@ export class PKPWorkersVRScene {
   /**
    * Security Auditor: Shield with scanning rays
    */
-  private createSecurityAuditorVisualization(parent: TransformNode, color: Color3): void {
+  private createSecurityAuditorVisualization(
+    parent: TransformNode,
+    color: Color3,
+  ): void {
     // Shield
     const shield = MeshBuilder.CreateCylinder(
       'shield',
       { diameterTop: 0, diameterBottom: 1.2, height: 1.5 },
-      this.scene
+      this.scene,
     );
     shield.position = new Vector3(0, 1.5, 0);
     shield.rotation.z = Math.PI;
@@ -520,7 +585,7 @@ export class PKPWorkersVRScene {
       const ring = MeshBuilder.CreateTorus(
         `scanRing_${i}`,
         { diameter: 1 + i * 0.3, thickness: 0.05 },
-        this.scene
+        this.scene,
       );
       ring.position = new Vector3(0, 1.5, 0);
       ring.rotation.x = Math.PI / 2;
@@ -532,7 +597,12 @@ export class PKPWorkersVRScene {
       ring.material = ringMat;
 
       // Pulsing animation
-      const pulseAnim = new Animation('ringPulse', 'scaling', 30, Animation.ANIMATIONTYPE_VECTOR3);
+      const pulseAnim = new Animation(
+        'ringPulse',
+        'scaling',
+        30,
+        Animation.ANIMATIONTYPE_VECTOR3,
+      );
       pulseAnim.setKeys([
         { frame: i * 10, value: new Vector3(0.8, 0.8, 0.8) },
         { frame: i * 10 + 30, value: new Vector3(1.2, 1.2, 1.2) },
@@ -546,12 +616,15 @@ export class PKPWorkersVRScene {
   /**
    * Deployer: Rocket with deployment stages
    */
-  private createDeployerVisualization(parent: TransformNode, color: Color3): void {
+  private createDeployerVisualization(
+    parent: TransformNode,
+    color: Color3,
+  ): void {
     // Rocket body
     const rocketBody = MeshBuilder.CreateCylinder(
       'rocketBody',
       { diameter: 0.4, height: 1.5 },
-      this.scene
+      this.scene,
     );
     rocketBody.position = new Vector3(0, 1.5, 0);
     rocketBody.parent = parent;
@@ -560,7 +633,7 @@ export class PKPWorkersVRScene {
     const nose = MeshBuilder.CreateCylinder(
       'rocketNose',
       { diameterTop: 0, diameterBottom: 0.4, height: 0.5 },
-      this.scene
+      this.scene,
     );
     nose.position = new Vector3(0, 2.5, 0);
     nose.parent = parent;
@@ -575,7 +648,10 @@ export class PKPWorkersVRScene {
 
     // Flame particles
     const flameParticles = new ParticleSystem('rocketFlame', 100, this.scene);
-    flameParticles.particleTexture = new Texture('textures/flare.png', this.scene);
+    flameParticles.particleTexture = new Texture(
+      'textures/flare.png',
+      this.scene,
+    );
     flameParticles.emitter = new Vector3(0, 0.8, 0);
     flameParticles.minEmitBox = new Vector3(-0.1, 0, -0.1);
     flameParticles.maxEmitBox = new Vector3(0.1, 0, 0.1);
@@ -595,7 +671,12 @@ export class PKPWorkersVRScene {
     flameParticles.start();
 
     // Bobbing animation
-    const bobAnim = new Animation('rocketBob', 'position.y', 30, Animation.ANIMATIONTYPE_FLOAT);
+    const bobAnim = new Animation(
+      'rocketBob',
+      'position.y',
+      30,
+      Animation.ANIMATIONTYPE_FLOAT,
+    );
     bobAnim.setKeys([
       { frame: 0, value: 1.5 },
       { frame: 30, value: 1.7 },
@@ -613,12 +694,12 @@ export class PKPWorkersVRScene {
       const packet = MeshBuilder.CreateBox(
         `packet_${i}`,
         { size: 0.2 },
-        this.scene
+        this.scene,
       );
       packet.position = new Vector3(
         -1 + Math.random() * 2,
         0.5 + Math.random(),
-        -1 + Math.random() * 2
+        -1 + Math.random() * 2,
       );
       packet.parent = parent;
 
@@ -628,14 +709,24 @@ export class PKPWorkersVRScene {
       packet.material = packetMat;
 
       // Floating animation
-      const floatAnim = new Animation('packetFloat', 'position.y', 30, Animation.ANIMATIONTYPE_FLOAT);
+      const floatAnim = new Animation(
+        'packetFloat',
+        'position.y',
+        30,
+        Animation.ANIMATIONTYPE_FLOAT,
+      );
       floatAnim.setKeys([
         { frame: 0, value: packet.position.y },
         { frame: 50, value: packet.position.y + 0.5 },
         { frame: 100, value: packet.position.y },
       ]);
 
-      const rotateAnim = new Animation('packetRotate', 'rotation.y', 30, Animation.ANIMATIONTYPE_FLOAT);
+      const rotateAnim = new Animation(
+        'packetRotate',
+        'rotation.y',
+        30,
+        Animation.ANIMATIONTYPE_FLOAT,
+      );
       rotateAnim.setKeys([
         { frame: 0, value: 0 },
         { frame: 100, value: Math.PI * 2 },
@@ -649,8 +740,16 @@ export class PKPWorkersVRScene {
   /**
    * Create worker label
    */
-  private createWorkerLabel(name: string, parent: TransformNode, color: Color3): void {
-    const label = MeshBuilder.CreatePlane('label', { width: 2.5, height: 0.4 }, this.scene);
+  private createWorkerLabel(
+    name: string,
+    parent: TransformNode,
+    color: Color3,
+  ): void {
+    const label = MeshBuilder.CreatePlane(
+      'label',
+      { width: 2.5, height: 0.4 },
+      this.scene,
+    );
     label.position = new Vector3(0, 3, 0);
     label.parent = parent;
 
@@ -674,8 +773,15 @@ export class PKPWorkersVRScene {
   /**
    * Create status display
    */
-  private createStatusDisplay(type: WorkerTaskType, parent: TransformNode): void {
-    const statusPanel = MeshBuilder.CreatePlane('statusPanel', { width: 2.5, height: 0.6 }, this.scene);
+  private createStatusDisplay(
+    type: WorkerTaskType,
+    parent: TransformNode,
+  ): void {
+    const statusPanel = MeshBuilder.CreatePlane(
+      'statusPanel',
+      { width: 2.5, height: 0.6 },
+      this.scene,
+    );
     statusPanel.position = new Vector3(0, 0.5, 0);
     statusPanel.parent = parent;
 
@@ -824,7 +930,7 @@ export class PKPWorkersVRScene {
     if (statusPanel) {
       const texture = AdvancedDynamicTexture.CreateForMesh(statusPanel);
       const controls = texture.getChildren();
-      
+
       // This is simplified - in production you'd store references to the GUI controls
       console.log(`${worker.name}: ${worker.status} - ${worker.progress}%`);
     }

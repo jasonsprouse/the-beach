@@ -21,11 +21,16 @@ import {
   ActionManager,
   ExecuteCodeAction,
 } from '@babylonjs/core';
-import { AdvancedDynamicTexture, TextBlock, Rectangle, Control } from '@babylonjs/gui';
+import {
+  AdvancedDynamicTexture,
+  TextBlock,
+  Rectangle,
+  Control,
+} from '@babylonjs/gui';
 
 /**
  * VR Scene: "The Lit Compute Network Visualization"
- * 
+ *
  * An immersive 3D environment showcasing the Lit Compute Network
  * with interactive nodes, data flows, and a VR agent guide.
  */
@@ -80,7 +85,7 @@ export class LitComputeVRScene {
       Math.PI / 3,
       30,
       new Vector3(0, 5, 0),
-      this.scene
+      this.scene,
     );
     this.camera.attachControl(true);
     this.camera.lowerRadiusLimit = 10;
@@ -96,7 +101,7 @@ export class LitComputeVRScene {
     const ambient = new HemisphericLight(
       'ambient',
       new Vector3(0, 1, 0),
-      this.scene
+      this.scene,
     );
     ambient.intensity = 0.3;
     ambient.groundColor = new Color3(0.1, 0.05, 0.2);
@@ -105,7 +110,7 @@ export class LitComputeVRScene {
     const mainLight = new DirectionalLight(
       'mainLight',
       new Vector3(-1, -2, -1),
-      this.scene
+      this.scene,
     );
     mainLight.intensity = 0.5;
     mainLight.position = new Vector3(20, 40, 20);
@@ -117,7 +122,7 @@ export class LitComputeVRScene {
       new Vector3(0, -1, 0),
       Math.PI / 3,
       2,
-      this.scene
+      this.scene,
     );
     spotlight.intensity = 2;
     spotlight.diffuse = new Color3(0.3, 0.5, 1.0);
@@ -135,9 +140,9 @@ export class LitComputeVRScene {
     const ground = MeshBuilder.CreateGround(
       'ground',
       { width: 100, height: 100, subdivisions: 20 },
-      this.scene
+      this.scene,
     );
-    
+
     const groundMaterial = new PBRMaterial('groundMat', this.scene);
     groundMaterial.albedoColor = new Color3(0.05, 0.05, 0.15);
     groundMaterial.metallic = 0.2;
@@ -168,12 +173,9 @@ export class LitComputeVRScene {
       const lineX = MeshBuilder.CreateLines(
         `gridX${i}`,
         {
-          points: [
-            new Vector3(i, 0.1, -50),
-            new Vector3(i, 0.1, 50),
-          ],
+          points: [new Vector3(i, 0.1, -50), new Vector3(i, 0.1, 50)],
         },
-        this.scene
+        this.scene,
       );
       lineX.color = new Color3(0.2, 0.3, 0.5);
       lineX.alpha = 0.3;
@@ -182,12 +184,9 @@ export class LitComputeVRScene {
       const lineZ = MeshBuilder.CreateLines(
         `gridZ${i}`,
         {
-          points: [
-            new Vector3(-50, 0.1, i),
-            new Vector3(50, 0.1, i),
-          ],
+          points: [new Vector3(-50, 0.1, i), new Vector3(50, 0.1, i)],
         },
-        this.scene
+        this.scene,
       );
       lineZ.color = new Color3(0.2, 0.3, 0.5);
       lineZ.alpha = 0.3;
@@ -202,12 +201,12 @@ export class LitComputeVRScene {
       const star = MeshBuilder.CreateSphere(
         `star${i}`,
         { diameter: 0.5 },
-        this.scene
+        this.scene,
       );
       star.position = new Vector3(
         (Math.random() - 0.5) * 200,
         Math.random() * 100 + 50,
-        (Math.random() - 0.5) * 200
+        (Math.random() - 0.5) * 200,
       );
 
       const starMat = new StandardMaterial(`starMat${i}`, this.scene);
@@ -247,7 +246,7 @@ export class LitComputeVRScene {
     const node = MeshBuilder.CreateSphere(
       `node${id}`,
       { diameter: 2 },
-      this.scene
+      this.scene,
     );
     node.position = position;
 
@@ -270,7 +269,7 @@ export class LitComputeVRScene {
           thickness: 0.05,
           tessellation: 32,
         },
-        this.scene
+        this.scene,
       );
       torus.position = position;
       torus.rotation.x = Math.PI / 2;
@@ -282,7 +281,11 @@ export class LitComputeVRScene {
     }
 
     // Info label
-    this.createNodeLabel(node, `Node ${id + 1}`, `Active • ${Math.floor(Math.random() * 50 + 50)} Jobs`);
+    this.createNodeLabel(
+      node,
+      `Node ${id + 1}`,
+      `Active • ${Math.floor(Math.random() * 50 + 50)} Jobs`,
+    );
 
     // Pulsing animation
     this.createPulseAnimation(node);
@@ -297,7 +300,7 @@ export class LitComputeVRScene {
     const hub = MeshBuilder.CreateSphere(
       'centralHub',
       { diameter: 4 },
-      this.scene
+      this.scene,
     );
     hub.position = new Vector3(0, 5, 0);
 
@@ -315,10 +318,10 @@ export class LitComputeVRScene {
     const field = MeshBuilder.CreateSphere(
       'energyField',
       { diameter: 6 },
-      this.scene
+      this.scene,
     );
     field.position = hub.position;
-    
+
     const fieldMat = new StandardMaterial('fieldMat', this.scene);
     fieldMat.emissiveColor = new Color3(1.0, 0.5, 0.2);
     fieldMat.alpha = 0.2;
@@ -347,15 +350,11 @@ export class LitComputeVRScene {
    * Create particle flow between two points
    */
   private createParticleFlow(start: Vector3, end: Vector3, id: number) {
-    const particles = new ParticleSystem(
-      `particles${id}`,
-      500,
-      this.scene
-    );
+    const particles = new ParticleSystem(`particles${id}`, 500, this.scene);
 
     particles.particleTexture = new Texture(
       'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMwMGZmZmYiLz48L3N2Zz4=',
-      this.scene
+      this.scene,
     );
 
     particles.emitter = start;
@@ -386,7 +385,7 @@ export class LitComputeVRScene {
     const body = MeshBuilder.CreateCylinder(
       'agentBody',
       { height: 2, diameter: 0.8 },
-      this.scene
+      this.scene,
     );
     body.position = new Vector3(-5, 6, -5);
 
@@ -394,7 +393,7 @@ export class LitComputeVRScene {
     const head = MeshBuilder.CreateSphere(
       'agentHead',
       { diameter: 0.8 },
-      this.scene
+      this.scene,
     );
     head.position = body.position.add(new Vector3(0, 1.5, 0));
 
@@ -416,7 +415,7 @@ export class LitComputeVRScene {
     const ring = MeshBuilder.CreateTorus(
       'agentRing',
       { diameter: 1.5, thickness: 0.1, tessellation: 32 },
-      this.scene
+      this.scene,
     );
     ring.position = head.position;
     ring.rotation.x = Math.PI / 2;
@@ -444,7 +443,7 @@ export class LitComputeVRScene {
     const plane = MeshBuilder.CreatePlane(
       'speechBubble',
       { width: 6, height: 3 },
-      this.scene
+      this.scene,
     );
     plane.position = position.add(new Vector3(0, 2, 0));
     plane.billboardMode = 7; // Face camera
@@ -489,7 +488,7 @@ export class LitComputeVRScene {
     const stats = MeshBuilder.CreatePlane(
       'statsPanel',
       { width: 8, height: 4 },
-      this.scene
+      this.scene,
     );
     stats.position = new Vector3(15, 8, 0);
     stats.rotation.y = -Math.PI / 4;
@@ -506,7 +505,8 @@ export class LitComputeVRScene {
     statsTexture.addControl(statsRect);
 
     const statsText = new TextBlock();
-    statsText.text = `📊 NETWORK STATISTICS\n\n` +
+    statsText.text =
+      `📊 NETWORK STATISTICS\n\n` +
       `Active Nodes: 8\n` +
       `Total Jobs: 1,247\n` +
       `Success Rate: 98.5%\n` +
@@ -529,7 +529,7 @@ export class LitComputeVRScene {
     const plane = MeshBuilder.CreatePlane(
       `label_${mesh.name}`,
       { width: 3, height: 1 },
-      this.scene
+      this.scene,
     );
     plane.position = mesh.position.add(new Vector3(0, 2, 0));
     plane.billboardMode = 7;
@@ -584,7 +584,7 @@ export class LitComputeVRScene {
       'scaling',
       30,
       Animation.ANIMATIONTYPE_VECTOR3,
-      Animation.ANIMATIONLOOPMODE_CYCLE
+      Animation.ANIMATIONLOOPMODE_CYCLE,
     );
 
     const keys = [
@@ -607,7 +607,7 @@ export class LitComputeVRScene {
       'position.y',
       30,
       Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CYCLE
+      Animation.ANIMATIONLOOPMODE_CYCLE,
     );
 
     const startY = mesh.position.y;
@@ -631,7 +631,7 @@ export class LitComputeVRScene {
       'rotation.y',
       30,
       Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CYCLE
+      Animation.ANIMATIONLOOPMODE_CYCLE,
     );
 
     const keys = [
@@ -650,40 +650,31 @@ export class LitComputeVRScene {
   private setupInteractions() {
     this.nodes.forEach((node) => {
       node.mesh.actionManager = new ActionManager(this.scene);
-      
+
       // On hover
       node.mesh.actionManager.registerAction(
-        new ExecuteCodeAction(
-          ActionManager.OnPointerOverTrigger,
-          () => {
-            node.mesh.scaling = new Vector3(1.2, 1.2, 1.2);
-            const mat = node.mesh.material as PBRMaterial;
-            mat.emissiveColor = new Color3(0.3, 0.6, 1.0);
-          }
-        )
+        new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, () => {
+          node.mesh.scaling = new Vector3(1.2, 1.2, 1.2);
+          const mat = node.mesh.material as PBRMaterial;
+          mat.emissiveColor = new Color3(0.3, 0.6, 1.0);
+        }),
       );
 
       // On hover out
       node.mesh.actionManager.registerAction(
-        new ExecuteCodeAction(
-          ActionManager.OnPointerOutTrigger,
-          () => {
-            node.mesh.scaling = new Vector3(1, 1, 1);
-            const mat = node.mesh.material as PBRMaterial;
-            mat.emissiveColor = new Color3(0.1, 0.3, 0.5);
-          }
-        )
+        new ExecuteCodeAction(ActionManager.OnPointerOutTrigger, () => {
+          node.mesh.scaling = new Vector3(1, 1, 1);
+          const mat = node.mesh.material as PBRMaterial;
+          mat.emissiveColor = new Color3(0.1, 0.3, 0.5);
+        }),
       );
 
       // On click
       node.mesh.actionManager.registerAction(
-        new ExecuteCodeAction(
-          ActionManager.OnPickTrigger,
-          () => {
-            console.log(`Clicked Node ${node.id + 1}`);
-            this.showNodeDetails(node);
-          }
-        )
+        new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
+          console.log(`Clicked Node ${node.id + 1}`);
+          this.showNodeDetails(node);
+        }),
       );
     });
   }
@@ -692,14 +683,15 @@ export class LitComputeVRScene {
    * Show detailed info when clicking node
    */
   private showNodeDetails(node: any) {
-    const details = `Node ${node.id + 1} Details:\n\n` +
+    const details =
+      `Node ${node.id + 1} Details:\n\n` +
       `Status: Active ✓\n` +
       `Jobs Processed: ${Math.floor(Math.random() * 500 + 100)}\n` +
       `Uptime: ${Math.floor(Math.random() * 30 + 70)}%\n` +
       `Earnings: ${(Math.random() * 5 + 1).toFixed(2)} ETH\n` +
       `Response Time: ${(Math.random() * 2 + 1).toFixed(1)}s\n` +
       `Success Rate: ${(Math.random() * 5 + 95).toFixed(1)}%`;
-    
+
     alert(details);
   }
 
@@ -714,7 +706,7 @@ export class LitComputeVRScene {
    * Dispose resources
    */
   public dispose() {
-    this.dataParticles.forEach(p => p.dispose());
+    this.dataParticles.forEach((p) => p.dispose());
     this.scene.dispose();
     this.engine.dispose();
   }

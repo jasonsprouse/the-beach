@@ -12,13 +12,13 @@ import { IpldService } from '../services/ipld.service';
 
 /**
  * IPLD Controller
- * 
+ *
  * Provides HTTP endpoints for IPLD operations:
  * - Resolve CIDs
  * - Verify data integrity
  * - Export/import blocks
  * - Query node graphs
- * 
+ *
  * This enables content-addressable, verifiable data structures
  * across the Lit Compute network
  */
@@ -35,10 +35,11 @@ export class IpldController {
   @Get('info')
   getInfo() {
     const stats = this.ipldService.getStats();
-    
+
     return {
       name: 'IPLD Service for Lit Compute Network',
-      description: 'Content-addressable, cryptographically verifiable data structures',
+      description:
+        'Content-addressable, cryptographically verifiable data structures',
       version: '1.0.0',
       features: [
         'Content-addressed node identities',
@@ -61,7 +62,7 @@ export class IpldController {
     try {
       const data = await this.ipldService.resolve(cidString);
       const json = await this.ipldService.toJSON(cidString);
-      
+
       return {
         success: true,
         cid: cidString,
@@ -82,12 +83,10 @@ export class IpldController {
    * Verify data integrity against a CID
    */
   @Post('verify')
-  async verifyIntegrity(
-    @Body() body: { cid: string; data: any },
-  ) {
+  async verifyIntegrity(@Body() body: { cid: string; data: any }) {
     try {
       const { cid, data } = body;
-      
+
       if (!cid || !data) {
         throw new HttpException(
           'CID and data are required',
@@ -102,7 +101,7 @@ export class IpldController {
         cid,
         valid: isValid,
         timestamp: Date.now(),
-        message: isValid 
+        message: isValid
           ? 'Data integrity verified - CID matches content'
           : 'Data integrity check failed - CID does not match content',
       };
@@ -123,7 +122,7 @@ export class IpldController {
   async exportBlock(@Param('cid') cidString: string) {
     try {
       const bytes = await this.ipldService.exportBlock(cidString);
-      
+
       if (!bytes) {
         throw new HttpException(
           `Block not found for CID: ${cidString}`,
@@ -153,22 +152,17 @@ export class IpldController {
    * Import a block from external source
    */
   @Post('import')
-  async importBlock(
-    @Body() body: { data: string; encoding?: string },
-  ) {
+  async importBlock(@Body() body: { data: string; encoding?: string }) {
     try {
       const { data, encoding = 'base64' } = body;
-      
+
       if (!data) {
-        throw new HttpException(
-          'Data is required',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpException('Data is required', HttpStatus.BAD_REQUEST);
       }
 
       let bytes: Uint8Array;
       let parsedData: any;
-      
+
       if (encoding === 'base64') {
         bytes = new Uint8Array(Buffer.from(data, 'base64'));
         // Try to parse as JSON
@@ -215,7 +209,7 @@ export class IpldController {
   @Get('stats')
   getStats() {
     const stats = this.ipldService.getStats();
-    
+
     return {
       success: true,
       stats,
@@ -229,7 +223,8 @@ export class IpldController {
    */
   @Post('create-node')
   async createNodeCID(
-    @Body() body: {
+    @Body()
+    body: {
       walletAddress: string;
       publicKey: string;
       capabilities: any;
@@ -280,20 +275,13 @@ export class IpldController {
    */
   @Post('create-job')
   async createJobCID(
-    @Body() body: {
-      type: string;
-      input: any;
-      requirements: any;
-    },
+    @Body() body: { type: string; input: any; requirements: any },
   ) {
     try {
       const { type, input, requirements } = body;
 
       if (!type) {
-        throw new HttpException(
-          'Job type is required',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpException('Job type is required', HttpStatus.BAD_REQUEST);
       }
 
       const cid = await this.ipldService.createJobCID({
@@ -323,12 +311,7 @@ export class IpldController {
    * Create a job assignment link
    */
   @Post('assign-job')
-  async assignJob(
-    @Body() body: {
-      jobCID: string;
-      nodeCID: string;
-    },
-  ) {
+  async assignJob(@Body() body: { jobCID: string; nodeCID: string }) {
     try {
       const { jobCID: jobCIDString, nodeCID: nodeCIDString } = body;
 

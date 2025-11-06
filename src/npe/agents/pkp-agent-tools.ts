@@ -1,6 +1,6 @@
 /**
  * PKP Agent Tools Interface
- * 
+ *
  * Defines the capabilities and tools available to PKP agents
  * for performing automated work across repositories.
  */
@@ -46,7 +46,8 @@ export class GitTool implements PKPTool {
   id = 'git-operations';
   name = 'Git Operations';
   category = PKPToolCategory.GIT;
-  description = 'Execute Git commands (clone, branch, commit, push, PR creation)';
+  description =
+    'Execute Git commands (clone, branch, commit, push, PR creation)';
   requiredPermissions = ['git:read', 'git:write'];
 
   async execute(params: {
@@ -57,7 +58,7 @@ export class GitTool implements PKPTool {
     files?: string[];
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       switch (params.action) {
         case 'branch':
@@ -66,7 +67,7 @@ export class GitTool implements PKPTool {
             output: `Created branch: ${params.branch}`,
             executionTime: Date.now() - startTime,
           };
-        
+
         case 'commit':
           return {
             success: true,
@@ -77,14 +78,14 @@ export class GitTool implements PKPTool {
               files: params.files,
             },
           };
-        
+
         case 'push':
           return {
             success: true,
             output: `Pushed to ${params.branch}`,
             executionTime: Date.now() - startTime,
           };
-        
+
         case 'create-pr':
           return {
             success: true,
@@ -94,7 +95,7 @@ export class GitTool implements PKPTool {
               url: `https://github.com/example/repo/pull/123`,
             },
           };
-        
+
         default:
           throw new Error(`Unknown Git action: ${params.action}`);
       }
@@ -124,7 +125,7 @@ export class CodeAnalysisTool implements PKPTool {
     path?: string;
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       return {
         success: true,
@@ -161,7 +162,7 @@ export class TestingTool implements PKPTool {
     coverage?: boolean;
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       return {
         success: true,
@@ -199,7 +200,7 @@ export class SecurityTool implements PKPTool {
     path?: string;
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       return {
         success: true,
@@ -240,7 +241,7 @@ export class DeploymentTool implements PKPTool {
     service?: string;
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       return {
         success: true,
@@ -278,7 +279,7 @@ export class DocumentationTool implements PKPTool {
     output?: string;
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       return {
         success: true,
@@ -315,7 +316,7 @@ export class MonitoringTool implements PKPTool {
     timeRange?: string;
   }): Promise<ToolExecutionResult> {
     const startTime = Date.now();
-    
+
     try {
       return {
         success: true,
@@ -355,17 +356,17 @@ export class PKPToolRegistry {
     this.register(new DeploymentTool());
     this.register(new DocumentationTool());
     this.register(new MonitoringTool());
-    
+
     // Import and register VR tools
     try {
-      const { 
-        VREnvironmentTool, 
-        VRCodeVisualizationTool, 
+      const {
+        VREnvironmentTool,
+        VRCodeVisualizationTool,
         VRArchitectureTool,
         VRGitVisualizationTool,
-        VRCollaborationTool
+        VRCollaborationTool,
       } = require('./pkp-vr-tools');
-      
+
       this.register(new VREnvironmentTool());
       this.register(new VRCodeVisualizationTool());
       this.register(new VRArchitectureTool());
@@ -394,12 +395,9 @@ export class PKPToolRegistry {
     return Array.from(this.tools.values());
   }
 
-  async executeTool(
-    toolId: string,
-    params: any,
-  ): Promise<ToolExecutionResult> {
+  async executeTool(toolId: string, params: any): Promise<ToolExecutionResult> {
     const tool = this.get(toolId);
-    
+
     if (!tool) {
       return {
         success: false,

@@ -11,11 +11,13 @@ import { z } from 'zod';
 @Injectable()
 export class AIAgentService {
   private readonly logger = new Logger(AIAgentService.name);
-  
+
   // Default models
   private readonly defaultChatModel = openai('gpt-4-turbo');
   private readonly defaultCodeModel = openai('gpt-4-turbo');
-  private readonly defaultReasoningModel = anthropic('claude-3-5-sonnet-20241022');
+  private readonly defaultReasoningModel = anthropic(
+    'claude-3-5-sonnet-20241022',
+  );
 
   /**
    * Generate a task plan for an agent
@@ -40,13 +42,15 @@ export class AIAgentService {
       const { object } = await generateObject({
         model: this.defaultReasoningModel,
         schema: z.object({
-          tasks: z.array(z.object({
-            id: z.string(),
-            description: z.string(),
-            estimatedTime: z.string(),
-            dependencies: z.array(z.string()),
-            priority: z.enum(['high', 'medium', 'low']),
-          })),
+          tasks: z.array(
+            z.object({
+              id: z.string(),
+              description: z.string(),
+              estimatedTime: z.string(),
+              dependencies: z.array(z.string()),
+              priority: z.enum(['high', 'medium', 'low']),
+            }),
+          ),
           approach: z.string(),
           risks: z.array(z.string()),
         }),
@@ -56,7 +60,7 @@ Goal: ${params.goal}
 
 ${params.context ? `Context: ${JSON.stringify(params.context, null, 2)}` : ''}
 
-${params.constraints ? `Constraints:\n${params.constraints.map(c => `- ${c}`).join('\n')}` : ''}
+${params.constraints ? `Constraints:\n${params.constraints.map((c) => `- ${c}`).join('\n')}` : ''}
 
 Create a detailed task plan with:
 1. Specific, actionable tasks
@@ -120,12 +124,16 @@ TESTS: (if applicable)
 
       // Parse the response
       const codeMatch = text.match(/CODE:\s*```[\w]*\n([\s\S]*?)```/);
-      const explanationMatch = text.match(/EXPLANATION:\s*([\s\S]*?)(?:TESTS:|$)/);
+      const explanationMatch = text.match(
+        /EXPLANATION:\s*([\s\S]*?)(?:TESTS:|$)/,
+      );
       const testsMatch = text.match(/TESTS:.*?```[\w]*\n([\s\S]*?)```/);
 
       return {
         code: codeMatch ? codeMatch[1].trim() : text,
-        explanation: explanationMatch ? explanationMatch[1].trim() : 'Code generated successfully',
+        explanation: explanationMatch
+          ? explanationMatch[1].trim()
+          : 'Code generated successfully',
         tests: testsMatch ? testsMatch[1].trim() : undefined,
       };
     } catch (error) {
@@ -142,7 +150,12 @@ TESTS: (if applicable)
     language: string;
     context?: string;
   }): Promise<{
-    issues: Array<{ severity: string; line?: number; message: string; suggestion?: string }>;
+    issues: Array<{
+      severity: string;
+      line?: number;
+      message: string;
+      suggestion?: string;
+    }>;
     score: number;
     summary: string;
   }> {
@@ -150,12 +163,14 @@ TESTS: (if applicable)
       const { object } = await generateObject({
         model: this.defaultCodeModel,
         schema: z.object({
-          issues: z.array(z.object({
-            severity: z.enum(['critical', 'high', 'medium', 'low', 'info']),
-            line: z.number().optional(),
-            message: z.string(),
-            suggestion: z.string().optional(),
-          })),
+          issues: z.array(
+            z.object({
+              severity: z.enum(['critical', 'high', 'medium', 'low', 'info']),
+              line: z.number().optional(),
+              message: z.string(),
+              suggestion: z.string().optional(),
+            }),
+          ),
           score: z.number().min(0).max(100),
           summary: z.string(),
         }),
@@ -210,19 +225,32 @@ Be concise but thorough.`,
       });
 
       // Simple confidence estimation based on response length and certainty words
-      const certaintyWords = ['definitely', 'certainly', 'always', 'never', 'must'];
-      const uncertaintyWords = ['might', 'maybe', 'possibly', 'probably', 'could'];
-      
-      const certaintyCount = certaintyWords.filter(word => 
-        text.toLowerCase().includes(word)
+      const certaintyWords = [
+        'definitely',
+        'certainly',
+        'always',
+        'never',
+        'must',
+      ];
+      const uncertaintyWords = [
+        'might',
+        'maybe',
+        'possibly',
+        'probably',
+        'could',
+      ];
+
+      const certaintyCount = certaintyWords.filter((word) =>
+        text.toLowerCase().includes(word),
       ).length;
-      const uncertaintyCount = uncertaintyWords.filter(word => 
-        text.toLowerCase().includes(word)
+      const uncertaintyCount = uncertaintyWords.filter((word) =>
+        text.toLowerCase().includes(word),
       ).length;
-      
-      const confidence = Math.min(95, Math.max(50, 
-        70 + (certaintyCount * 5) - (uncertaintyCount * 5)
-      ));
+
+      const confidence = Math.min(
+        95,
+        Math.max(50, 70 + certaintyCount * 5 - uncertaintyCount * 5),
+      );
 
       return {
         answer: text,
@@ -263,18 +291,22 @@ Be concise but thorough.`,
             patterns: z.array(z.string()),
           }),
           timeline: z.object({
-            phases: z.array(z.object({
-              name: z.string(),
-              duration: z.string(),
-              tasks: z.array(z.string()),
-            })),
+            phases: z.array(
+              z.object({
+                name: z.string(),
+                duration: z.string(),
+                tasks: z.array(z.string()),
+              }),
+            ),
             totalEstimate: z.string(),
           }),
-          risks: z.array(z.object({
-            risk: z.string(),
-            mitigation: z.string(),
-            severity: z.enum(['critical', 'high', 'medium', 'low']),
-          })),
+          risks: z.array(
+            z.object({
+              risk: z.string(),
+              mitigation: z.string(),
+              severity: z.enum(['critical', 'high', 'medium', 'low']),
+            }),
+          ),
           recommendations: z.array(z.string()),
         }),
         prompt: `Analyze these project requirements and provide a comprehensive technical plan.
@@ -347,7 +379,7 @@ ${params.format === 'markdown' ? '- Clear headings\n- Code examples\n- Best prac
       const { text } = await generateText({
         model: this.defaultCodeModel,
         prompt: `Optimize this ${params.language} code for:
-${params.goals.map(g => `- ${g}`).join('\n')}
+${params.goals.map((g) => `- ${g}`).join('\n')}
 
 Original code:
 \`\`\`${params.language}
@@ -373,10 +405,14 @@ IMPROVEMENTS:
       const improvementsMatch = text.match(/IMPROVEMENTS:\s*([\s\S]*?)$/);
 
       // Parse improvements
-      const improvements: Array<{ type: string; description: string; impact: string }> = [];
+      const improvements: Array<{
+        type: string;
+        description: string;
+        impact: string;
+      }> = [];
       if (improvementsMatch) {
         const lines = improvementsMatch[1].trim().split('\n');
-        lines.forEach(line => {
+        lines.forEach((line) => {
           if (line.trim()) {
             improvements.push({
               type: 'optimization',
@@ -405,7 +441,7 @@ IMPROVEMENTS:
     agentRole?: string;
   }): Promise<{ response: string }> {
     try {
-      const systemMessage = params.agentRole 
+      const systemMessage = params.agentRole
         ? `You are a ${params.agentRole} AI agent helping with software development.`
         : 'You are a helpful AI assistant.';
 

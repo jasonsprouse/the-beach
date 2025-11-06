@@ -1,4 +1,13 @@
-import { Controller, Post, Get, Body, Param, Query, Sse, MessageEvent } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Param,
+  Query,
+  Sse,
+  MessageEvent,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { AIAgentService } from './services/ai-agent.service';
 import { AIVRSceneAgent } from './agents/AIVRSceneAgent';
@@ -6,7 +15,7 @@ import { AIToolRegistry } from './agents/ai-powered-tools';
 
 /**
  * AI Controller
- * 
+ *
  * Provides HTTP/SSE endpoints for AI agent interactions
  */
 @Controller('npe/ai')
@@ -25,7 +34,9 @@ export class AIController {
    * POST /npe/ai/generate-code
    */
   @Post('generate-code')
-  async generateCode(@Body() body: { description: string; language?: string; context?: string }) {
+  async generateCode(
+    @Body() body: { description: string; language?: string; context?: string },
+  ) {
     return await this.aiService.generateCode({
       description: body.description,
       language: body.language || 'TypeScript',
@@ -50,7 +61,9 @@ export class AIController {
    * POST /npe/ai/optimize-code
    */
   @Post('optimize-code')
-  async optimizeCode(@Body() body: { code: string; language?: string; goals?: string[] }) {
+  async optimizeCode(
+    @Body() body: { code: string; language?: string; goals?: string[] },
+  ) {
     return await this.aiService.optimizeCode({
       code: body.code,
       language: body.language || 'TypeScript',
@@ -63,7 +76,15 @@ export class AIController {
    * POST /npe/ai/plan-task
    */
   @Post('plan-task')
-  async planTask(@Body() body: { goal: string; agentRole?: string; context?: any; constraints?: string[] }) {
+  async planTask(
+    @Body()
+    body: {
+      goal: string;
+      agentRole?: string;
+      context?: any;
+      constraints?: string[];
+    },
+  ) {
     return await this.aiService.generateTaskPlan({
       agentRole: body.agentRole || 'Development Agent',
       goal: body.goal,
@@ -77,7 +98,9 @@ export class AIController {
    * POST /npe/ai/analyze-requirements
    */
   @Post('analyze-requirements')
-  async analyzeRequirements(@Body() body: { requirements: string; projectType?: string }) {
+  async analyzeRequirements(
+    @Body() body: { requirements: string; projectType?: string },
+  ) {
     return await this.aiService.analyzeRequirements({
       requirements: body.requirements,
       projectType: body.projectType,
@@ -89,11 +112,13 @@ export class AIController {
    * POST /npe/ai/generate-docs
    */
   @Post('generate-docs')
-  async generateDocs(@Body() body: { code?: string; description: string; format?: string }) {
+  async generateDocs(
+    @Body() body: { code?: string; description: string; format?: string },
+  ) {
     return await this.aiService.generateDocumentation({
       code: body.code,
       description: body.description,
-      format: body.format as any || 'markdown',
+      format: (body.format as any) || 'markdown',
     });
   }
 
@@ -102,7 +127,9 @@ export class AIController {
    * POST /npe/ai/ask
    */
   @Post('ask')
-  async askQuestion(@Body() body: { question: string; context?: string; agentRole?: string }) {
+  async askQuestion(
+    @Body() body: { question: string; context?: string; agentRole?: string },
+  ) {
     return await this.aiService.answerQuestion({
       question: body.question,
       context: body.context,
@@ -115,7 +142,13 @@ export class AIController {
    * POST /npe/ai/chat
    */
   @Post('chat')
-  async chat(@Body() body: { messages: Array<{ role: string; content: string }>; agentRole?: string }) {
+  async chat(
+    @Body()
+    body: {
+      messages: Array<{ role: string; content: string }>;
+      agentRole?: string;
+    },
+  ) {
     return await this.aiService.chat({
       messages: body.messages as any,
       agentRole: body.agentRole || 'Software Development Assistant',
@@ -127,7 +160,10 @@ export class AIController {
    * GET /npe/ai/stream?prompt=...
    */
   @Sse('stream')
-  streamResponse(@Query('prompt') prompt: string, @Query('role') agentRole?: string): Observable<MessageEvent> {
+  streamResponse(
+    @Query('prompt') prompt: string,
+    @Query('role') agentRole?: string,
+  ): Observable<MessageEvent> {
     return new Observable((observer) => {
       (async () => {
         try {
@@ -231,7 +267,9 @@ export class AIController {
    * GET /npe/ai/vr/stream?question=...
    */
   @Sse('vr/stream')
-  streamVRResponse(@Query('question') question: string): Observable<MessageEvent> {
+  streamVRResponse(
+    @Query('question') question: string,
+  ): Observable<MessageEvent> {
     return new Observable((observer) => {
       (async () => {
         try {
@@ -271,7 +309,9 @@ export class AIController {
    * POST /npe/ai/vr/feedback
    */
   @Post('vr/feedback')
-  async provideFeedback(@Body() body: { feedback: 'helpful' | 'not-helpful'; lastResponse: string }) {
+  async provideFeedback(
+    @Body() body: { feedback: 'helpful' | 'not-helpful'; lastResponse: string },
+  ) {
     await this.vrAgent.provideFeedback(body.feedback, body.lastResponse);
     return { success: true };
   }

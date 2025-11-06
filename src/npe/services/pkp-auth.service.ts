@@ -23,7 +23,7 @@ export interface AuthenticatedUser {
   name?: string;
   provider: AuthProvider;
   providerId: string; // Provider-specific ID (e.g., Google user ID)
-  
+
   // Main PKP (minted via Lit Protocol with WebAuthn/Social)
   mainPKP: {
     address: string;
@@ -33,7 +33,7 @@ export interface AuthenticatedUser {
       accessToken?: string;
     };
   };
-  
+
   // Metadata
   createdAt: Date;
   lastLogin: Date;
@@ -50,17 +50,17 @@ export interface SubPKP {
   parentPKP: string; // Main PKP address
   purpose: string; // 'development', 'sales', 'support', etc.
   capabilities: string[];
-  
+
   // Delegation settings
   autonomy: 'low' | 'medium' | 'high'; // How much can it do without approval
   spendingLimit?: number; // Max transaction amount
   approvalRequired: string[]; // Actions requiring main PKP approval
-  
+
   // Status
   status: 'active' | 'paused' | 'revoked';
   createdAt: Date;
   createdBy: string; // Main PKP that created it
-  
+
   // Usage tracking
   tasksCompleted: number;
   totalSpent: number;
@@ -115,17 +115,17 @@ export interface ApprovalRequest {
 @Injectable()
 export class PKPAuthService {
   private readonly logger = new Logger(PKPAuthService.name);
-  
+
   // Main PKP registry (human-owned)
   private authenticatedUsers = new Map<string, AuthenticatedUser>();
   private usersByEmail = new Map<string, AuthenticatedUser>();
-  
+
   // PKP hierarchy
   private pkpHierarchy = new Map<string, PKPHierarchy>();
-  
+
   // Sub-PKP registry (AI agents)
   private subPKPs = new Map<string, SubPKP>();
-  
+
   // Approval queue
   private approvalRequests = new Map<string, ApprovalRequest>();
 
@@ -144,14 +144,18 @@ export class PKPAuthService {
     name?: string;
     accessToken?: string;
   }): Promise<AuthenticatedUser> {
-    this.logger.log(`🔑 Authenticating user via ${params.provider}: ${params.email || params.providerId}`);
+    this.logger.log(
+      `🔑 Authenticating user via ${params.provider}: ${params.email || params.providerId}`,
+    );
 
     // Check if user already exists
-    const existingUser = this.usersByEmail.get(params.email || params.providerId);
+    const existingUser = this.usersByEmail.get(
+      params.email || params.providerId,
+    );
     if (existingUser) {
       existingUser.lastLogin = new Date();
       this.logger.log(`✅ Existing user authenticated: ${existingUser.userId}`);
-      
+
       this.eventEmitter.emit('user.login', { user: existingUser });
       return existingUser;
     }
@@ -186,7 +190,9 @@ export class PKPAuthService {
       delegationRules: [],
     });
 
-    this.logger.log(`✨ New user registered: ${user.userId} -> PKP: ${mainPKP.address}`);
+    this.logger.log(
+      `✨ New user registered: ${user.userId} -> PKP: ${mainPKP.address}`,
+    );
     this.eventEmitter.emit('user.registered', { user });
 
     return user;
@@ -213,7 +219,9 @@ export class PKPAuthService {
     const pkpAddress = `0x${Math.random().toString(16).slice(2, 42).padStart(40, '0')}`;
     const publicKey = `0x04${Math.random().toString(16).slice(2, 130).padStart(128, '0')}`;
 
-    this.logger.log(`🎫 Minted main PKP: ${pkpAddress} (via ${params.provider})`);
+    this.logger.log(
+      `🎫 Minted main PKP: ${pkpAddress} (via ${params.provider})`,
+    );
 
     return {
       address: pkpAddress,
@@ -255,7 +263,9 @@ export class PKPAuthService {
     // Verify main PKP exists
     const hierarchy = this.pkpHierarchy.get(params.mainPKPAddress);
     if (!hierarchy) {
-      throw new UnauthorizedException('Main PKP not found or not authenticated');
+      throw new UnauthorizedException(
+        'Main PKP not found or not authenticated',
+      );
     }
 
     // Generate sub-PKP (in production, use Lit Actions to derive)
@@ -283,8 +293,13 @@ export class PKPAuthService {
     hierarchy.subPKPs.set(subPKPAddress, subPKP);
     this.subPKPs.set(subPKPAddress, subPKP);
 
-    this.logger.log(`🤖 Created sub-PKP: ${subPKPAddress} for ${params.purpose}`);
-    this.eventEmitter.emit('subpkp.created', { subPKP, mainPKP: params.mainPKPAddress });
+    this.logger.log(
+      `🤖 Created sub-PKP: ${subPKPAddress} for ${params.purpose}`,
+    );
+    this.eventEmitter.emit('subpkp.created', {
+      subPKP,
+      mainPKP: params.mainPKPAddress,
+    });
 
     return subPKP;
   }
@@ -337,7 +352,9 @@ export class PKPAuthService {
     }
 
     if (request.mainPKP !== params.mainPKPAddress) {
-      throw new UnauthorizedException('Not authorized to respond to this request');
+      throw new UnauthorizedException(
+        'Not authorized to respond to this request',
+      );
     }
 
     if (request.status !== 'pending') {
@@ -352,7 +369,9 @@ export class PKPAuthService {
     request.status = params.approved ? 'approved' : 'rejected';
     request.respondedAt = new Date();
 
-    this.logger.log(`${params.approved ? '✅' : '❌'} Approval ${request.status}: ${params.requestId}`);
+    this.logger.log(
+      `${params.approved ? '✅' : '❌'} Approval ${request.status}: ${params.requestId}`,
+    );
     this.eventEmitter.emit('approval.responded', { request });
 
     return request;
@@ -365,14 +384,26 @@ export class PKPAuthService {
     subPKPAddress: string;
     action: string;
     amount?: number;
-  }): Promise<{ allowed: boolean; requiresApproval: boolean; reason?: string }> {
+  }): Promise<{
+    allowed: boolean;
+    requiresApproval: boolean;
+    reason?: string;
+  }> {
     const subPKP = this.subPKPs.get(params.subPKPAddress);
     if (!subPKP) {
-      return { allowed: false, requiresApproval: false, reason: 'Sub-PKP not found' };
+      return {
+        allowed: false,
+        requiresApproval: false,
+        reason: 'Sub-PKP not found',
+      };
     }
 
     if (subPKP.status !== 'active') {
-      return { allowed: false, requiresApproval: false, reason: `Sub-PKP is ${subPKP.status}` };
+      return {
+        allowed: false,
+        requiresApproval: false,
+        reason: `Sub-PKP is ${subPKP.status}`,
+      };
     }
 
     // Check if action requires approval

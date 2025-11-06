@@ -1,6 +1,6 @@
 /**
  * NPE Module
- * 
+ *
  * This module provides NPE (Non-Person Entity) team management
  * for the Lit Compute Network development project.
  */
@@ -28,7 +28,14 @@ import { PKPLiveGateway } from './pkp-live.gateway';
 
 @Module({
   imports: [EventEmitterModule.forRoot(), ScheduleModule.forRoot()],
-  controllers: [NPEController, PKPController, AIController, PKPAuthController, TierProductsController, TaskAssignmentController],
+  controllers: [
+    NPEController,
+    PKPController,
+    AIController,
+    PKPAuthController,
+    TierProductsController,
+    TaskAssignmentController,
+  ],
   providers: [
     LitComputeTeamService,
     GameManagerService,

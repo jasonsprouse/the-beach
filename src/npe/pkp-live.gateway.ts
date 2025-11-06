@@ -48,13 +48,15 @@ export interface PKPAgent {
   },
   namespace: '/pkp-live',
 })
-export class PKPLiveGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class PKPLiveGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
   private readonly logger = new Logger(PKPLiveGateway.name);
   private connectedClients = new Map<string, Socket>();
-  
+
   // In-memory data stores
   private tasks: Map<number, PKPTask> = new Map();
   private agents: Map<string, PKPAgent> = new Map();
@@ -68,7 +70,7 @@ export class PKPLiveGateway implements OnGatewayConnection, OnGatewayDisconnect 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
     this.connectedClients.set(client.id, client);
-    
+
     // Send initial state to new client
     client.emit('initial-state', {
       tasks: Array.from(this.tasks.values()),
@@ -83,15 +85,35 @@ export class PKPLiveGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
   private initializeAgents() {
     const agentConfigs = [
-      { id: 'redis-encryptor', name: 'Redis Encryptor', type: 'encryption', emoji: '🔒' },
+      {
+        id: 'redis-encryptor',
+        name: 'Redis Encryptor',
+        type: 'encryption',
+        emoji: '🔒',
+      },
       { id: 'test-runner', name: 'Test Runner', type: 'testing', emoji: '✅' },
-      { id: 'code-reviewer', name: 'Code Reviewer', type: 'review', emoji: '📝' },
-      { id: 'metrics-collector', name: 'Metrics Collector', type: 'metrics', emoji: '📊' },
-      { id: 'security-auditor', name: 'Security Auditor', type: 'security', emoji: '🛡️' },
+      {
+        id: 'code-reviewer',
+        name: 'Code Reviewer',
+        type: 'review',
+        emoji: '📝',
+      },
+      {
+        id: 'metrics-collector',
+        name: 'Metrics Collector',
+        type: 'metrics',
+        emoji: '📊',
+      },
+      {
+        id: 'security-auditor',
+        name: 'Security Auditor',
+        type: 'security',
+        emoji: '🛡️',
+      },
       { id: 'deployer', name: 'Deployer', type: 'deployment', emoji: '🚀' },
     ];
 
-    agentConfigs.forEach(config => {
+    agentConfigs.forEach((config) => {
       this.agents.set(config.id, {
         id: config.id,
         name: config.name,
@@ -112,7 +134,14 @@ export class PKPLiveGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
   @SubscribeMessage('create-task')
   handleCreateTask(
-    @MessageBody() data: { title: string; description: string; agentType: string; repository: string; priority: string },
+    @MessageBody()
+    data: {
+      title: string;
+      description: string;
+      agentType: string;
+      repository: string;
+      priority: string;
+    },
     @ConnectedSocket() client: Socket,
   ) {
     const task: PKPTask = {
@@ -132,7 +161,7 @@ export class PKPLiveGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     this.tasks.set(task.id, task);
     this.server.emit('task-created', task);
-    
+
     return { success: true, task };
   }
 
@@ -163,7 +192,7 @@ export class PKPLiveGateway implements OnGatewayConnection, OnGatewayDisconnect 
     agent.totalTasks++;
 
     this.server.emit('task-assigned', { task, agent });
-    
+
     // Simulate task execution
     this.executeTask(task.id, data.agentId);
 
@@ -181,13 +210,14 @@ export class PKPLiveGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
   @SubscribeMessage('clear-completed')
   handleClearCompleted(@ConnectedSocket() client: Socket) {
-    const completedTasks = Array.from(this.tasks.values())
-      .filter(t => t.status === 'completed' || t.status === 'failed');
-    
-    completedTasks.forEach(task => this.tasks.delete(task.id));
-    
+    const completedTasks = Array.from(this.tasks.values()).filter(
+      (t) => t.status === 'completed' || t.status === 'failed',
+    );
+
+    completedTasks.forEach((task) => this.tasks.delete(task.id));
+
     this.server.emit('tasks-cleared', { count: completedTasks.length });
-    
+
     return { success: true, cleared: completedTasks.length };
   }
 
@@ -209,11 +239,16 @@ export class PKPLiveGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
       const currentTask = this.tasks.get(taskId);
       if (currentTask && currentTask.status === 'in_progress') {
-        currentTask.progress = Math.min(100, currentTask.progress + Math.floor(Math.random() * 20) + 10);
-        
+        currentTask.progress = Math.min(
+          100,
+          currentTask.progress + Math.floor(Math.random() * 20) + 10,
+        );
+
         // Add output messages
         const outputs = this.generateTaskOutput(currentTask);
-        currentTask.output?.push(outputs[Math.floor(Math.random() * outputs.length)]);
+        currentTask.output?.push(
+          outputs[Math.floor(Math.random() * outputs.length)],
+        );
 
         this.server.emit('task-progress', {
           taskId: currentTask.id,
@@ -241,7 +276,9 @@ export class PKPLiveGateway implements OnGatewayConnection, OnGatewayDisconnect 
     task.status = success ? 'completed' : 'failed';
     task.endTime = new Date();
     task.progress = 100;
-    task.actualDuration = Math.floor((task.endTime.getTime() - task.startTime!.getTime()) / 1000);
+    task.actualDuration = Math.floor(
+      (task.endTime.getTime() - task.startTime!.getTime()) / 1000,
+    );
 
     if (!success) {
       task.errors?.push('Task failed due to simulated error');
@@ -253,15 +290,21 @@ export class PKPLiveGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (success) {
       agent.tasksCompleted++;
     }
-    
+
     // Recalculate success rate
-    agent.successRate = Math.round((agent.tasksCompleted / agent.totalTasks) * 100);
-    
+    agent.successRate = Math.round(
+      (agent.tasksCompleted / agent.totalTasks) * 100,
+    );
+
     // Update average duration
-    const completedTasks = Array.from(this.tasks.values())
-      .filter(t => t.assignedAgent === agent.name && t.actualDuration);
+    const completedTasks = Array.from(this.tasks.values()).filter(
+      (t) => t.assignedAgent === agent.name && t.actualDuration,
+    );
     if (completedTasks.length > 0) {
-      const totalDuration = completedTasks.reduce((sum, t) => sum + (t.actualDuration || 0), 0);
+      const totalDuration = completedTasks.reduce(
+        (sum, t) => sum + (t.actualDuration || 0),
+        0,
+      );
       agent.averageDuration = Math.round(totalDuration / completedTasks.length);
     }
 
@@ -323,14 +366,14 @@ export class PKPLiveGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
     return {
       totalTasks: tasks.length,
-      completedTasks: tasks.filter(t => t.status === 'completed').length,
-      failedTasks: tasks.filter(t => t.status === 'failed').length,
-      inProgressTasks: tasks.filter(t => t.status === 'in_progress').length,
-      idleTasks: tasks.filter(t => t.status === 'idle').length,
+      completedTasks: tasks.filter((t) => t.status === 'completed').length,
+      failedTasks: tasks.filter((t) => t.status === 'failed').length,
+      inProgressTasks: tasks.filter((t) => t.status === 'in_progress').length,
+      idleTasks: tasks.filter((t) => t.status === 'idle').length,
       totalAgents: agents.length,
-      activeAgents: agents.filter(a => a.status === 'working').length,
+      activeAgents: agents.filter((a) => a.status === 'working').length,
       averageSuccessRate: Math.round(
-        agents.reduce((sum, a) => sum + a.successRate, 0) / agents.length
+        agents.reduce((sum, a) => sum + a.successRate, 0) / agents.length,
       ),
     };
   }

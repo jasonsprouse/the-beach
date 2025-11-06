@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Biometric Payment System - Live Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .demo-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .demo-icon {
+            font-size: 2em;
+            margin-right: 15px;
+        }
+
+        .demo-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .demo-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .demo-button {
+            width: 100%;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .demo-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .demo-button:active {
+            transform: scale(0.98);
+        }
+
+        .demo-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .response-box.show {
+            display: block;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .biometric-simulation {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            border: 2px solid #2196F3;
+        }
+
+        .biometric-step {
+            margin: 10px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .step-icon {
+            margin-right: 10px;
+            font-size: 1.5em;
+        }
+
+        .pricing-table {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .pricing-tiers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .tier-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .tier-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+        }
+
+        .tier-card.featured {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+        }
+
+        .tier-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .tier-price {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .tier-period {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .tier-features {
+            text-align: left;
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .tier-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .tier-features li::before {
+            content: "✓ ";
+            color: #4caf50;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .api-docs {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .endpoint {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .endpoint-method {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            display: block;
+            overflow-x: auto;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            padding: 20px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulsing {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Biometric Payment System</h1>
+            <p>Live Demo - Touch ID, Face ID, WebAuthn & Web Payments</p>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-value">$147K</div>
+                <div class="stat-label">Year 1 Revenue</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">12</div>
+                <div class="stat-label">Monetization Touchpoints</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">$1.57M</div>
+                <div class="stat-label">5-Year Projection</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">$65K</div>
+                <div class="stat-label">Fraud Prevention Savings</div>
+            </div>
+        </div>
+
+        <div class="demo-grid">
+            <!-- Demo 1: Marketplace Purchase -->
+            <div class="demo-card">
+                <div class="demo-header">
+                    <div class="demo-icon">💳</div>
+                    <div class="demo-title">Marketplace Purchase</div>
+                </div>
+                <div class="demo-description">
+                    Purchase a premium code package ($150) with biometric verification. 
+                    Automatically requires HIGH assurance level.
+                </div>
+                <button class="demo-button" onclick="demoMarketplacePurchase()">
+                    Purchase Premium Package ($150)
+                </button>
+                <div id="marketplace-response" class="response-box"></div>
+            </div>
+
+            <!-- Demo 2: Subscription Upgrade -->
+            <div class="demo-card">
+                <div class="demo-header">
+                    <div class="demo-icon">⭐</div>
+                    <div class="demo-title">Tier Upgrade</div>
+                </div>
+                <div class="demo-description">
+                    Upgrade to Premium tier with enterprise biometric verification ($2.99 fee) 
+                    and recurring subscription ($9.99/month).
+                </div>
+                <button class="demo-button" onclick="demoTierUpgrade()">
+                    Upgrade to Premium ($9.99/mo)
+                </button>
+                <div id="tier-response" class="response-box"></div>
+            </div>
+
+            <!-- Demo 3: Batch Approval -->
+            <div class="demo-card">
+                <div class="demo-header">
+                    <div class="demo-icon">📋</div>
+                    <div class="demo-title">Batch Task Approval</div>
+                </div>
+                <div class="demo-description">
+                    Approve 5 task assignments with a single biometric verification. 
+                    Freemium users pay $0.10, Premium users get unlimited.
+                </div>
+                <button class="demo-button" onclick="demoBatchApproval()">
+                    Approve 5 Tasks (Batch)
+                </button>
+                <div id="batch-response" class="response-box"></div>
+            </div>
+
+            <!-- Demo 4: VR Payment -->
+            <div class="demo-card">
+                <div class="demo-header">
+                    <div class="demo-icon">🥽</div>
+                    <div class="demo-title">VR Spatial Biometric</div>
+                </div>
+                <div class="demo-description">
+                    Purchase VR asset using spatial biometric verification (gaze + hand tracking).
+                    Bot detection through natural human movement analysis.
+                </div>
+                <button class="demo-button" onclick="demoVRPayment()">
+                    Buy VR Asset ($29.99)
+                </button>
+                <div id="vr-response" class="response-box"></div>
+            </div>
+
+            <!-- Demo 5: Agent Hiring -->
+            <div class="demo-card">
+                <div class="demo-header">
+                    <div class="demo-icon">🤖</div>
+                    <div class="demo-title">Agent Marketplace</div>
+                </div>
+                <div class="demo-description">
+                    Hire a digital agent with escrow payment. Funds held until work completion.
+                    15% platform fee on transactions.
+                </div>
+                <button class="demo-button" onclick="demoAgentHiring()">
+                    Hire Agent ($100 escrow)
+                </button>
+                <div id="agent-response" class="response-box"></div>
+            </div>
+
+            <!-- Demo 6: PKP Recovery -->
+            <div class="demo-card">
+                <div class="demo-header">
+                    <div class="demo-icon">🛡️</div>
+                    <div class="demo-title">Guardian Recovery</div>
+                </div>
+                <div class="demo-description">
+                    Recover lost PKP with 2-of-3 guardian biometric verification. 
+                    Decentralized social recovery with $9.99 one-time fee.
+                </div>
+                <button class="demo-button" onclick="demoPKPRecovery()">
+                    Request PKP Recovery
+                </button>
+                <div id="recovery-response" class="response-box"></div>
+            </div>
+        </div>
+
+        <!-- Pricing Table -->
+        <div class="pricing-table">
+            <h2 style="text-align: center; margin-bottom: 10px;">💰 Pricing Tiers</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                Choose the plan that fits your needs
+            </p>
+            <div class="pricing-tiers">
+                <div class="tier-card">
+                    <div class="tier-name">Freemium</div>
+                    <div class="tier-price">$0</div>
+                    <div class="tier-period">/month</div>
+                    <ul class="tier-features">
+                        <li>10 biometric verifications/mo</li>
+                        <li>Basic fingerprint auth</li>
+                        <li>Manual sub-PKP approvals</li>
+                        <li>$0.10 per batch approval</li>
+                        <li>Community support</li>
+                    </ul>
+                    <button class="demo-button" onclick="alert('Already on Freemium!')">Current Plan</button>
+                </div>
+
+                <div class="tier-card featured">
+                    <div class="tier-name">Basic</div>
+                    <div class="tier-price">$4.99</div>
+                    <div class="tier-period">/month</div>
+                    <ul class="tier-features">
+                        <li>100 biometric verifications/mo</li>
+                        <li>Face recognition</li>
+                        <li>Unlimited batch approvals</li>
+                        <li>Auto sub-PKP approval</li>
+                        <li>Email support</li>
+                    </ul>
+                    <button class="demo-button" onclick="demoTierUpgrade('basic')">Upgrade to Basic</button>
+                </div>
+
+                <div class="tier-card featured">
+                    <div class="tier-name">Premium</div>
+                    <div class="tier-price">$9.99</div>
+                    <div class="tier-period">/month</div>
+                    <ul class="tier-features">
+                        <li>Unlimited verifications</li>
+                        <li>Liveness detection</li>
+                        <li>VR spatial biometric</li>
+                        <li>Enterprise verification</li>
+                        <li>Priority support</li>
+                        <li>Advanced analytics</li>
+                    </ul>
+                    <button class="demo-button" onclick="demoTierUpgrade('premium')">Upgrade to Premium</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Documentation -->
+        <div class="api-docs">
+            <h2 style="margin-bottom: 20px;">📡 API Endpoints</h2>
+            
+            <div class="endpoint">
+                <span class="endpoint-method">POST</span>
+                <span class="endpoint-path">/payments/biometric-purchase</span>
+                <p style="margin-top: 10px; color: #666;">Combined biometric verification and payment in one call</p>
+                <code>{
+  "pkpAddress": "0x1234...",
+  "amount": 99.99,
+  "description": "Premium package",
+  "action": "purchase"
+}</code>
+            </div>
+
+            <div class="endpoint">
+                <span class="endpoint-method">POST</span>
+                <span class="endpoint-path">/payments/subscription</span>
+                <p style="margin-top: 10px; color: #666;">Create recurring subscription with biometric confirmation</p>
+                <code>{
+  "pkpAddress": "0x1234...",
+  "amount": 9.99,
+  "interval": "monthly",
+  "biometricToken": "bio_..."
+}</code>
+            </div>
+
+            <div class="endpoint">
+                <span class="endpoint-method">POST</span>
+                <span class="endpoint-path">/biometric/verify</span>
+                <p style="margin-top: 10px; color: #666;">Standalone biometric verification with assurance levels</p>
+                <code>{
+  "pkpAddress": "0x1234...",
+  "action": "purchase",
+  "amount": 150.00
+}</code>
+            </div>
+
+            <div class="endpoint">
+                <span class="endpoint-method">POST</span>
+                <span class="endpoint-path">/payments/escrow</span>
+                <p style="margin-top: 10px; color: #666;">Create escrow payment for agent hiring</p>
+                <code>{
+  "pkpAddress": "0x1234...",
+  "amount": 100.00,
+  "releaseCondition": "work-complete",
+  "biometricToken": "bio_..."
+}</code>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🔐 Secured by WebAuthn (FIDO2) & Payment Request API</p>
+            <p>PCI DSS Level 1 | GDPR Compliant | SOC 2 Type II</p>
+            <p style="margin-top: 10px;">
+                <a href="/biometric-landing.html" style="color: white; text-decoration: underline;">Marketing Landing Page</a> | 
+                <a href="/docs" style="color: white; text-decoration: underline;">Full Documentation</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+        const DEMO_PKP = '0x' + '1234567890abcdef'.repeat(5);
+
+        function showResponse(elementId, data, type = 'success') {
+            const el = document.getElementById(elementId);
+            el.className = `response-box show ${type}`;
+            el.textContent = JSON.stringify(data, null, 2);
+        }
+
+        function showLoading(elementId) {
+            const el = document.getElementById(elementId);
+            el.className = 'response-box show loading';
+            el.textContent = '⏳ Processing biometric verification...';
+        }
+
+        async function demoMarketplacePurchase() {
+            showLoading('marketplace-response');
+            
+            // Simulate biometric verification
+            await simulateBiometric('marketplace-response', 'HIGH');
+            
+            try {
+                const response = await fetch(`${API_BASE}/payments/biometric-purchase`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pkpAddress: DEMO_PKP,
+                        amount: 150.00,
+                        description: 'Premium Code Package',
+                        action: 'purchase'
+                    })
+                });
+                
+                const data = await response.json();
+                showResponse('marketplace-response', {
+                    ...data,
+                    message: '✅ Purchase successful! Biometric verified (HIGH assurance)',
+                    fee: '$0.25 verification fee charged'
+                }, 'success');
+            } catch (error) {
+                showResponse('marketplace-response', {
+                    error: error.message,
+                    demo: 'This is a demo - actual API integration pending'
+                }, 'error');
+            }
+        }
+
+        async function demoTierUpgrade(tier = 'premium') {
+            showLoading('tier-response');
+            
+            // Simulate enterprise biometric
+            await simulateBiometric('tier-response', 'ENTERPRISE');
+            
+            const amount = tier === 'basic' ? 4.99 : 9.99;
+            
+            try {
+                const response = await fetch(`${API_BASE}/payments/subscription`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pkpAddress: DEMO_PKP,
+                        amount: amount,
+                        interval: 'monthly',
+                        biometricToken: 'bio_enterprise_' + Date.now()
+                    })
+                });
+                
+                const data = await response.json();
+                showResponse('tier-response', {
+                    ...data,
+                    message: `✅ Upgraded to ${tier.toUpperCase()} tier!`,
+                    enterpriseFee: '$2.99 enterprise verification fee',
+                    subscription: `$${amount}/month recurring`
+                }, 'success');
+            } catch (error) {
+                showResponse('tier-response', {
+                    demo: 'DEMO MODE: Subscription created',
+                    tier: tier,
+                    amount: `$${amount}/month`,
+                    enterpriseFee: '$2.99',
+                    features: tier === 'premium' ? 
+                        ['Unlimited verifications', 'VR spatial biometric', 'Liveness detection'] :
+                        ['100 verifications/mo', 'Batch approvals', 'Face recognition']
+                }, 'success');
+            }
+        }
+
+        async function demoBatchApproval() {
+            showLoading('batch-response');
+            
+            // Simulate batch biometric
+            await simulateBiometric('batch-response', 'MEDIUM');
+            
+            showResponse('batch-response', {
+                demo: 'DEMO MODE: Batch approval processed',
+                tasksApproved: 5,
+                biometricToken: 'bio_batch_' + Date.now(),
+                fee: '$0.10 (Freemium user)',
+                message: '✅ 5 tasks approved with single biometric!',
+                tip: 'Upgrade to Basic ($4.99/mo) for unlimited batch approvals'
+            }, 'success');
+        }
+
+        async function demoVRPayment() {
+            showLoading('vr-response');
+            
+            // Simulate VR spatial biometric
+            const vrSimulation = document.getElementById('vr-response');
+            vrSimulation.className = 'response-box show biometric-simulation';
+            vrSimulation.innerHTML = `
+                <div class="biometric-step">
+                    <span class="step-icon">👁️</span>
+                    <span>Analyzing gaze pattern... HUMAN DETECTED</span>
+                </div>
+                <div class="biometric-step">
+                    <span class="step-icon">✋</span>
+                    <span>Tracking hand movement... NATURAL MOTION</span>
+                </div>
+                <div class="biometric-step">
+                    <span class="step-icon">🤖</span>
+                    <span>Bot detection... PASSED</span>
+                </div>
+            `;
+            
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            showResponse('vr-response', {
+                demo: 'DEMO MODE: VR payment processed',
+                amount: 29.99,
+                spatialBiometric: {
+                    gazePattern: 'human_natural',
+                    handMovement: 'organic',
+                    botScore: 0.02
+                },
+                payment: {
+                    id: 'vr_pay_' + Date.now(),
+                    status: 'captured'
+                },
+                message: '✅ VR asset purchased! Spatial biometric verified',
+                marketplaceFee: '15% ($4.50)'
+            }, 'success');
+        }
+
+        async function demoAgentHiring() {
+            showLoading('agent-response');
+            
+            await simulateBiometric('agent-response', 'MEDIUM');
+            
+            showResponse('agent-response', {
+                demo: 'DEMO MODE: Agent hired with escrow',
+                escrow: {
+                    id: 'escrow_' + Date.now(),
+                    amount: 100.00,
+                    releaseCondition: 'agent-work-complete',
+                    status: 'held'
+                },
+                agent: {
+                    id: 'agent_12345',
+                    name: 'CodeBot Pro',
+                    hourlyRate: 25.00,
+                    estimatedHours: 4
+                },
+                message: '✅ Agent hired! Funds held in escrow',
+                platformFee: '15% ($15.00)',
+                releaseInfo: 'Funds released automatically when work marked complete'
+            }, 'success');
+        }
+
+        async function demoPKPRecovery() {
+            showLoading('recovery-response');
+            
+            // Simulate guardian verification
+            const recoverySimulation = document.getElementById('recovery-response');
+            recoverySimulation.className = 'response-box show biometric-simulation';
+            recoverySimulation.innerHTML = `
+                <div class="biometric-step">
+                    <span class="step-icon">👤</span>
+                    <span>Guardian 1/3: Biometric verified ✓</span>
+                </div>
+                <div class="biometric-step">
+                    <span class="step-icon">👤</span>
+                    <span>Guardian 2/3: Biometric verified ✓</span>
+                </div>
+                <div class="biometric-step">
+                    <span class="step-icon">🔓</span>
+                    <span>2-of-3 threshold met! Recovery approved</span>
+                </div>
+            `;
+            
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            
+            showResponse('recovery-response', {
+                demo: 'DEMO MODE: PKP recovery successful',
+                guardians: {
+                    verified: 2,
+                    required: 2,
+                    total: 3
+                },
+                recovery: {
+                    lostPKP: DEMO_PKP,
+                    newPKP: '0x' + 'fedcba0987654321'.repeat(5),
+                    status: 'recovered'
+                },
+                message: '✅ PKP recovered via guardian verification!',
+                fee: '$9.99 one-time recovery fee',
+                security: 'Decentralized social recovery - no central authority'
+            }, 'success');
+        }
+
+        async function simulateBiometric(elementId, assuranceLevel) {
+            const el = document.getElementById(elementId);
+            el.className = 'response-box show biometric-simulation';
+            
+            const steps = {
+                'LOW': ['Requesting fingerprint...', 'Touch ID verified ✓'],
+                'MEDIUM': ['Requesting face recognition...', 'Checking liveness...', 'Face ID verified ✓'],
+                'HIGH': ['Requesting multi-factor...', 'Face recognition...', 'Liveness detection...', 'Verified ✓'],
+                'ENTERPRISE': ['Requesting enterprise verification...', 'Face + liveness...', 'Creating audit trail...', 'Enterprise verified ✓']
+            };
+            
+            const levelSteps = steps[assuranceLevel] || steps['MEDIUM'];
+            
+            for (let i = 0; i < levelSteps.length; i++) {
+                el.innerHTML = `
+                    <div class="biometric-step ${i === levelSteps.length - 1 ? '' : 'pulsing'}">
+                        <span class="step-icon">🔐</span>
+                        <span>${levelSteps[i]}</span>
+                    </div>
+                `;
+                await new Promise(resolve => setTimeout(resolve, 600));
+            }
+        }
+
+        // Auto-demo on load
+        window.addEventListener('load', () => {
+            console.log('🔐 Biometric Payment Demo Ready');
+            console.log('API Base:', API_BASE);
+            console.log('Demo PKP:', DEMO_PKP);
+        });
+    </script>
+</body>
+</html>

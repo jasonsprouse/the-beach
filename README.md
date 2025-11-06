@@ -29,6 +29,7 @@
 - 📱 **Cross-Platform** - Works on desktop, mobile, and VR headsets
 - 🔐 **Lit Compute Network** - NEW! Earn crypto by sharing CPU for encryption operations ([Quick Start](QUICK_START.md) | [Full Guide](LIT_COMPUTE_QUICKSTART.md))
 - 🤖 **Digital AI Agents (NPE)** - Watch autonomous AI agents build software in real-time ([Complete Guide](DIGITAL_AI_AGENTS_GUIDE.md) | [Y8 App Guide](Y8_APP_DIGITAL_AGENTS_GUIDE.md) | [Quick Index](DIGITAL_AGENTS_INDEX.md))
+- 🤖 **Agent Operations** - NEW! Autonomous agents can check out branches, monitor logs, and manage workflows ([Quick Start](AGENT_QUICKSTART.md) | [Complete Guide](AGENT_OPERATIONS_GUIDE.md))
 
 ## 🎯 Quick Start
 

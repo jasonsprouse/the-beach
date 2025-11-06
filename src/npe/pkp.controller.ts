@@ -1,9 +1,22 @@
-import { Controller, Get, Post, Param, Body, HttpException, HttpStatus } from '@nestjs/common';
-import { PKPTaskManagerService, PKPTaskStatus, PKPTaskPriority, PKPAgentType } from './pkp-task-manager.service';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  PKPTaskManagerService,
+  PKPTaskStatus,
+  PKPTaskPriority,
+  PKPAgentType,
+} from './pkp-task-manager.service';
 
 /**
  * PKP Controller
- * 
+ *
  * REST API endpoints for managing PKP (Programmable Key Pair) agents and tasks
  */
 @Controller('npe/pkp')
@@ -33,10 +46,7 @@ export class PKPController {
     const task = this.pkpTaskManager.getTask(taskId);
 
     if (!task) {
-      throw new HttpException(
-        `Task ${taskId} not found`,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException(`Task ${taskId} not found`, HttpStatus.NOT_FOUND);
     }
 
     return {
@@ -231,10 +241,7 @@ export class PKPController {
    * POST /npe/pkp/tasks/:id/git-context
    */
   @Post('tasks/:id/git-context')
-  updateGitContext(
-    @Param('id') id: string,
-    @Body() gitContext: any,
-  ) {
+  updateGitContext(@Param('id') id: string, @Body() gitContext: any) {
     try {
       const taskId = parseInt(id, 10);
       const task = this.pkpTaskManager.updateGitContext(taskId, gitContext);
@@ -245,10 +252,7 @@ export class PKPController {
         data: task,
       };
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -257,10 +261,7 @@ export class PKPController {
    * POST /npe/pkp/tasks/:id/commit
    */
   @Post('tasks/:id/commit')
-  recordCommit(
-    @Param('id') id: string,
-    @Body() body: { commitHash: string },
-  ) {
+  recordCommit(@Param('id') id: string, @Body() body: { commitHash: string }) {
     try {
       const taskId = parseInt(id, 10);
       const task = this.pkpTaskManager.recordCommit(taskId, body.commitHash);
@@ -271,10 +272,7 @@ export class PKPController {
         data: task,
       };
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -283,10 +281,7 @@ export class PKPController {
    * POST /npe/pkp/tasks/:id/pr
    */
   @Post('tasks/:id/pr')
-  setPullRequestUrl(
-    @Param('id') id: string,
-    @Body() body: { prUrl: string },
-  ) {
+  setPullRequestUrl(@Param('id') id: string, @Body() body: { prUrl: string }) {
     try {
       const taskId = parseInt(id, 10);
       const task = this.pkpTaskManager.setPullRequestUrl(taskId, body.prUrl);
@@ -297,10 +292,7 @@ export class PKPController {
         data: task,
       };
     } catch (error) {
-      throw new HttpException(
-        error.message,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -396,7 +388,7 @@ export class PKPController {
     return {
       success: true,
       count: workspaces.length,
-      workspaces: workspaces.map(w => ({
+      workspaces: workspaces.map((w) => ({
         id: w.id,
         name: w.name,
         scene: w.scene,
@@ -409,9 +401,7 @@ export class PKPController {
   }
 
   @Post('vr/workspaces')
-  async createVRWorkspace(
-    @Body() body: { name: string; sceneType: string },
-  ) {
+  async createVRWorkspace(@Body() body: { name: string; sceneType: string }) {
     // Use task 1 as default for VR operations
     const result = await this.pkpTaskManager.executeTool(1, 'vr-environment', {
       action: 'create',
@@ -447,7 +437,7 @@ export class PKPController {
   async getVRWorkspace(@Param('id') id: string) {
     const { vrWorkspaceManager } = require('./agents/pkp-vr-tools');
     const workspace = vrWorkspaceManager.getWorkspace(id);
-    
+
     if (!workspace) {
       return {
         success: false,

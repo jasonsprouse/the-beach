@@ -2,7 +2,7 @@ import { Vector3 } from '@babylonjs/core';
 
 /**
  * VR Agent: Interactive Scene Guide
- * 
+ *
  * An AI-powered holographic guide that explains the VR scene,
  * responds to user interactions, and provides contextual information.
  */
@@ -26,13 +26,13 @@ export class VRSceneAgent {
     },
     {
       timestamp: 10000,
-      text: "Each glowing sphere represents an active compute node. There are currently 8 nodes online.",
+      text: 'Each glowing sphere represents an active compute node. There are currently 8 nodes online.',
       focus: 'nodes',
       duration: 6000,
     },
     {
       timestamp: 16000,
-      text: "These nodes process PKP authentication requests, execute Lit Actions, and handle distributed jobs.",
+      text: 'These nodes process PKP authentication requests, execute Lit Actions, and handle distributed jobs.',
       focus: 'nodes',
       duration: 6000,
     },
@@ -44,82 +44,91 @@ export class VRSceneAgent {
     },
     {
       timestamp: 28000,
-      text: "The central orange sphere is the network coordinator. It handles job distribution and load balancing.",
+      text: 'The central orange sphere is the network coordinator. It handles job distribution and load balancing.',
       focus: 'hub',
       duration: 6000,
     },
     {
       timestamp: 34000,
-      text: "The orbital rings around each node represent active connections and processing capacity.",
+      text: 'The orbital rings around each node represent active connections and processing capacity.',
       focus: 'rings',
       duration: 5000,
     },
     {
       timestamp: 39000,
-      text: "This entire system powers the Y8 App dashboard you built earlier - providing real-time WebSocket updates!",
+      text: 'This entire system powers the Y8 App dashboard you built earlier - providing real-time WebSocket updates!',
       focus: 'overview',
       duration: 7000,
     },
     {
       timestamp: 46000,
-      text: "Click on any node to see detailed statistics. Try hovering over them to see them pulse!",
+      text: 'Click on any node to see detailed statistics. Try hovering over them to see them pulse!',
       focus: 'interaction',
       duration: 5000,
     },
     {
       timestamp: 51000,
-      text: "The stats panel on your right shows live network metrics: jobs processed, success rates, and earnings.",
+      text: 'The stats panel on your right shows live network metrics: jobs processed, success rates, and earnings.',
       focus: 'stats',
       duration: 6000,
     },
     {
       timestamp: 57000,
-      text: "This is The Beach - the NestJS backend with Socket.IO WebSockets connecting everything together.",
+      text: 'This is The Beach - the NestJS backend with Socket.IO WebSockets connecting everything together.',
       focus: 'hub',
       duration: 6000,
     },
     {
       timestamp: 63000,
-      text: "Feel free to explore! Use your mouse to orbit, zoom, and discover more about the network. Enjoy! 🚀",
+      text: 'Feel free to explore! Use your mouse to orbit, zoom, and discover more about the network. Enjoy! 🚀',
       focus: 'overview',
       duration: 7000,
     },
   ];
 
   private nodeExplanations = [
-    "This node specializes in PKP wallet authentication and signature generation.",
-    "This node handles Lit Actions execution for smart contract automation.",
-    "This node processes encryption and decryption requests for secure data storage.",
-    "This node manages access control conditions and permission verification.",
-    "This node coordinates distributed job scheduling across the network.",
-    "This node monitors network health and performance metrics in real-time.",
-    "This node handles payment processing and earnings distribution.",
-    "This node provides redundancy and failover capabilities for high availability.",
+    'This node specializes in PKP wallet authentication and signature generation.',
+    'This node handles Lit Actions execution for smart contract automation.',
+    'This node processes encryption and decryption requests for secure data storage.',
+    'This node manages access control conditions and permission verification.',
+    'This node coordinates distributed job scheduling across the network.',
+    'This node monitors network health and performance metrics in real-time.',
+    'This node handles payment processing and earnings distribution.',
+    'This node provides redundancy and failover capabilities for high availability.',
   ];
 
   private sceneFeatures = {
     nodes: {
-      name: "Compute Nodes",
-      description: "Decentralized processing units that handle authentication, encryption, and job execution.",
-      tech: "Lit Protocol PKP infrastructure with distributed consensus",
+      name: 'Compute Nodes',
+      description:
+        'Decentralized processing units that handle authentication, encryption, and job execution.',
+      tech: 'Lit Protocol PKP infrastructure with distributed consensus',
       count: 8,
     },
     hub: {
-      name: "Central Coordinator",
-      description: "The heart of the network that orchestrates job distribution and load balancing.",
-      tech: "NestJS with Socket.IO WebSockets for real-time coordination",
-      role: "Job queue management, health monitoring, payment processing",
+      name: 'Central Coordinator',
+      description:
+        'The heart of the network that orchestrates job distribution and load balancing.',
+      tech: 'NestJS with Socket.IO WebSockets for real-time coordination',
+      role: 'Job queue management, health monitoring, payment processing',
     },
     particles: {
-      name: "Data Flows",
-      description: "Visual representation of encrypted data packets moving through the network.",
-      tech: "Babylon.js particle systems simulating real network traffic patterns",
-      throughput: "~500 jobs/second across all nodes",
+      name: 'Data Flows',
+      description:
+        'Visual representation of encrypted data packets moving through the network.',
+      tech: 'Babylon.js particle systems simulating real network traffic patterns',
+      throughput: '~500 jobs/second across all nodes',
     },
     stats: {
-      name: "Network Statistics",
-      description: "Live metrics showing network performance and health.",
-      metrics: ["Active Nodes", "Jobs Processed", "Success Rate", "Response Time", "Total Earnings"],
+      name: 'Network Statistics',
+      description: 'Live metrics showing network performance and health.',
+      metrics: [
+        'Active Nodes',
+        'Jobs Processed',
+        'Success Rate',
+        'Response Time',
+        'Total Earnings',
+      ],
     },
   };
 
@@ -151,7 +160,10 @@ export class VRSceneAgent {
    * Play current narration
    */
   private playNarration() {
-    if (!this.isNarrating || this.currentNarrationIndex >= this.narrations.length) {
+    if (
+      !this.isNarrating ||
+      this.currentNarrationIndex >= this.narrations.length
+    ) {
       console.log('✅ VR Agent: Tour complete!');
       return;
     }
@@ -170,7 +182,7 @@ export class VRSceneAgent {
    */
   public speak(text: string, focus?: string) {
     console.log(`🤖 VR Agent: "${text}"${focus ? ` [Focus: ${focus}]` : ''}`);
-    
+
     if (this.onSpeechCallback) {
       this.onSpeechCallback(text);
     }
@@ -187,7 +199,7 @@ export class VRSceneAgent {
    */
   public explainNode(nodeId: number): string {
     if (nodeId < 0 || nodeId >= this.nodeExplanations.length) {
-      return "This is a compute node in the Lit Network.";
+      return 'This is a compute node in the Lit Network.';
     }
 
     const baseExplanation = this.nodeExplanations[nodeId];
@@ -221,9 +233,9 @@ export class VRSceneAgent {
    */
   public explainFeature(featureName: keyof typeof this.sceneFeatures): string {
     const feature = this.sceneFeatures[featureName];
-    
+
     if (!feature) {
-      return "Unknown feature. Try asking about: nodes, hub, particles, or stats.";
+      return 'Unknown feature. Try asking about: nodes, hub, particles, or stats.';
     }
 
     let explanation = `🌟 ${feature.name}\n\n${feature.description}\n\n`;
@@ -258,7 +270,7 @@ export class VRSceneAgent {
     const q = question.toLowerCase();
 
     if (q.includes('node') && q.includes('how many')) {
-      return "There are currently 8 active compute nodes in the network. Each node handles different aspects of the Lit Protocol infrastructure.";
+      return 'There are currently 8 active compute nodes in the network. Each node handles different aspects of the Lit Protocol infrastructure.';
     }
 
     if (q.includes('particle') || q.includes('flow')) {
@@ -275,49 +287,49 @@ export class VRSceneAgent {
 
     if (q.includes('what') && q.includes('this')) {
       return (
-        "This is a 3D visualization of the Lit Compute Network - the backend infrastructure " +
+        'This is a 3D visualization of the Lit Compute Network - the backend infrastructure ' +
         "that powers the Y8 App you've been building. It shows real-time network topology, " +
-        "data flows, and node activities in an immersive VR environment."
+        'data flows, and node activities in an immersive VR environment.'
       );
     }
 
     if (q.includes('how') && q.includes('work')) {
       return (
-        "The network works through distributed consensus:\n\n" +
-        "1. Jobs arrive at the central hub\n" +
-        "2. The coordinator distributes them to available nodes\n" +
-        "3. Nodes process jobs (auth, encryption, Lit Actions)\n" +
-        "4. Results flow back through the network\n" +
-        "5. Payments are processed automatically\n\n" +
-        "All connected via WebSockets for real-time updates!"
+        'The network works through distributed consensus:\n\n' +
+        '1. Jobs arrive at the central hub\n' +
+        '2. The coordinator distributes them to available nodes\n' +
+        '3. Nodes process jobs (auth, encryption, Lit Actions)\n' +
+        '4. Results flow back through the network\n' +
+        '5. Payments are processed automatically\n\n' +
+        'All connected via WebSockets for real-time updates!'
       );
     }
 
     if (q.includes('y8') || q.includes('app')) {
       return (
-        "Y8 App is the frontend you built earlier! It connects to this backend " +
-        "(The Beach) to provide the dashboard, node management, and job tracking " +
-        "interfaces. The real-time updates you see in the UI come from this network."
+        'Y8 App is the frontend you built earlier! It connects to this backend ' +
+        '(The Beach) to provide the dashboard, node management, and job tracking ' +
+        'interfaces. The real-time updates you see in the UI come from this network.'
       );
     }
 
     if (q.includes('beach')) {
       return (
-        "The Beach is the NestJS backend service that coordinates everything. " +
-        "It uses Socket.IO for WebSocket connections, Redis for pub/sub messaging, " +
+        'The Beach is the NestJS backend service that coordinates everything. ' +
+        'It uses Socket.IO for WebSocket connections, Redis for pub/sub messaging, ' +
         "and manages the entire Lit Compute Network infrastructure you're seeing visualized here."
       );
     }
 
     // Default response
     return (
-      "I can explain:\n" +
-      "• The compute nodes (try clicking one!)\n" +
-      "• The central hub and its role\n" +
-      "• Data flows and particle effects\n" +
-      "• Network statistics and metrics\n" +
-      "• How Y8 App connects to this\n\n" +
-      "What would you like to know more about?"
+      'I can explain:\n' +
+      '• The compute nodes (try clicking one!)\n' +
+      '• The central hub and its role\n' +
+      '• Data flows and particle effects\n' +
+      '• Network statistics and metrics\n' +
+      '• How Y8 App connects to this\n\n' +
+      'What would you like to know more about?'
     );
   }
 
@@ -326,14 +338,14 @@ export class VRSceneAgent {
    */
   public getExplorationTips(): string[] {
     return [
-      "💡 Click on any glowing node to see detailed statistics",
-      "💡 Hover over nodes to see them pulse and glow brighter",
-      "💡 Use mouse wheel to zoom in and out for different perspectives",
-      "💡 The particle streams show encrypted data packets in transit",
-      "💡 Watch the orbital rings - they indicate processing activity",
-      "💡 The stats panel updates with live network metrics",
-      "💡 The central hub rotates as it coordinates network operations",
-      "💡 Stars in the background represent the decentralized nature",
+      '💡 Click on any glowing node to see detailed statistics',
+      '💡 Hover over nodes to see them pulse and glow brighter',
+      '💡 Use mouse wheel to zoom in and out for different perspectives',
+      '💡 The particle streams show encrypted data packets in transit',
+      '💡 Watch the orbital rings - they indicate processing activity',
+      '💡 The stats panel updates with live network metrics',
+      '💡 The central hub rotates as it coordinates network operations',
+      '💡 Stars in the background represent the decentralized nature',
     ];
   }
 
@@ -369,22 +381,24 @@ export class VRSceneAgent {
   /**
    * Celebrate user interactions
    */
-  public onUserInteraction(interactionType: 'click' | 'hover' | 'zoom'): string {
+  public onUserInteraction(
+    interactionType: 'click' | 'hover' | 'zoom',
+  ): string {
     const responses = {
       click: [
         "Great! You're exploring the network. Each node has unique characteristics!",
-        "Excellent choice! This node is processing jobs right now.",
-        "You found an interesting node! Check out its statistics.",
+        'Excellent choice! This node is processing jobs right now.',
+        'You found an interesting node! Check out its statistics.',
       ],
       hover: [
-        "Nice! Watch how the node responds to your attention.",
-        "The glow intensifies when you hover - showing active processing power.",
+        'Nice! Watch how the node responds to your attention.',
+        'The glow intensifies when you hover - showing active processing power.',
         "Beautiful, isn't it? The holographic effect shows node vitality.",
       ],
       zoom: [
-        "Good perspective change! Different angles reveal different insights.",
-        "Zooming helps you see the intricate details of the network topology.",
-        "From here you can see how all the pieces work together!",
+        'Good perspective change! Different angles reveal different insights.',
+        'Zooming helps you see the intricate details of the network topology.',
+        'From here you can see how all the pieces work together!',
       ],
     };
 

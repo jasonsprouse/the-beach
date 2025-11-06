@@ -1,15 +1,26 @@
-import { Injectable, Logger, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PKPAuthService, AuthenticatedUser, SubPKP } from './pkp-auth.service';
-import { PKPTaskManagerService, PKPTask, PKPTaskStatus, PKPTaskPriority, PKPAgentType } from '../pkp-task-manager.service';
+import {
+  PKPTaskManagerService,
+  PKPTask,
+  PKPTaskStatus,
+  PKPTaskPriority,
+  PKPAgentType,
+} from '../pkp-task-manager.service';
 
 /**
  * Task Assignment Authorization Level
  */
 export enum TaskAuthLevel {
-  FREEMIUM = 'freemium',    // Limited task assignments
-  BASIC = 'basic',          // More assignments
-  PREMIUM = 'premium',      // Unlimited assignments
+  FREEMIUM = 'freemium', // Limited task assignments
+  BASIC = 'basic', // More assignments
+  PREMIUM = 'premium', // Unlimited assignments
 }
 
 /**
@@ -46,43 +57,52 @@ export interface AssignmentQuota {
 
 /**
  * Task Authorization Service
- * 
+ *
  * Manages WebAuthn authorization for assigning tasks to sub-PKPs.
  * Freemium users need to approve each assignment via UI.
  */
 @Injectable()
 export class TaskAuthorizationService {
   private readonly logger = new Logger(TaskAuthorizationService.name);
-  
+
   // Assignment request queue
   private assignmentRequests = new Map<string, TaskAssignmentRequest>();
-  
+
   // Quota definitions
   private readonly quotas: Map<TaskAuthLevel, AssignmentQuota> = new Map([
-    [TaskAuthLevel.FREEMIUM, {
-      tier: TaskAuthLevel.FREEMIUM,
-      maxPendingTasks: 3,
-      maxActiveTasksPerSubPKP: 1,
-      maxSubPKPs: 3,
-      requiresApproval: true,
-      canBulkAssign: false,
-    }],
-    [TaskAuthLevel.BASIC, {
-      tier: TaskAuthLevel.BASIC,
-      maxPendingTasks: 25,
-      maxActiveTasksPerSubPKP: 3,
-      maxSubPKPs: 25,
-      requiresApproval: false,
-      canBulkAssign: true,
-    }],
-    [TaskAuthLevel.PREMIUM, {
-      tier: TaskAuthLevel.PREMIUM,
-      maxPendingTasks: Infinity,
-      maxActiveTasksPerSubPKP: Infinity,
-      maxSubPKPs: Infinity,
-      requiresApproval: false,
-      canBulkAssign: true,
-    }],
+    [
+      TaskAuthLevel.FREEMIUM,
+      {
+        tier: TaskAuthLevel.FREEMIUM,
+        maxPendingTasks: 3,
+        maxActiveTasksPerSubPKP: 1,
+        maxSubPKPs: 3,
+        requiresApproval: true,
+        canBulkAssign: false,
+      },
+    ],
+    [
+      TaskAuthLevel.BASIC,
+      {
+        tier: TaskAuthLevel.BASIC,
+        maxPendingTasks: 25,
+        maxActiveTasksPerSubPKP: 3,
+        maxSubPKPs: 25,
+        requiresApproval: false,
+        canBulkAssign: true,
+      },
+    ],
+    [
+      TaskAuthLevel.PREMIUM,
+      {
+        tier: TaskAuthLevel.PREMIUM,
+        maxPendingTasks: Infinity,
+        maxActiveTasksPerSubPKP: Infinity,
+        maxSubPKPs: Infinity,
+        requiresApproval: false,
+        canBulkAssign: true,
+      },
+    ],
   ]);
 
   constructor(
@@ -103,7 +123,9 @@ export class TaskAuthorizationService {
     taskId: number;
     bypassApproval?: boolean; // Admin override
   }): Promise<TaskAssignmentRequest> {
-    this.logger.log(`📝 Task assignment requested: Task #${params.taskId} → Sub-PKP ${params.subPKP}`);
+    this.logger.log(
+      `📝 Task assignment requested: Task #${params.taskId} → Sub-PKP ${params.subPKP}`,
+    );
 
     // Verify main PKP exists
     const hierarchy = await this.pkpAuthService.getHierarchy(params.mainPKP);
@@ -114,7 +136,9 @@ export class TaskAuthorizationService {
     // Verify sub-PKP belongs to main PKP
     const subPKP = hierarchy.subPKPs.get(params.subPKP);
     if (!subPKP) {
-      throw new ForbiddenException(`Sub-PKP ${params.subPKP} not found or not owned by ${params.mainPKP}`);
+      throw new ForbiddenException(
+        `Sub-PKP ${params.subPKP} not found or not owned by ${params.mainPKP}`,
+      );
     }
 
     // Get task
@@ -126,7 +150,7 @@ export class TaskAuthorizationService {
     // Check user tier and quotas
     const userTier = this.mapTierToAuthLevel(hierarchy.owner.tier);
     const quota = this.quotas.get(userTier)!;
-    
+
     await this.validateQuotas(params.mainPKP, params.subPKP, userTier, quota);
 
     // Create assignment request
@@ -171,7 +195,10 @@ export class TaskAuthorizationService {
   /**
    * Approve task assignment (via UI or auto)
    */
-  async approveAssignment(requestId: string, mainPKP: string): Promise<TaskAssignmentRequest> {
+  async approveAssignment(
+    requestId: string,
+    mainPKP: string,
+  ): Promise<TaskAssignmentRequest> {
     const request = this.assignmentRequests.get(requestId);
     if (!request) {
       throw new NotFoundException(`Assignment request ${requestId} not found`);
@@ -197,9 +224,14 @@ export class TaskAuthorizationService {
     this.assignmentRequests.set(requestId, request);
 
     // Actually assign the task to the sub-PKP
-    await this.taskManagerService.assignTaskToAgent(request.taskId, request.metadata!.agentType);
-    
-    this.logger.log(`✅ Task assignment approved: Task #${request.taskId} → ${request.subPKP}`);
+    await this.taskManagerService.assignTaskToAgent(
+      request.taskId,
+      request.metadata!.agentType,
+    );
+
+    this.logger.log(
+      `✅ Task assignment approved: Task #${request.taskId} → ${request.subPKP}`,
+    );
 
     // Emit event
     this.eventEmitter.emit('task.assignment.approved', {
@@ -215,7 +247,11 @@ export class TaskAuthorizationService {
   /**
    * Reject task assignment
    */
-  async rejectAssignment(requestId: string, mainPKP: string, reason?: string): Promise<TaskAssignmentRequest> {
+  async rejectAssignment(
+    requestId: string,
+    mainPKP: string,
+    reason?: string,
+  ): Promise<TaskAssignmentRequest> {
     const request = this.assignmentRequests.get(requestId);
     if (!request) {
       throw new NotFoundException(`Assignment request ${requestId} not found`);
@@ -232,7 +268,9 @@ export class TaskAuthorizationService {
     request.status = 'rejected';
     this.assignmentRequests.set(requestId, request);
 
-    this.logger.log(`❌ Task assignment rejected: ${requestId} - ${reason || 'No reason provided'}`);
+    this.logger.log(
+      `❌ Task assignment rejected: ${requestId} - ${reason || 'No reason provided'}`,
+    );
 
     // Emit event
     this.eventEmitter.emit('task.assignment.rejected', {
@@ -253,7 +291,9 @@ export class TaskAuthorizationService {
     mainPKP: string;
     assignments: Array<{ subPKP: string; taskId: number }>;
   }): Promise<TaskAssignmentRequest[]> {
-    this.logger.log(`📚 Bulk task assignment: ${params.assignments.length} tasks`);
+    this.logger.log(
+      `📚 Bulk task assignment: ${params.assignments.length} tasks`,
+    );
 
     const hierarchy = await this.pkpAuthService.getHierarchy(params.mainPKP);
     if (!hierarchy) {
@@ -264,11 +304,13 @@ export class TaskAuthorizationService {
     const quota = this.quotas.get(userTier)!;
 
     if (!quota.canBulkAssign) {
-      throw new ForbiddenException('Bulk assignment not available on Freemium tier. Upgrade to Basic or Premium.');
+      throw new ForbiddenException(
+        'Bulk assignment not available on Freemium tier. Upgrade to Basic or Premium.',
+      );
     }
 
     const results: TaskAssignmentRequest[] = [];
-    
+
     for (const assignment of params.assignments) {
       try {
         const request = await this.requestTaskAssignment({
@@ -279,7 +321,9 @@ export class TaskAuthorizationService {
         });
         results.push(request);
       } catch (error) {
-        this.logger.error(`Failed to assign task ${assignment.taskId}: ${error.message}`);
+        this.logger.error(
+          `Failed to assign task ${assignment.taskId}: ${error.message}`,
+        );
         // Continue with other assignments
       }
     }
@@ -290,18 +334,25 @@ export class TaskAuthorizationService {
   /**
    * Get pending assignments for a main PKP (for UI)
    */
-  async getPendingAssignments(mainPKP: string): Promise<TaskAssignmentRequest[]> {
+  async getPendingAssignments(
+    mainPKP: string,
+  ): Promise<TaskAssignmentRequest[]> {
     return Array.from(this.assignmentRequests.values())
-      .filter(req => req.mainPKP === mainPKP && req.status === 'pending')
+      .filter((req) => req.mainPKP === mainPKP && req.status === 'pending')
       .sort((a, b) => b.requestedAt.getTime() - a.requestedAt.getTime());
   }
 
   /**
    * Get all assignments for a main PKP
    */
-  async getAllAssignments(mainPKP: string, status?: string): Promise<TaskAssignmentRequest[]> {
+  async getAllAssignments(
+    mainPKP: string,
+    status?: string,
+  ): Promise<TaskAssignmentRequest[]> {
     return Array.from(this.assignmentRequests.values())
-      .filter(req => req.mainPKP === mainPKP && (!status || req.status === status))
+      .filter(
+        (req) => req.mainPKP === mainPKP && (!status || req.status === status),
+      )
       .sort((a, b) => b.requestedAt.getTime() - a.requestedAt.getTime());
   }
 
@@ -344,17 +395,17 @@ export class TaskAuthorizationService {
     const pendingTasks = await this.getPendingAssignments(mainPKP);
     const activeTasks = this.taskManagerService.getActiveTasksForPKP(mainPKP);
     const subPKPCount = hierarchy.subPKPs.size;
-    
+
     // Count assignments this month
     const monthStart = new Date();
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);
-    
-    const assignmentsThisMonth = Array.from(this.assignmentRequests.values())
-      .filter(req => 
-        req.mainPKP === mainPKP && 
-        req.requestedAt >= monthStart
-      ).length;
+
+    const assignmentsThisMonth = Array.from(
+      this.assignmentRequests.values(),
+    ).filter(
+      (req) => req.mainPKP === mainPKP && req.requestedAt >= monthStart,
+    ).length;
 
     return {
       tier: userTier,
@@ -383,7 +434,7 @@ export class TaskAuthorizationService {
     if (stats.usage.pendingTasks >= quota.maxPendingTasks) {
       throw new ForbiddenException(
         `Pending tasks limit reached (${quota.maxPendingTasks}). ` +
-        `Upgrade to ${tier === TaskAuthLevel.FREEMIUM ? 'Basic' : 'Premium'} for more capacity.`
+          `Upgrade to ${tier === TaskAuthLevel.FREEMIUM ? 'Basic' : 'Premium'} for more capacity.`,
       );
     }
 
@@ -391,16 +442,17 @@ export class TaskAuthorizationService {
     if (stats.usage.subPKPCount >= quota.maxSubPKPs) {
       throw new ForbiddenException(
         `Sub-PKP limit reached (${quota.maxSubPKPs}). ` +
-        `Upgrade to ${tier === TaskAuthLevel.FREEMIUM ? 'Basic' : 'Premium'} for more sub-PKPs.`
+          `Upgrade to ${tier === TaskAuthLevel.FREEMIUM ? 'Basic' : 'Premium'} for more sub-PKPs.`,
       );
     }
 
     // Check active tasks per sub-PKP
-    const subPKPActiveTasks = this.taskManagerService.getActiveTasksForSubPKP(subPKP);
+    const subPKPActiveTasks =
+      this.taskManagerService.getActiveTasksForSubPKP(subPKP);
     if (subPKPActiveTasks.length >= quota.maxActiveTasksPerSubPKP) {
       throw new ForbiddenException(
         `Sub-PKP ${subPKP} has reached its active task limit (${quota.maxActiveTasksPerSubPKP}). ` +
-        `Wait for tasks to complete or upgrade tier.`
+          `Wait for tasks to complete or upgrade tier.`,
       );
     }
   }
@@ -437,7 +489,9 @@ export class TaskAuthorizationService {
     }
 
     if (expiredCount > 0) {
-      this.logger.log(`🧹 Cleaned up ${expiredCount} expired assignment requests`);
+      this.logger.log(
+        `🧹 Cleaned up ${expiredCount} expired assignment requests`,
+      );
     }
   }
 }

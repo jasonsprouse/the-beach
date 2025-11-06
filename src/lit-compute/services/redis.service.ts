@@ -3,7 +3,7 @@ import Redis from 'ioredis';
 
 /**
  * Redis Service for Lit Compute Network
- * 
+ *
  * Manages distributed state across Y8 App and The Beach:
  * - User sessions (shared with Y8 App)
  * - Job queue (pending, active, completed)
@@ -19,9 +19,11 @@ export class RedisService implements OnModuleInit {
 
   onModuleInit() {
     const redisUrl = process.env.REDIS_URL || process.env.KV_REST_API_URL;
-    
+
     if (!redisUrl) {
-      this.logger.warn('⚠️  Redis URL not configured. Using in-memory fallback for development.');
+      this.logger.warn(
+        '⚠️  Redis URL not configured. Using in-memory fallback for development.',
+      );
       this.isRedisAvailable = false;
       return;
     }
@@ -118,7 +120,10 @@ export class RedisService implements OnModuleInit {
     this.logger.log(`Job enqueued: ${job.id}`);
 
     // Publish event for real-time updates
-    await this.publishEvent('job:created', { jobId: job.id, status: 'pending' });
+    await this.publishEvent('job:created', {
+      jobId: job.id,
+      status: 'pending',
+    });
   }
 
   /**
@@ -156,7 +161,9 @@ export class RedisService implements OnModuleInit {
    */
   async assignJobToNode(jobId: string, nodeId: string): Promise<void> {
     if (!this.checkRedisAvailable()) {
-      this.logger.warn(`assignJobToNode skipped (no Redis): ${jobId} -> ${nodeId}`);
+      this.logger.warn(
+        `assignJobToNode skipped (no Redis): ${jobId} -> ${nodeId}`,
+      );
       return;
     }
 

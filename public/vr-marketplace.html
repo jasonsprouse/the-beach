@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPE Code Marketplace - VR Shopping Experience</title>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #renderCanvas {
+            width: 100%;
+            height: 100vh;
+            touch-action: none;
+        }
+        #ui-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 300px;
+            z-index: 100;
+        }
+        .product-card {
+            background: rgba(100, 100, 255, 0.2);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid rgba(100, 100, 255, 0.5);
+        }
+        .price {
+            color: #4CAF50;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .buy-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .buy-btn:hover {
+            background: #45a049;
+        }
+        #vr-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 100;
+        }
+        #vr-button:hover {
+            background: #0b7dda;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    
+    <div id="ui-overlay">
+        <h2>🛒 NPE Code Marketplace</h2>
+        <p>Walk around and click products to view details</p>
+        <div id="selected-product" style="display: none;">
+            <div class="product-card">
+                <h3 id="product-name"></h3>
+                <p id="product-desc"></p>
+                <div class="price" id="product-price"></div>
+                <button class="buy-btn" onclick="buyProduct()">Buy Now</button>
+            </div>
+        </div>
+        <div style="margin-top: 20px; font-size: 12px;">
+            <p>💰 Total Revenue: $<span id="total-revenue">0</span></p>
+            <p>🎯 Total Sales: <span id="total-sales">0</span></p>
+        </div>
+    </div>
+    
+    <button id="vr-button" onclick="enterVR()">🥽 Enter VR Mode</button>
+
+    <script>
+        const canvas = document.getElementById("renderCanvas");
+        const engine = new BABYLON.Engine(canvas, true);
+        
+        let scene, camera, selectedProduct = null;
+        
+        const products = [
+            {
+                id: 'npe-auth-system',
+                name: 'NPE Auth System',
+                description: 'Complete PKP authentication with 6 providers',
+                price: 1499,
+                position: new BABYLON.Vector3(-10, 2, 0),
+                color: new BABYLON.Color3(0.2, 0.8, 1),
+                videoUrl: 'https://goodfaith.church/post/npe-auth-demo',
+            },
+            {
+                id: 'ai-testing-revenue',
+                name: 'AI Testing & Revenue',
+                description: 'AI-powered code testing with revenue metrics',
+                price: 2499,
+                position: new BABYLON.Vector3(-5, 2, 5),
+                color: new BABYLON.Color3(1, 0.5, 0.2),
+                videoUrl: 'https://goodfaith.church/post/ai-revenue-testing',
+            },
+            {
+                id: 'log-data-marketplace',
+                name: 'Log Data Marketplace',
+                description: 'AI agents pay for valuable pipeline logs',
+                price: 2199,
+                position: new BABYLON.Vector3(0, 2, 8),
+                color: new BABYLON.Color3(0.8, 0.2, 1),
+                videoUrl: 'https://goodfaith.church/post/log-marketplace',
+            },
+            {
+                id: 'freemium-digital-agents',
+                name: 'Digital Agents',
+                description: 'AI agents that build projects autonomously',
+                price: 3499,
+                position: new BABYLON.Vector3(5, 2, 5),
+                color: new BABYLON.Color3(0.2, 1, 0.5),
+                videoUrl: 'https://goodfaith.church/post/digital-agents',
+            },
+            {
+                id: 'game-manager',
+                name: 'Game Manager',
+                description: 'Gamification with XP, levels, achievements',
+                price: 1899,
+                position: new BABYLON.Vector3(10, 2, 0),
+                color: new BABYLON.Color3(1, 0.8, 0.2),
+                videoUrl: 'https://goodfaith.church/post/gamification',
+            },
+            {
+                id: 'complete-bundle',
+                name: 'Complete Bundle',
+                description: 'All 5 systems - Save 40%!',
+                price: 8999,
+                position: new BABYLON.Vector3(0, 3, -5),
+                color: new BABYLON.Color3(1, 0.2, 0.5),
+                videoUrl: 'https://goodfaith.church/post/npe-bundle',
+            },
+        ];
+        
+        function createScene() {
+            const scene = new BABYLON.Scene(engine);
+            
+            // Camera
+            camera = new BABYLON.UniversalCamera(
+                "camera",
+                new BABYLON.Vector3(0, 1.7, 15),
+                scene
+            );
+            camera.attachControl(canvas, true);
+            camera.speed = 0.5;
+            camera.applyGravity = true;
+            camera.ellipsoid = new BABYLON.Vector3(1, 1, 1);
+            
+            // Lighting
+            const hemiLight = new BABYLON.HemisphericLight(
+                "hemiLight",
+                new BABYLON.Vector3(0, 1, 0),
+                scene
+            );
+            hemiLight.intensity = 0.3;
+            
+            // Point lights for ambiance
+            const pointLight1 = new BABYLON.PointLight(
+                "pointLight1",
+                new BABYLON.Vector3(-10, 5, 0),
+                scene
+            );
+            pointLight1.intensity = 0.5;
+            pointLight1.diffuse = new BABYLON.Color3(0.2, 0.8, 1);
+            
+            const pointLight2 = new BABYLON.PointLight(
+                "pointLight2",
+                new BABYLON.Vector3(10, 5, 0),
+                scene
+            );
+            pointLight2.intensity = 0.5;
+            pointLight2.diffuse = new BABYLON.Color3(1, 0.2, 0.8);
+            
+            // Cyberpunk floor
+            const ground = BABYLON.MeshBuilder.CreateGround(
+                "ground",
+                { width: 50, height: 50 },
+                scene
+            );
+            const groundMat = new BABYLON.StandardMaterial("groundMat", scene);
+            groundMat.diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.2);
+            groundMat.specularColor = new BABYLON.Color3(0.5, 0.5, 1);
+            groundMat.emissiveColor = new BABYLON.Color3(0.05, 0.05, 0.15);
+            ground.material = groundMat;
+            
+            // Grid lines on floor
+            for (let i = -25; i <= 25; i += 2) {
+                const line1 = BABYLON.MeshBuilder.CreateLines(
+                    "line1_" + i,
+                    {
+                        points: [
+                            new BABYLON.Vector3(i, 0.01, -25),
+                            new BABYLON.Vector3(i, 0.01, 25),
+                        ],
+                    },
+                    scene
+                );
+                line1.color = new BABYLON.Color3(0.3, 0.3, 0.8);
+                
+                const line2 = BABYLON.MeshBuilder.CreateLines(
+                    "line2_" + i,
+                    {
+                        points: [
+                            new BABYLON.Vector3(-25, 0.01, i),
+                            new BABYLON.Vector3(25, 0.01, i),
+                        ],
+                    },
+                    scene
+                );
+                line2.color = new BABYLON.Color3(0.3, 0.3, 0.8);
+            }
+            
+            // Skybox
+            const skybox = BABYLON.MeshBuilder.CreateBox(
+                "skybox",
+                { size: 100 },
+                scene
+            );
+            const skyboxMat = new BABYLON.StandardMaterial("skyboxMat", scene);
+            skyboxMat.backFaceCulling = false;
+            skyboxMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
+            skyboxMat.specularColor = new BABYLON.Color3(0, 0, 0);
+            skyboxMat.emissiveColor = new BABYLON.Color3(0.05, 0.05, 0.15);
+            skybox.material = skyboxMat;
+            
+            // Create product displays
+            products.forEach(product => createProductDisplay(product, scene));
+            
+            // Create video wall
+            createVideoWall(scene);
+            
+            // Create info terminals
+            createInfoTerminal(new BABYLON.Vector3(-15, 1, -5), scene);
+            createCheckoutPortal(new BABYLON.Vector3(15, 1, -5), scene);
+            
+            // Enable collisions
+            scene.gravity = new BABYLON.Vector3(0, -9.81, 0);
+            scene.collisionsEnabled = true;
+            ground.checkCollisions = true;
+            camera.checkCollisions = true;
+            
+            return scene;
+        }
+        
+        function createProductDisplay(product, scene) {
+            // Create holographic product box
+            const box = BABYLON.MeshBuilder.CreateBox(
+                product.id,
+                { size: 2 },
+                scene
+            );
+            box.position = product.position;
+            
+            // Material with emissive glow
+            const mat = new BABYLON.StandardMaterial(product.id + "_mat", scene);
+            mat.diffuseColor = product.color;
+            mat.emissiveColor = product.color.scale(0.5);
+            mat.alpha = 0.7;
+            box.material = mat;
+            
+            // Rotation animation
+            scene.registerBeforeRender(() => {
+                box.rotation.y += 0.01;
+            });
+            
+            // Floating animation
+            let time = 0;
+            scene.registerBeforeRender(() => {
+                time += 0.01;
+                box.position.y = product.position.y + Math.sin(time) * 0.2;
+            });
+            
+            // Click interaction
+            box.actionManager = new BABYLON.ActionManager(scene);
+            box.actionManager.registerAction(
+                new BABYLON.ExecuteCodeAction(
+                    BABYLON.ActionManager.OnPickTrigger,
+                    () => selectProduct(product)
+                )
+            );
+            
+            // Particle system for sparkles
+            const particles = new BABYLON.ParticleSystem(
+                product.id + "_particles",
+                2000,
+                scene
+            );
+            particles.particleTexture = new BABYLON.Texture(
+                "https://www.babylonjs.com/assets/Flare.png",
+                scene
+            );
+            particles.emitter = box;
+            particles.minSize = 0.1;
+            particles.maxSize = 0.3;
+            particles.minLifeTime = 0.5;
+            particles.maxLifeTime = 1.5;
+            particles.emitRate = 50;
+            particles.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+            particles.color1 = new BABYLON.Color4(product.color.r, product.color.g, product.color.b, 1);
+            particles.color2 = new BABYLON.Color4(product.color.r * 0.5, product.color.g * 0.5, product.color.b * 0.5, 1);
+            particles.start();
+            
+            // Add 3D text label
+            createProductLabel(product.name, product.position.add(new BABYLON.Vector3(0, 2, 0)), scene);
+            
+            // Add price tag
+            createPriceTag(`$${product.price}`, product.position.add(new BABYLON.Vector3(0, -1.5, 0)), scene);
+        }
+        
+        function createProductLabel(text, position, scene) {
+            const plane = BABYLON.MeshBuilder.CreatePlane(
+                "label_" + text,
+                { width: 3, height: 0.5 },
+                scene
+            );
+            plane.position = position;
+            plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+            
+            const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane);
+            
+            const textBlock = new BABYLON.GUI.TextBlock();
+            textBlock.text = text;
+            textBlock.color = "white";
+            textBlock.fontSize = 48;
+            textBlock.fontWeight = "bold";
+            advancedTexture.addControl(textBlock);
+        }
+        
+        function createPriceTag(text, position, scene) {
+            const plane = BABYLON.MeshBuilder.CreatePlane(
+                "price_" + text,
+                { width: 2, height: 0.4 },
+                scene
+            );
+            plane.position = position;
+            plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+            
+            const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(plane);
+            
+            const rect = new BABYLON.GUI.Rectangle();
+            rect.width = "100%";
+            rect.height = "100%";
+            rect.background = "green";
+            rect.cornerRadius = 10;
+            advancedTexture.addControl(rect);
+            
+            const textBlock = new BABYLON.GUI.TextBlock();
+            textBlock.text = text;
+            textBlock.color = "white";
+            textBlock.fontSize = 40;
+            textBlock.fontWeight = "bold";
+            rect.addControl(textBlock);
+        }
+        
+        function createVideoWall(scene) {
+            const videoWall = BABYLON.MeshBuilder.CreatePlane(
+                "videoWall",
+                { width: 20, height: 10 },
+                scene
+            );
+            videoWall.position = new BABYLON.Vector3(0, 5, -10);
+            
+            const mat = new BABYLON.StandardMaterial("videoWallMat", scene);
+            mat.diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.3);
+            mat.emissiveColor = new BABYLON.Color3(0.5, 0.5, 1);
+            videoWall.material = mat;
+            
+            // Add "Marketing Videos" text
+            createProductLabel("Marketing Videos", new BABYLON.Vector3(0, 11, -10), scene);
+        }
+        
+        function createInfoTerminal(position, scene) {
+            const terminal = BABYLON.MeshBuilder.CreateBox(
+                "infoTerminal",
+                { width: 2, height: 2, depth: 0.5 },
+                scene
+            );
+            terminal.position = position;
+            
+            const mat = new BABYLON.StandardMaterial("terminalMat", scene);
+            mat.diffuseColor = new BABYLON.Color3(0.2, 0.8, 0.8);
+            mat.emissiveColor = new BABYLON.Color3(0.1, 0.4, 0.4);
+            terminal.material = mat;
+            
+            createProductLabel("📋 Product Catalog", position.add(new BABYLON.Vector3(0, 1.5, 0)), scene);
+        }
+        
+        function createCheckoutPortal(position, scene) {
+            const portal = BABYLON.MeshBuilder.CreateTorus(
+                "checkoutPortal",
+                { diameter: 3, thickness: 0.5, tessellation: 32 },
+                scene
+            );
+            portal.position = position;
+            portal.rotation.y = -Math.PI / 6;
+            
+            const mat = new BABYLON.StandardMaterial("portalMat", scene);
+            mat.diffuseColor = new BABYLON.Color3(0.2, 1, 0.2);
+            mat.emissiveColor = new BABYLON.Color3(0.1, 0.5, 0.1);
+            portal.material = mat;
+            
+            // Rotation animation
+            scene.registerBeforeRender(() => {
+                portal.rotation.z += 0.02;
+            });
+            
+            createProductLabel("🛒 Checkout", position.add(new BABYLON.Vector3(0, 2, 0)), scene);
+        }
+        
+        function selectProduct(product) {
+            selectedProduct = product;
+            
+            // Update UI
+            document.getElementById('selected-product').style.display = 'block';
+            document.getElementById('product-name').textContent = product.name;
+            document.getElementById('product-desc').textContent = product.description;
+            document.getElementById('product-price').textContent = `$${product.price}`;
+            
+            console.log('Selected product:', product);
+            
+            // Visual feedback
+            const mesh = scene.getMeshByName(product.id);
+            if (mesh) {
+                mesh.scaling = new BABYLON.Vector3(1.2, 1.2, 1.2);
+                setTimeout(() => {
+                    mesh.scaling = new BABYLON.Vector3(1, 1, 1);
+                }, 300);
+            }
+        }
+        
+        async function buyProduct() {
+            if (!selectedProduct) return;
+            
+            // In production, this would call the Stripe API
+            const checkoutUrl = `https://checkout.stripe.com/pay/${selectedProduct.id}?amount=${selectedProduct.price * 100}`;
+            
+            alert(`🎉 Purchasing ${selectedProduct.name} for $${selectedProduct.price}!\n\nIn production, this would redirect to:\n${checkoutUrl}\n\nYou'll receive:\n- Source code\n- Documentation\n- License key\n- Updates for 1 year`);
+            
+            // Update analytics (mock)
+            const currentRevenue = parseInt(document.getElementById('total-revenue').textContent);
+            const currentSales = parseInt(document.getElementById('total-sales').textContent);
+            
+            document.getElementById('total-revenue').textContent = currentRevenue + selectedProduct.price;
+            document.getElementById('total-sales').textContent = currentSales + 1;
+            
+            // Celebration particles
+            createCelebrationEffect(camera.position, scene);
+        }
+        
+        function createCelebrationEffect(position, scene) {
+            const particles = new BABYLON.ParticleSystem("celebration", 1000, scene);
+            particles.particleTexture = new BABYLON.Texture(
+                "https://www.babylonjs.com/assets/Flare.png",
+                scene
+            );
+            particles.emitter = position;
+            particles.minSize = 0.3;
+            particles.maxSize = 0.8;
+            particles.minLifeTime = 1;
+            particles.maxLifeTime = 2;
+            particles.emitRate = 500;
+            particles.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+            particles.color1 = new BABYLON.Color4(1, 0.8, 0.2, 1);
+            particles.color2 = new BABYLON.Color4(1, 0.2, 0.8, 1);
+            particles.direction1 = new BABYLON.Vector3(-1, 1, -1);
+            particles.direction2 = new BABYLON.Vector3(1, 1, 1);
+            particles.minEmitPower = 5;
+            particles.maxEmitPower = 10;
+            
+            particles.start();
+            
+            setTimeout(() => {
+                particles.stop();
+                setTimeout(() => particles.dispose(), 2000);
+            }, 500);
+        }
+        
+        function enterVR() {
+            if (scene.activeCamera.metadata) {
+                // Already in VR
+                return;
+            }
+            
+            const vrHelper = scene.createDefaultVRExperience({
+                createDeviceOrientationCamera: false,
+            });
+            
+            vrHelper.enableTeleportation({ floorMeshes: [scene.getMeshByName("ground")] });
+            
+            alert('🥽 VR Mode Activated!\n\nPut on your VR headset and use controllers to teleport and interact with products.');
+        }
+        
+        // Create scene
+        scene = createScene();
+        
+        // Render loop
+        engine.runRenderLoop(() => {
+            scene.render();
+        });
+        
+        // Resize
+        window.addEventListener("resize", () => {
+            engine.resize();
+        });
+        
+        // Log startup
+        console.log(`
+🎮 VR Code Marketplace Loaded!
+
+Products: ${products.length}
+Controls:
+- WASD / Arrow Keys: Move
+- Mouse: Look around
+- Click products: View details
+- Click "Enter VR": VR mode
+
+Marketing Videos: goodfaith.church/post
+        `);
+    </script>
+</body>
+</html>

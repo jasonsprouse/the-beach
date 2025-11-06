@@ -3,10 +3,10 @@ import { GameManagerService, Agent } from './game-manager.service';
 
 /**
  * Geo-Fenced Deployment Service
- * 
+ *
  * Manages location-based NPE services with geospatial indexing,
  * service discovery, and proximity-based routing.
- * 
+ *
  * Based on The Beach's geo-fenced service deployment pattern.
  */
 
@@ -45,25 +45,28 @@ export interface NearbyService extends ServiceListing {
 @Injectable()
 export class GeoDeploymentService {
   private readonly logger = new Logger(GeoDeploymentService.name);
-  
+
   // Service database (in production, use PostGIS or MongoDB with geospatial indexing)
   private serviceDatabase = new Map<string, ServiceListing>();
   private geoIndex = new Map<string, ServiceListing[]>(); // Grid-based index for fast lookups
 
-  constructor(
-    private readonly gameManager: GameManagerService,
-  ) {
+  constructor(private readonly gameManager: GameManagerService) {
     this.logger.log('🌍 Geo-Deployment Service initialized');
   }
 
   /**
    * Post a new geo-fenced service
    */
-  async postService(config: Omit<ServiceListing, 'id' | 'geofence' | 'status'>): Promise<ServiceListing> {
+  async postService(
+    config: Omit<ServiceListing, 'id' | 'geofence' | 'status'>,
+  ): Promise<ServiceListing> {
     const listing: ServiceListing = {
       id: this.generateServiceId(),
       ...config,
-      geofence: this.createCircularGeofence(config.location, config.serviceRadius),
+      geofence: this.createCircularGeofence(
+        config.location,
+        config.serviceRadius,
+      ),
       status: 'active',
     };
 
@@ -93,7 +96,9 @@ export class GeoDeploymentService {
       },
     );
 
-    this.logger.log(`📍 Service posted: ${listing.name} at (${listing.location.lat}, ${listing.location.lng})`);
+    this.logger.log(
+      `📍 Service posted: ${listing.name} at (${listing.location.lat}, ${listing.location.lng})`,
+    );
     this.logger.log(`   Category: ${listing.category}`);
     this.logger.log(`   Radius: ${listing.serviceRadius}m`);
     this.logger.log(`   ETA: ${listing.estimatedResponse / 60}min`);
@@ -110,25 +115,30 @@ export class GeoDeploymentService {
     searchRadius: number = 10000, // 10km default
   ): Promise<NearbyService | null> {
     // Query geospatial index for nearby services
-    const nearbyServices = this.queryRadius(customerLocation, searchRadius).filter(
-      s => s.category === serviceType && s.status === 'active',
-    );
+    const nearbyServices = this.queryRadius(
+      customerLocation,
+      searchRadius,
+    ).filter((s) => s.category === serviceType && s.status === 'active');
 
     if (nearbyServices.length === 0) {
-      this.logger.warn(`No providers found for ${serviceType} in ${searchRadius}m radius`);
+      this.logger.warn(
+        `No providers found for ${serviceType} in ${searchRadius}m radius`,
+      );
       return null;
     }
 
     // Calculate distances and sort by proximity
-    const servicesWithDistance: NearbyService[] = nearbyServices.map(service => ({
-      ...service,
-      distance: this.calculateDistance(customerLocation, service.location),
-      eta: this.estimateArrival(
-        customerLocation,
-        service.location,
-        service.estimatedResponse,
-      ),
-    }));
+    const servicesWithDistance: NearbyService[] = nearbyServices.map(
+      (service) => ({
+        ...service,
+        distance: this.calculateDistance(customerLocation, service.location),
+        eta: this.estimateArrival(
+          customerLocation,
+          service.location,
+          service.estimatedResponse,
+        ),
+      }),
+    );
 
     // Sort by distance
     servicesWithDistance.sort((a, b) => a.distance - b.distance);
@@ -150,23 +160,30 @@ export class GeoDeploymentService {
     searchRadius: number = 10000,
     category?: string,
   ): Promise<NearbyService[]> {
-    const nearbyServices = this.queryRadius(customerLocation, searchRadius).filter(
-      s => s.status === 'active' && (!category || s.category === category),
+    const nearbyServices = this.queryRadius(
+      customerLocation,
+      searchRadius,
+    ).filter(
+      (s) => s.status === 'active' && (!category || s.category === category),
     );
 
-    const servicesWithDistance: NearbyService[] = nearbyServices.map(service => ({
-      ...service,
-      distance: this.calculateDistance(customerLocation, service.location),
-      eta: this.estimateArrival(
-        customerLocation,
-        service.location,
-        service.estimatedResponse,
-      ),
-    }));
+    const servicesWithDistance: NearbyService[] = nearbyServices.map(
+      (service) => ({
+        ...service,
+        distance: this.calculateDistance(customerLocation, service.location),
+        eta: this.estimateArrival(
+          customerLocation,
+          service.location,
+          service.estimatedResponse,
+        ),
+      }),
+    );
 
     servicesWithDistance.sort((a, b) => a.distance - b.distance);
 
-    this.logger.log(`📍 Found ${servicesWithDistance.length} services within ${searchRadius}m`);
+    this.logger.log(
+      `📍 Found ${servicesWithDistance.length} services within ${searchRadius}m`,
+    );
 
     return servicesWithDistance;
   }
@@ -266,9 +283,12 @@ export class GeoDeploymentService {
   /**
    * Update service status
    */
-  async updateServiceStatus(serviceId: string, status: 'active' | 'paused' | 'offline'): Promise<void> {
+  async updateServiceStatus(
+    serviceId: string,
+    status: 'active' | 'paused' | 'offline',
+  ): Promise<void> {
     const service = this.serviceDatabase.get(serviceId);
-    
+
     if (service) {
       service.status = status;
       this.logger.log(`🔄 Service ${serviceId} status updated: ${status}`);
@@ -280,7 +300,7 @@ export class GeoDeploymentService {
    */
   async removeService(serviceId: string): Promise<void> {
     const service = this.serviceDatabase.get(serviceId);
-    
+
     if (service) {
       this.serviceDatabase.delete(serviceId);
       // Also decommission agent
@@ -301,7 +321,7 @@ export class GeoDeploymentService {
    */
   getServicesByCategory(category: string): ServiceListing[] {
     return Array.from(this.serviceDatabase.values()).filter(
-      s => s.category === category,
+      (s) => s.category === category,
     );
   }
 
@@ -313,7 +333,7 @@ export class GeoDeploymentService {
     updates: Partial<ServiceListing>,
   ): Promise<ServiceListing | null> {
     const service = this.serviceDatabase.get(serviceId);
-    
+
     if (!service) {
       return null;
     }
@@ -348,15 +368,15 @@ export class GeoDeploymentService {
     const services = this.getAllServices();
     const categories = new Map<string, number>();
 
-    services.forEach(s => {
+    services.forEach((s) => {
       categories.set(s.category, (categories.get(s.category) || 0) + 1);
     });
 
     return {
       totalServices: services.length,
-      activeServices: services.filter(s => s.status === 'active').length,
-      pausedServices: services.filter(s => s.status === 'paused').length,
-      offlineServices: services.filter(s => s.status === 'offline').length,
+      activeServices: services.filter((s) => s.status === 'active').length,
+      pausedServices: services.filter((s) => s.status === 'paused').length,
+      offlineServices: services.filter((s) => s.status === 'offline').length,
       categoriesServed: categories.size,
       categoryBreakdown: Object.fromEntries(categories),
     };
@@ -375,8 +395,8 @@ export class GeoDeploymentService {
    */
   getServiceCoverageMap(): any {
     const services = this.getAllServices();
-    
-    return services.map(service => ({
+
+    return services.map((service) => ({
       id: service.id,
       name: service.name,
       category: service.category,

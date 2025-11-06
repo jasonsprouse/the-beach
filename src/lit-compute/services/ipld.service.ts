@@ -5,25 +5,25 @@ import { createHash } from 'crypto';
 
 /**
  * IPLD Service for Content-Addressable Node Network
- * 
+ *
  * Uses content-addressable hashing for:
  * - Content-addressable node identities
  * - Cryptographically verifiable node data
  * - Distributed data structures
  * - Cross-platform data linking
- * 
+ *
  * This implementation uses CommonJS-compatible libraries for NestJS compatibility
  */
 @Injectable()
 export class IpldService {
   private readonly logger = new Logger(IpldService.name);
-  
+
   // Local block store (in production, use IPFS or persistent storage)
   private blockStore = new Map<string, any>();
 
   /**
    * Create a CID-like identifier for node data
-   * 
+   *
    * Format: base58(sha256(objectHash(nodeData)))
    * This creates a cryptographically secure, content-addressed identifier
    */
@@ -35,12 +35,15 @@ export class IpldService {
   }): Promise<string> {
     try {
       // Create deterministic hash of the node data
-      const dataHash = objectHash(nodeData, { algorithm: 'sha256', encoding: 'hex' });
-      
+      const dataHash = objectHash(nodeData, {
+        algorithm: 'sha256',
+        encoding: 'hex',
+      });
+
       // Create a CID-like identifier using base58
       const hash = createHash('sha256').update(dataHash).digest();
       const cid = 'z' + bs58.encode(hash); // 'z' prefix indicates base58btc encoding
-      
+
       // Store the block
       this.blockStore.set(cid, nodeData);
 
@@ -62,10 +65,13 @@ export class IpldService {
     timestamp: number;
   }): Promise<string> {
     try {
-      const dataHash = objectHash(jobData, { algorithm: 'sha256', encoding: 'hex' });
+      const dataHash = objectHash(jobData, {
+        algorithm: 'sha256',
+        encoding: 'hex',
+      });
       const hash = createHash('sha256').update(dataHash).digest();
       const cid = 'z' + bs58.encode(hash);
-      
+
       this.blockStore.set(cid, jobData);
 
       this.logger.log(`Created job CID: ${cid}`);
@@ -92,7 +98,10 @@ export class IpldService {
         createdAt: Date.now(),
       };
 
-      const dataHash = objectHash(graph, { algorithm: 'sha256', encoding: 'hex' });
+      const dataHash = objectHash(graph, {
+        algorithm: 'sha256',
+        encoding: 'hex',
+      });
       const hash = createHash('sha256').update(dataHash).digest();
       const cid = 'z' + bs58.encode(hash);
 
@@ -128,11 +137,7 @@ export class IpldService {
    * Create a multiaddr-style address for a node
    * Format: /ip4/{ip}/tcp/{port}/ipld/{cid}
    */
-  createNodeAddress(
-    ip: string,
-    port: number,
-    nodeCID: string,
-  ): string {
+  createNodeAddress(ip: string, port: number, nodeCID: string): string {
     return `/ip4/${ip}/tcp/${port}/ipld/${nodeCID}`;
   }
 
@@ -145,9 +150,14 @@ export class IpldService {
     cid: string;
   } | null {
     try {
-      const parts = address.split('/').filter(p => p);
-      
-      if (parts.length < 6 || parts[0] !== 'ip4' || parts[2] !== 'tcp' || parts[4] !== 'ipld') {
+      const parts = address.split('/').filter((p) => p);
+
+      if (
+        parts.length < 6 ||
+        parts[0] !== 'ip4' ||
+        parts[2] !== 'tcp' ||
+        parts[4] !== 'ipld'
+      ) {
         return null;
       }
 
@@ -165,13 +175,13 @@ export class IpldService {
   /**
    * Verify that node data matches its CID
    */
-  async verifyNodeIntegrity(
-    nodeCID: string,
-    nodeData: any,
-  ): Promise<boolean> {
+  async verifyNodeIntegrity(nodeCID: string, nodeData: any): Promise<boolean> {
     try {
       // Recompute the CID from the data
-      const dataHash = objectHash(nodeData, { algorithm: 'sha256', encoding: 'hex' });
+      const dataHash = objectHash(nodeData, {
+        algorithm: 'sha256',
+        encoding: 'hex',
+      });
       const hash = createHash('sha256').update(dataHash).digest();
       const computedCID = 'z' + bs58.encode(hash);
 
@@ -206,7 +216,10 @@ export class IpldService {
         status: 'assigned',
       };
 
-      const dataHash = objectHash(assignment, { algorithm: 'sha256', encoding: 'hex' });
+      const dataHash = objectHash(assignment, {
+        algorithm: 'sha256',
+        encoding: 'hex',
+      });
       const hash = createHash('sha256').update(dataHash).digest();
       const cid = 'z' + bs58.encode(hash);
 
@@ -239,7 +252,10 @@ export class IpldService {
         verified: true,
       };
 
-      const dataHash = objectHash(verification, { algorithm: 'sha256', encoding: 'hex' });
+      const dataHash = objectHash(verification, {
+        algorithm: 'sha256',
+        encoding: 'hex',
+      });
       const hash = createHash('sha256').update(dataHash).digest();
       const cid = 'z' + bs58.encode(hash);
 

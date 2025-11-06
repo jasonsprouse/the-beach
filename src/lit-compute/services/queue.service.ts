@@ -17,7 +17,7 @@ export interface Job {
 
 /**
  * Queue Service for Lit Compute Network
- * 
+ *
  * Manages job queue operations:
  * - Job submission and validation
  * - Job assignment to available nodes
@@ -117,9 +117,7 @@ export class QueueService {
     const jobStatus = await this.redisService.getJobStatus(jobId);
 
     if (jobStatus.nodeId !== nodeId) {
-      throw new Error(
-        `Job ${jobId} is not assigned to node ${nodeId}`,
-      );
+      throw new Error(`Job ${jobId} is not assigned to node ${nodeId}`);
     }
 
     // Mark as completed in Redis
@@ -141,17 +139,13 @@ export class QueueService {
     const jobStatus = await this.redisService.getJobStatus(jobId);
 
     if (jobStatus.nodeId !== nodeId) {
-      throw new Error(
-        `Job ${jobId} is not assigned to node ${nodeId}`,
-      );
+      throw new Error(`Job ${jobId} is not assigned to node ${nodeId}`);
     }
 
     // Update status
     await this.redisService.getJobStatus(jobId); // This would need to be extended
 
-    this.logger.error(
-      `Job ${jobId} failed on node ${nodeId}: ${reason}`,
-    );
+    this.logger.error(`Job ${jobId} failed on node ${nodeId}: ${reason}`);
 
     // Re-queue job for another node
     // TODO: Implement retry logic with max attempts

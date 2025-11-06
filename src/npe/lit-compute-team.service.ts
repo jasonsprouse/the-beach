@@ -1,6 +1,6 @@
 /**
  * Lit Compute Network - NPE Team Service
- * 
+ *
  * This service manages the NPE development team for building the Lit Compute Network.
  * It implements the team structure defined in LIT_COMPUTE_NPE_TEAM.md
  */
@@ -198,7 +198,8 @@ export class LitComputeTeamService {
         phase: ProjectPhase.PHASE_1_MVP,
         number: 1,
         title: 'Functional Node Software',
-        description: 'CLI node software accepts and processes Lit Protocol encryption jobs',
+        description:
+          'CLI node software accepts and processes Lit Protocol encryption jobs',
         owner: 'npe_node_software',
         targetDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 3 months
         status: GoalStatus.NOT_STARTED,
@@ -232,7 +233,8 @@ export class LitComputeTeamService {
         phase: ProjectPhase.PHASE_1_MVP,
         number: 2,
         title: 'Smart Contracts Deployed',
-        description: 'Job coordinator contract deployed to testnet with payment distribution',
+        description:
+          'Job coordinator contract deployed to testnet with payment distribution',
         owner: 'npe_smart_contracts',
         targetDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
         status: GoalStatus.NOT_STARTED,
@@ -334,7 +336,8 @@ export class LitComputeTeamService {
         phase: ProjectPhase.PHASE_1_MVP,
         number: 5,
         title: 'Security Validation',
-        description: 'ZK proofs, consensus validation, and fraud detection working',
+        description:
+          'ZK proofs, consensus validation, and fraud detection working',
         owner: 'npe_security',
         targetDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
         status: GoalStatus.NOT_STARTED,
@@ -454,11 +457,26 @@ export class LitComputeTeamService {
         projectedCompletion: new Date(),
       },
       metrics: {
-        activeNodes: { current: 0, target: 100, trend: '→', percentOfTarget: 0 },
-        jobsPerDay: { current: 0, target: 1000, trend: '→', percentOfTarget: 0 },
+        activeNodes: {
+          current: 0,
+          target: 100,
+          trend: '→',
+          percentOfTarget: 0,
+        },
+        jobsPerDay: {
+          current: 0,
+          target: 1000,
+          trend: '→',
+          percentOfTarget: 0,
+        },
         successRate: { current: 0, target: 99, trend: '→', percentOfTarget: 0 },
         avgJobTime: { current: 0, target: 2, trend: '→', percentOfTarget: 0 },
-        testCoverage: { current: 0, target: 80, trend: '→', percentOfTarget: 0 },
+        testCoverage: {
+          current: 0,
+          target: 80,
+          trend: '→',
+          percentOfTarget: 0,
+        },
         uptime: { current: 0, target: 99.9, trend: '→', percentOfTarget: 0 },
       },
       achievements: [],
@@ -481,7 +499,9 @@ export class LitComputeTeamService {
 
     const now = new Date();
     const phase1Goals = this.getGoalsByPhase(ProjectPhase.PHASE_1_MVP);
-    const phase1Complete = phase1Goals.filter((g) => g.status === GoalStatus.COMPLETE).length;
+    const phase1Complete = phase1Goals.filter(
+      (g) => g.status === GoalStatus.COMPLETE,
+    ).length;
 
     const report: MonthlyReport = {
       month: now.getMonth() + 1,
@@ -600,7 +620,8 @@ export class LitComputeTeamService {
 
   private getWeekNumber(date: Date): number {
     const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-    const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
+    const pastDaysOfYear =
+      (date.getTime() - firstDayOfYear.getTime()) / 86400000;
     return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
   }
 }

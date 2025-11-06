@@ -1,12 +1,16 @@
 /**
  * PKP VR Environment Tools
- * 
+ *
  * Enable PKP agents to work in immersive VR environments using Babylon.js,
  * visualize code architecture, interact with data flows, and collaborate
  * in virtual workspaces.
  */
 
-import { PKPTool, PKPToolCategory, ToolExecutionResult } from './pkp-agent-tools';
+import {
+  PKPTool,
+  PKPToolCategory,
+  ToolExecutionResult,
+} from './pkp-agent-tools';
 
 // ============================================================================
 // VR Environment Types
@@ -24,7 +28,14 @@ export interface VRWorkspace {
 
 export interface VRObject {
   id: string;
-  type: 'code-block' | 'data-flow' | 'architecture-node' | 'git-branch' | 'test-result' | 'security-alert' | 'deployment-status';
+  type:
+    | 'code-block'
+    | 'data-flow'
+    | 'architecture-node'
+    | 'git-branch'
+    | 'test-result'
+    | 'security-alert'
+    | 'deployment-status';
   position: { x: number; y: number; z: number };
   rotation?: { x: number; y: number; z: number };
   scale?: { x: number; y: number; z: number };
@@ -101,7 +112,11 @@ export class VRWorkspaceManager {
     return workspace;
   }
 
-  joinWorkspace(workspaceId: string, agentId: string, agentName: string): VRAgentAvatar {
+  joinWorkspace(
+    workspaceId: string,
+    agentId: string,
+    agentName: string,
+  ): VRAgentAvatar {
     const workspace = this.workspaces.get(workspaceId);
     if (!workspace) {
       throw new Error(`Workspace ${workspaceId} not found`);
@@ -140,14 +155,21 @@ export class VRWorkspaceManager {
     return Array.from(this.workspaces.values());
   }
 
-  updateAgentPosition(agentId: string, position: { x: number; y: number; z: number }): void {
+  updateAgentPosition(
+    agentId: string,
+    position: { x: number; y: number; z: number },
+  ): void {
     const avatar = this.activeAgents.get(agentId);
     if (avatar) {
       avatar.position = position;
     }
   }
 
-  setAgentStatus(agentId: string, status: VRAgentAvatar['status'], task?: string): void {
+  setAgentStatus(
+    agentId: string,
+    status: VRAgentAvatar['status'],
+    task?: string,
+  ): void {
     const avatar = this.activeAgents.get(agentId);
     if (avatar) {
       avatar.status = status;
@@ -167,14 +189,20 @@ export class VREnvironmentTool implements PKPTool {
   id = 'vr-environment';
   name = 'VR Environment';
   category = PKPToolCategory.VR;
-  description = 'Create and interact with VR workspaces for immersive development';
+  description =
+    'Create and interact with VR workspaces for immersive development';
   requiredPermissions = ['vr:access', 'vr:create'];
 
   async execute(params: {
     action: 'create' | 'join' | 'list' | 'teleport' | 'status';
     workspaceId?: string;
     workspaceName?: string;
-    sceneType?: 'code-city' | 'data-ocean' | 'git-forest' | 'test-arena' | 'architecture-space';
+    sceneType?:
+      | 'code-city'
+      | 'data-ocean'
+      | 'git-forest'
+      | 'test-arena'
+      | 'architecture-space';
     agentId?: string;
     agentName?: string;
     position?: { x: number; y: number; z: number };
@@ -188,7 +216,7 @@ export class VREnvironmentTool implements PKPTool {
         case 'create': {
           const workspace = vrWorkspaceManager.createWorkspace(
             params.workspaceName || 'Untitled Workspace',
-            params.sceneType || 'code-city'
+            params.sceneType || 'code-city',
           );
           return {
             success: true,
@@ -204,12 +232,14 @@ export class VREnvironmentTool implements PKPTool {
 
         case 'join': {
           if (!params.workspaceId || !params.agentId || !params.agentName) {
-            throw new Error('workspaceId, agentId, and agentName required for join');
+            throw new Error(
+              'workspaceId, agentId, and agentName required for join',
+            );
           }
           const avatar = vrWorkspaceManager.joinWorkspace(
             params.workspaceId,
             params.agentId,
-            params.agentName
+            params.agentName,
           );
           return {
             success: true,
@@ -229,7 +259,7 @@ export class VREnvironmentTool implements PKPTool {
             output: `Found ${workspaces.length} VR workspaces`,
             executionTime: Date.now() - startTime,
             metadata: {
-              workspaces: workspaces.map(w => ({
+              workspaces: workspaces.map((w) => ({
                 id: w.id,
                 name: w.name,
                 scene: w.scene,
@@ -245,7 +275,10 @@ export class VREnvironmentTool implements PKPTool {
           if (!params.agentId || !params.position) {
             throw new Error('agentId and position required for teleport');
           }
-          vrWorkspaceManager.updateAgentPosition(params.agentId, params.position);
+          vrWorkspaceManager.updateAgentPosition(
+            params.agentId,
+            params.position,
+          );
           return {
             success: true,
             output: `Agent teleported to ${JSON.stringify(params.position)}`,
@@ -258,7 +291,11 @@ export class VREnvironmentTool implements PKPTool {
           if (!params.agentId || !params.status) {
             throw new Error('agentId and status required');
           }
-          vrWorkspaceManager.setAgentStatus(params.agentId, params.status, params.task);
+          vrWorkspaceManager.setAgentStatus(
+            params.agentId,
+            params.status,
+            params.task,
+          );
           return {
             success: true,
             output: `Agent status updated to: ${params.status}`,
@@ -288,11 +325,16 @@ export class VRCodeVisualizationTool implements PKPTool {
   id = 'vr-code-visualization';
   name = 'VR Code Visualization';
   category = PKPToolCategory.VR;
-  description = 'Visualize code architecture, dependencies, and complexity in 3D space';
+  description =
+    'Visualize code architecture, dependencies, and complexity in 3D space';
   requiredPermissions = ['vr:access', 'code:read'];
 
   async execute(params: {
-    action: 'visualize' | 'add-file' | 'show-dependencies' | 'highlight-complexity';
+    action:
+      | 'visualize'
+      | 'add-file'
+      | 'show-dependencies'
+      | 'highlight-complexity';
     workspaceId: string;
     path?: string;
     layout?: 'grid' | 'circular' | 'hierarchical' | 'force-directed';
@@ -309,8 +351,11 @@ export class VRCodeVisualizationTool implements PKPTool {
       switch (params.action) {
         case 'visualize': {
           // Create 3D visualization of codebase
-          const files = this.generateCodeVisualization(params.path || 'src/', params.layout || 'force-directed');
-          
+          const files = this.generateCodeVisualization(
+            params.path || 'src/',
+            params.layout || 'force-directed',
+          );
+
           files.forEach((file, index) => {
             const object: VRObject = {
               id: `code-${index}`,
@@ -374,13 +419,44 @@ export class VRCodeVisualizationTool implements PKPTool {
     }
   }
 
-  private generateCodeVisualization(basePath: string, layout: string): VRCodeFile[] {
+  private generateCodeVisualization(
+    basePath: string,
+    layout: string,
+  ): VRCodeFile[] {
     // Mock code files - in production, scan actual filesystem
     const files: VRCodeFile[] = [
-      { path: 'src/main.ts', lines: 100, complexity: 5, position: { x: 0, y: 0, z: 0 }, color: '#00ff00', connections: ['src/app.module.ts'] },
-      { path: 'src/app.module.ts', lines: 200, complexity: 8, position: { x: 5, y: 0, z: 0 }, color: '#ffff00', connections: ['src/npe/npe.module.ts'] },
-      { path: 'src/npe/npe.module.ts', lines: 150, complexity: 12, position: { x: 10, y: 0, z: 0 }, color: '#ff6600', connections: [] },
-      { path: 'src/lit-compute/lit-compute.module.ts', lines: 300, complexity: 15, position: { x: 5, y: 5, z: 0 }, color: '#ff0000', connections: [] },
+      {
+        path: 'src/main.ts',
+        lines: 100,
+        complexity: 5,
+        position: { x: 0, y: 0, z: 0 },
+        color: '#00ff00',
+        connections: ['src/app.module.ts'],
+      },
+      {
+        path: 'src/app.module.ts',
+        lines: 200,
+        complexity: 8,
+        position: { x: 5, y: 0, z: 0 },
+        color: '#ffff00',
+        connections: ['src/npe/npe.module.ts'],
+      },
+      {
+        path: 'src/npe/npe.module.ts',
+        lines: 150,
+        complexity: 12,
+        position: { x: 10, y: 0, z: 0 },
+        color: '#ff6600',
+        connections: [],
+      },
+      {
+        path: 'src/lit-compute/lit-compute.module.ts',
+        lines: 300,
+        complexity: 15,
+        position: { x: 5, y: 5, z: 0 },
+        color: '#ff0000',
+        connections: [],
+      },
     ];
 
     // Apply layout algorithm
@@ -400,9 +476,24 @@ export class VRCodeVisualizationTool implements PKPTool {
 
   private generateDependencies(): VRDependency[] {
     return [
-      { from: 'src/main.ts', to: 'src/app.module.ts', type: 'import', strength: 1.0 },
-      { from: 'src/app.module.ts', to: 'src/npe/npe.module.ts', type: 'import', strength: 0.8 },
-      { from: 'src/app.module.ts', to: 'src/lit-compute/lit-compute.module.ts', type: 'import', strength: 0.8 },
+      {
+        from: 'src/main.ts',
+        to: 'src/app.module.ts',
+        type: 'import',
+        strength: 1.0,
+      },
+      {
+        from: 'src/app.module.ts',
+        to: 'src/npe/npe.module.ts',
+        type: 'import',
+        strength: 0.8,
+      },
+      {
+        from: 'src/app.module.ts',
+        to: 'src/lit-compute/lit-compute.module.ts',
+        type: 'import',
+        strength: 0.8,
+      },
     ];
   }
 }
@@ -440,7 +531,7 @@ export class VRArchitectureTool implements PKPTool {
         case 'visualize': {
           // Create architecture nodes
           const nodes = this.generateArchitectureNodes();
-          
+
           nodes.forEach((node, index) => {
             const object: VRObject = {
               id: `arch-${index}`,
@@ -465,8 +556,8 @@ export class VRArchitectureTool implements PKPTool {
             executionTime: Date.now() - startTime,
             metadata: {
               nodes: nodes.length,
-              services: nodes.filter(n => n.type === 'service').length,
-              databases: nodes.filter(n => n.type === 'database').length,
+              services: nodes.filter((n) => n.type === 'service').length,
+              databases: nodes.filter((n) => n.type === 'database').length,
             },
           };
         }
@@ -542,7 +633,12 @@ export class VRArchitectureTool implements PKPTool {
         position: { x: 0, y: 3, z: -10 },
         size: 2,
         health: 'healthy',
-        metrics: { requests: 15000, latency: 45, errorRate: 0.1, uptime: 99.99 },
+        metrics: {
+          requests: 15000,
+          latency: 45,
+          errorRate: 0.1,
+          uptime: 99.99,
+        },
       },
       {
         id: 'npe-service',
@@ -551,7 +647,12 @@ export class VRArchitectureTool implements PKPTool {
         position: { x: -5, y: 3, z: 0 },
         size: 1.5,
         health: 'healthy',
-        metrics: { requests: 8000, latency: 120, errorRate: 0.2, uptime: 99.95 },
+        metrics: {
+          requests: 8000,
+          latency: 120,
+          errorRate: 0.2,
+          uptime: 99.95,
+        },
       },
       {
         id: 'lit-compute',
@@ -569,7 +670,12 @@ export class VRArchitectureTool implements PKPTool {
         position: { x: 0, y: 0, z: 5 },
         size: 1,
         health: 'healthy',
-        metrics: { requests: 50000, latency: 2, errorRate: 0.01, uptime: 99.99 },
+        metrics: {
+          requests: 50000,
+          latency: 2,
+          errorRate: 0.01,
+          uptime: 99.99,
+        },
       },
     ];
   }
@@ -587,7 +693,11 @@ export class VRGitVisualizationTool implements PKPTool {
   requiredPermissions = ['vr:access', 'git:read'];
 
   async execute(params: {
-    action: 'show-branches' | 'show-history' | 'visualize-merge' | 'walk-commits';
+    action:
+      | 'show-branches'
+      | 'show-history'
+      | 'visualize-merge'
+      | 'walk-commits';
     workspaceId: string;
     branch?: string;
     limit?: number;
@@ -604,9 +714,24 @@ export class VRGitVisualizationTool implements PKPTool {
         case 'show-branches': {
           // Create branch visualization as a tree
           const branches = [
-            { name: 'master', position: { x: 0, y: 0, z: 0 }, color: '#00ff00', commits: 150 },
-            { name: 'product/lit-compute-network', position: { x: 5, y: 2, z: 0 }, color: '#00ffff', commits: 45 },
-            { name: 'feature/pkp-tools', position: { x: -5, y: 1, z: 0 }, color: '#ff00ff', commits: 12 },
+            {
+              name: 'master',
+              position: { x: 0, y: 0, z: 0 },
+              color: '#00ff00',
+              commits: 150,
+            },
+            {
+              name: 'product/lit-compute-network',
+              position: { x: 5, y: 2, z: 0 },
+              color: '#00ffff',
+              commits: 45,
+            },
+            {
+              name: 'feature/pkp-tools',
+              position: { x: -5, y: 1, z: 0 },
+              color: '#ff00ff',
+              commits: 12,
+            },
           ];
 
           branches.forEach((branch, index) => {
@@ -682,7 +807,12 @@ export class VRCollaborationTool implements PKPTool {
   requiredPermissions = ['vr:access', 'vr:collaborate'];
 
   async execute(params: {
-    action: 'point-at' | 'draw-annotation' | 'voice-chat' | 'share-screen' | 'hand-gesture';
+    action:
+      | 'point-at'
+      | 'draw-annotation'
+      | 'voice-chat'
+      | 'share-screen'
+      | 'hand-gesture';
     workspaceId: string;
     agentId: string;
     target?: { x: number; y: number; z: number };

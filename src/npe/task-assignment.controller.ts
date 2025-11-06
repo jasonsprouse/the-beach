@@ -1,33 +1,34 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Body, 
-  Param, 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
   Query,
   Logger,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { TaskAuthorizationService, TaskAssignmentRequest } from './services/task-authorization.service';
+import {
+  TaskAuthorizationService,
+  TaskAssignmentRequest,
+} from './services/task-authorization.service';
 
 /**
  * Task Assignment Controller
- * 
+ *
  * REST API for WebAuthn-authorized task assignments to sub-PKPs
  */
 @Controller('npe/tasks/assignments')
 export class TaskAssignmentController {
   private readonly logger = new Logger(TaskAssignmentController.name);
 
-  constructor(
-    private readonly taskAuthService: TaskAuthorizationService,
-  ) {}
+  constructor(private readonly taskAuthService: TaskAuthorizationService) {}
 
   /**
    * Request task assignment to a sub-PKP
    * POST /npe/tasks/assignments/request
-   * 
+   *
    * @body mainPKP - Main PKP address (human-owned)
    * @body subPKP - Sub-PKP address (AI agent)
    * @body taskId - Task ID to assign
@@ -35,14 +36,12 @@ export class TaskAssignmentController {
   @Post('request')
   @HttpCode(HttpStatus.CREATED)
   async requestAssignment(
-    @Body() body: {
-      mainPKP: string;
-      subPKP: string;
-      taskId: number;
-    },
+    @Body() body: { mainPKP: string; subPKP: string; taskId: number },
   ): Promise<TaskAssignmentRequest> {
-    this.logger.log(`📝 Assignment request: Task #${body.taskId} → ${body.subPKP}`);
-    
+    this.logger.log(
+      `📝 Assignment request: Task #${body.taskId} → ${body.subPKP}`,
+    );
+
     return await this.taskAuthService.requestTaskAssignment({
       mainPKP: body.mainPKP,
       subPKP: body.subPKP,
@@ -53,7 +52,7 @@ export class TaskAssignmentController {
   /**
    * Approve task assignment
    * POST /npe/tasks/assignments/:id/approve
-   * 
+   *
    * @param id - Assignment request ID
    * @body mainPKP - Main PKP address (for authorization)
    */
@@ -63,14 +62,14 @@ export class TaskAssignmentController {
     @Body() body: { mainPKP: string },
   ): Promise<TaskAssignmentRequest> {
     this.logger.log(`✅ Approving assignment: ${id}`);
-    
+
     return await this.taskAuthService.approveAssignment(id, body.mainPKP);
   }
 
   /**
    * Reject task assignment
    * POST /npe/tasks/assignments/:id/reject
-   * 
+   *
    * @param id - Assignment request ID
    * @body mainPKP - Main PKP address (for authorization)
    * @body reason - Optional rejection reason
@@ -81,27 +80,32 @@ export class TaskAssignmentController {
     @Body() body: { mainPKP: string; reason?: string },
   ): Promise<TaskAssignmentRequest> {
     this.logger.log(`❌ Rejecting assignment: ${id}`);
-    
-    return await this.taskAuthService.rejectAssignment(id, body.mainPKP, body.reason);
+
+    return await this.taskAuthService.rejectAssignment(
+      id,
+      body.mainPKP,
+      body.reason,
+    );
   }
 
   /**
    * Bulk assign tasks (Basic/Premium only)
    * POST /npe/tasks/assignments/bulk
-   * 
+   *
    * @body mainPKP - Main PKP address
    * @body assignments - Array of {subPKP, taskId} pairs
    */
   @Post('bulk')
   @HttpCode(HttpStatus.CREATED)
   async bulkAssign(
-    @Body() body: {
+    @Body()
+    body: {
       mainPKP: string;
       assignments: Array<{ subPKP: string; taskId: number }>;
     },
   ): Promise<TaskAssignmentRequest[]> {
     this.logger.log(`📚 Bulk assignment: ${body.assignments.length} tasks`);
-    
+
     return await this.taskAuthService.bulkAssignTasks({
       mainPKP: body.mainPKP,
       assignments: body.assignments,
@@ -117,7 +121,7 @@ export class TaskAssignmentController {
     @Query('mainPKP') mainPKP: string,
   ): Promise<TaskAssignmentRequest[]> {
     this.logger.log(`📋 Getting pending assignments for ${mainPKP}`);
-    
+
     return await this.taskAuthService.getPendingAssignments(mainPKP);
   }
 
@@ -131,7 +135,7 @@ export class TaskAssignmentController {
     @Query('status') status?: string,
   ): Promise<TaskAssignmentRequest[]> {
     this.logger.log(`📋 Getting all assignments for ${mainPKP}`);
-    
+
     return await this.taskAuthService.getAllAssignments(mainPKP, status);
   }
 
@@ -142,12 +146,12 @@ export class TaskAssignmentController {
   @Get(':id')
   async getAssignment(@Param('id') id: string): Promise<TaskAssignmentRequest> {
     this.logger.log(`📄 Getting assignment: ${id}`);
-    
+
     const assignment = this.taskAuthService.getAssignment(id);
     if (!assignment) {
       throw new Error(`Assignment ${id} not found`);
     }
-    
+
     return assignment;
   }
 
@@ -158,7 +162,7 @@ export class TaskAssignmentController {
   @Get('stats/:mainPKP')
   async getUserStats(@Param('mainPKP') mainPKP: string) {
     this.logger.log(`📊 Getting stats for ${mainPKP}`);
-    
+
     return await this.taskAuthService.getUserStats(mainPKP);
   }
 }

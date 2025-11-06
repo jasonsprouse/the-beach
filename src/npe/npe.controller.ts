@@ -1,11 +1,20 @@
 /**
  * NPE Controller - The Beach Multi-Agent Platform
- * 
+ *
  * REST API endpoints for NPE management, geo-services, tier management, and agent orchestration.
  * This is a simplified, working version compatible with current service interfaces.
  */
 
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { LitComputeTeamService } from './lit-compute-team.service';
 import { GameManagerService } from './game-manager.service';
 import { NPETierManagerService, NPETier } from './npe-tier-manager.service';
@@ -128,7 +137,7 @@ export class NPEController {
     await this.gameManager.registerAgent(
       pkp,
       config.type,
-      config.capabilities || []
+      config.capabilities || [],
     );
 
     return {
@@ -177,7 +186,9 @@ export class NPEController {
     }
 
     // Return all tiers
-    const allTiers = [NPETier.FREEMIUM, NPETier.BASE, NPETier.PREMIUM].map(t => this.tierManager.getTierInfo(t));
+    const allTiers = [NPETier.FREEMIUM, NPETier.BASE, NPETier.PREMIUM].map(
+      (t) => this.tierManager.getTierInfo(t),
+    );
 
     return {
       success: true,
@@ -203,7 +214,10 @@ export class NPEController {
       usage: {
         npes: npeCount,
         maxNPEs: info.limits.maxNPEs,
-        percentUsed: info.limits.maxNPEs === -1 ? 0 : (npeCount / info.limits.maxNPEs) * 100,
+        percentUsed:
+          info.limits.maxNPEs === -1
+            ? 0
+            : (npeCount / info.limits.maxNPEs) * 100,
       },
     };
   }
@@ -268,7 +282,7 @@ export class NPEController {
     @Query('lat') lat: string,
     @Query('lng') lng: string,
     @Query('radius') radius: string = '5000',
-    @Query('category') category?: string
+    @Query('category') category?: string,
   ) {
     const location = {
       lat: parseFloat(lat),
@@ -278,7 +292,7 @@ export class NPEController {
     const services = await this.geoDeployment.findNearbyServices(
       location,
       parseInt(radius, 10),
-      category
+      category,
     );
 
     return {
@@ -353,7 +367,7 @@ export class NPEController {
   @Get('agents')
   async getAgents(@Query('purpose') purpose?: string) {
     let agents;
-    
+
     if (purpose) {
       agents = await this.gameManager.getAgentsByPurpose(purpose);
     } else {

@@ -1,9 +1,9 @@
 /**
  * NPE Team Structure for Lit Compute Network
- * 
+ *
  * This file defines the TypeScript types and interfaces for the NPE development team
  * that will build the Lit Compute Network distributed processing system.
- * 
+ *
  * Based on: LIT_COMPUTE_NPE_TEAM.md
  */
 
@@ -67,10 +67,10 @@ export interface NPETeam {
 
 export enum ProjectPhase {
   PLANNING = 'planning',
-  PHASE_1_MVP = 'phase_1_mvp',          // Months 1-3
-  PHASE_2_DESKTOP = 'phase_2_desktop',   // Months 4-6
+  PHASE_1_MVP = 'phase_1_mvp', // Months 1-3
+  PHASE_2_DESKTOP = 'phase_2_desktop', // Months 4-6
   PHASE_3_PRODUCTION = 'phase_3_production', // Months 7-9
-  PHASE_4_SCALE = 'phase_4_scale',       // Months 10-12
+  PHASE_4_SCALE = 'phase_4_scale', // Months 10-12
   MAINTENANCE = 'maintenance',
 }
 
@@ -166,9 +166,9 @@ export interface Blocker {
 }
 
 export enum BlockerSeverity {
-  MINOR = 'minor',       // Can work around it
+  MINOR = 'minor', // Can work around it
   MODERATE = 'moderate', // Slowing progress
-  MAJOR = 'major',       // Blocking multiple tasks
+  MAJOR = 'major', // Blocking multiple tasks
   CRITICAL = 'critical', // Project at risk
 }
 
@@ -296,12 +296,12 @@ export interface BudgetUpdate {
 // ============================================================================
 
 export interface GoodFaithMetrics {
-  commitmentScore: number;      // % of deadlines met (target: >90%)
-  disciplineScore: number;      // Code quality metrics (target: >90%)
-  integrityScore: number;       // Honest reporting rate (target: >90%)
-  directSourcingScore: number;  // Documentation quality (target: >90%)
-  investmentImpact: number;     // $ reinvested in community
-  overallScore: number;         // Average of all scores
+  commitmentScore: number; // % of deadlines met (target: >90%)
+  disciplineScore: number; // Code quality metrics (target: >90%)
+  integrityScore: number; // Honest reporting rate (target: >90%)
+  directSourcingScore: number; // Documentation quality (target: >90%)
+  investmentImpact: number; // $ reinvested in community
+  overallScore: number; // Average of all scores
   alignment: 'excellent' | 'good' | 'needs_improvement' | 'critical';
 }
 
@@ -310,11 +310,11 @@ export interface GoodFaithMetrics {
 // ============================================================================
 
 export interface TestMetrics {
-  unitCoverage: number;          // Target: 80%+
-  integrationCoverage: number;   // Target: 60%+
-  e2eCoverage: number;           // Target: 100% critical paths
-  passRate: number;              // Target: 100%
-  avgTestDuration: number;       // Target: <5 min (in seconds)
+  unitCoverage: number; // Target: 80%+
+  integrationCoverage: number; // Target: 60%+
+  e2eCoverage: number; // Target: 100% critical paths
+  passRate: number; // Target: 100%
+  avgTestDuration: number; // Target: <5 min (in seconds)
   testsWritten: number;
   testsFailed: number;
   testsPassing: number;
@@ -377,11 +377,11 @@ export enum CommentType {
 }
 
 export enum CommentSeverity {
-  BLOCKER = 'blocker',     // Must fix before merge
-  CRITICAL = 'critical',   // Should fix before merge
-  MAJOR = 'major',         // Should fix soon
-  MINOR = 'minor',         // Nice to have
-  NITPICK = 'nitpick',     // Optional
+  BLOCKER = 'blocker', // Must fix before merge
+  CRITICAL = 'critical', // Should fix before merge
+  MAJOR = 'major', // Should fix soon
+  MINOR = 'minor', // Nice to have
+  NITPICK = 'nitpick', // Optional
 }
 
 // ============================================================================

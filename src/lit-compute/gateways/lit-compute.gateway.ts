@@ -13,7 +13,7 @@ import { RedisService } from '../services/redis.service';
 
 /**
  * Lit Compute WebSocket Gateway
- * 
+ *
  * Real-time communication for:
  * - Job status updates
  * - Node commands
@@ -143,13 +143,10 @@ export class LitComputeGateway
   private async subscribeToRedisChannels() {
     try {
       // Subscribe to global events
-      await this.redisService.subscribe(
-        'channel:global:events',
-        (message) => {
-          const event = JSON.parse(message);
-          this.broadcastEvent(event);
-        },
-      );
+      await this.redisService.subscribe('channel:global:events', (message) => {
+        const event = JSON.parse(message);
+        this.broadcastEvent(event);
+      });
 
       this.logger.log('Subscribed to Redis pub/sub channels');
     } catch (error) {

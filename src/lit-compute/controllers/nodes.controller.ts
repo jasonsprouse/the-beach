@@ -29,13 +29,13 @@ interface Heartbeat {
 
 /**
  * Nodes Controller
- * 
+ *
  * Endpoints for node operators:
  * - Register node with IPLD content addressing
  * - Send heartbeat
  * - Get assigned jobs
  * - Accept/reject jobs
- * 
+ *
  * Uses IPLD for cryptographically verifiable node identities
  */
 @Controller('lit-compute/nodes')

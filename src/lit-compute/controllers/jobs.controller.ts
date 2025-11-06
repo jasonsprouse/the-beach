@@ -25,7 +25,7 @@ interface JobCompletion {
 
 /**
  * Jobs Controller
- * 
+ *
  * Endpoints for job management:
  * - Submit encryption job
  * - Get job status

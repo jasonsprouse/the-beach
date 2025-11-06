@@ -38,13 +38,13 @@ export enum PKPAgentType {
  * Git Context for PKP Task
  */
 export interface PKPGitContext {
-  branch: string;              // Target branch to work on
-  baseBranch?: string;         // Base branch to branch from (default: master/main)
-  startCommit?: string;        // Commit hash where work started
-  currentCommit?: string;      // Current commit hash
-  targetCommit?: string;       // Target commit to reach
-  commits?: string[];          // List of commits made by PKP
-  pullRequestUrl?: string;     // PR URL when work is ready for review
+  branch: string; // Target branch to work on
+  baseBranch?: string; // Base branch to branch from (default: master/main)
+  startCommit?: string; // Commit hash where work started
+  currentCommit?: string; // Current commit hash
+  targetCommit?: string; // Target commit to reach
+  commits?: string[]; // List of commits made by PKP
+  pullRequestUrl?: string; // PR URL when work is ready for review
 }
 
 /**
@@ -66,7 +66,7 @@ export interface PKPTask {
   filesToCreate: string[];
   blockers: string[];
   progressPercent: number;
-  gitContext?: PKPGitContext;  // Git branch and commit tracking
+  gitContext?: PKPGitContext; // Git branch and commit tracking
 }
 
 /**
@@ -87,7 +87,7 @@ export interface PKPAgent {
 
 /**
  * PKP Task Manager Service
- * 
+ *
  * Manages work assignments for PKP (Programmable Key Pair) agents
  * across The Beach and Y8 App repositories.
  */

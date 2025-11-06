@@ -4,7 +4,7 @@ import { RedisService } from './redis.service';
 
 /**
  * Coordinator Service for Lit Compute Network
- * 
+ *
  * Orchestrates high-level operations:
  * - Job lifecycle management
  * - Node health monitoring
