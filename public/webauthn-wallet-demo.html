@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAuthn Wallet Payment Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        
+        .section h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .input-group {
+            margin: 15px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .biometric-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .biometric-status.verified {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .biometric-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .biometric-status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-indicator.success { background: #28a745; }
+        .status-indicator.error { background: #dc3545; }
+        .status-indicator.pending { background: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 WebAuthn Wallet Payment Demo</h1>
+        <p style="text-align: center; color: #666;">
+            Secure wallet payments using TouchID, FaceID, or Windows Hello
+        </p>
+
+        <!-- Registration Section -->
+        <div class="section">
+            <h3>1. Register Biometric Credential</h3>
+            <p>First, register your biometric device (TouchID/FaceID) with your PKP wallet:</p>
+            
+            <div class="input-group">
+                <label for="pkpAddress">PKP Wallet Address:</label>
+                <input type="text" id="pkpAddress" value="0x1234567890abcdef1234567890abcdef12345678" />
+            </div>
+            
+            <div class="input-group">
+                <label for="displayName">Display Name:</label>
+                <input type="text" id="displayName" value="John Doe" />
+            </div>
+            
+            <button onclick="registerBiometric()">📱 Register Biometric</button>
+            <span id="registrationStatus" class="biometric-status pending">Not Registered</span>
+            
+            <div id="registrationResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Authentication Test -->
+        <div class="section">
+            <h3>2. Test Biometric Authentication</h3>
+            <p>Test your biometric authentication before making payments:</p>
+            
+            <button onclick="testAuthentication()" id="testAuthBtn" disabled>🔐 Test Authentication</button>
+            <span id="authStatus" class="biometric-status pending">Not Authenticated</span>
+            
+            <div id="authResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Wallet Payment -->
+        <div class="section">
+            <h3>3. Wallet Payment</h3>
+            <p>Make a direct blockchain transaction using your PKP wallet:</p>
+            
+            <div class="input-group">
+                <label for="recipientAddress">Recipient Address:</label>
+                <input type="text" id="recipientAddress" value="0xabcdef1234567890abcdef1234567890abcdef12" />
+            </div>
+            
+            <div class="input-group">
+                <label for="amount">Amount (ETH):</label>
+                <input type="number" id="amount" value="0.1" step="0.001" />
+            </div>
+            
+            <div class="input-group">
+                <label for="description">Description:</label>
+                <input type="text" id="description" value="Premium Code Package" />
+            </div>
+            
+            <button onclick="processWalletPayment()" id="walletPayBtn" disabled>💳 Pay with Wallet</button>
+            <span id="walletStatus" class="biometric-status pending">Ready</span>
+            
+            <div id="walletResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Payment Request API -->
+        <div class="section">
+            <h3>4. Payment Request API (Apple Pay / Google Pay)</h3>
+            <p>Use native payment methods with biometric pre-authentication:</p>
+            
+            <div class="input-group">
+                <label for="payAmount">Amount (USD):</label>
+                <input type="number" id="payAmount" value="99.99" step="0.01" />
+            </div>
+            
+            <div class="input-group">
+                <label for="payMethod">Payment Method:</label>
+                <select id="payMethod">
+                    <option value="apple-pay">Apple Pay</option>
+                    <option value="google-pay">Google Pay</option>
+                </select>
+            </div>
+            
+            <button onclick="processPaymentRequest()" id="payReqBtn" disabled>📱 Pay with Apple/Google Pay</button>
+            <span id="payReqStatus" class="biometric-status pending">Ready</span>
+            
+            <div id="payReqResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- System Status -->
+        <div class="section">
+            <h3>5. System Status</h3>
+            <div id="systemStatus">
+                <div><span class="status-indicator pending"></span>WebAuthn Support: <span id="webauthnSupport">Checking...</span></div>
+                <div><span class="status-indicator pending"></span>Payment Request API: <span id="paymentRequestSupport">Checking...</span></div>
+                <div><span class="status-indicator pending"></span>Server Connection: <span id="serverConnection">Checking...</span></div>
+                <div><span class="status-indicator pending"></span>Biometric Token: <span id="tokenStatus">None</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include the WebAuthn wallet payment functions -->
+    <script src="./examples/webauthn-wallet-payment.js"></script>
+    
+    <script>
+        // Global state
+        let currentBiometricToken = null;
+        let isRegistered = false;
+
+        // Check system capabilities on load
+        window.onload = function() {
+            checkSystemCapabilities();
+        };
+
+        function checkSystemCapabilities() {
+            // Check WebAuthn support
+            const webauthnSupported = !!window.PublicKeyCredential;
+            updateStatus('webauthnSupport', webauthnSupported ? 'Supported ✅' : 'Not Supported ❌', webauthnSupported);
+
+            // Check Payment Request API support
+            const paymentRequestSupported = !!window.PaymentRequest;
+            updateStatus('paymentRequestSupport', paymentRequestSupported ? 'Supported ✅' : 'Not Supported ❌', paymentRequestSupported);
+
+            // Check server connection
+            checkServerConnection();
+        }
+
+        async function checkServerConnection() {
+            try {
+                const response = await fetch('/');
+                updateStatus('serverConnection', response.ok ? 'Connected ✅' : 'Error ❌', response.ok);
+            } catch (error) {
+                updateStatus('serverConnection', 'Offline ❌', false);
+            }
+        }
+
+        function updateStatus(elementId, text, success) {
+            const element = document.getElementById(elementId);
+            const indicator = element.parentElement.querySelector('.status-indicator');
+            
+            element.textContent = text;
+            indicator.className = `status-indicator ${success ? 'success' : 'error'}`;
+        }
+
+        function showResult(elementId, result, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `result ${isSuccess ? 'success' : 'error'}`;
+            element.textContent = typeof result === 'object' ? JSON.stringify(result, null, 2) : result;
+        }
+
+        function updateBiometricStatus(statusId, status, success) {
+            const element = document.getElementById(statusId);
+            element.textContent = status;
+            element.className = `biometric-status ${success ? 'verified' : (success === false ? 'error' : 'pending')}`;
+        }
+
+        // Registration function
+        async function registerBiometric() {
+            const pkpAddress = document.getElementById('pkpAddress').value;
+            const displayName = document.getElementById('displayName').value;
+
+            if (!pkpAddress || !displayName) {
+                alert('Please fill in PKP address and display name');
+                return;
+            }
+
+            try {
+                updateBiometricStatus('registrationStatus', 'Registering...', null);
+                
+                const result = await registerWebAuthnForWallet(pkpAddress, displayName);
+                
+                showResult('registrationResult', result, true);
+                updateBiometricStatus('registrationStatus', 'Registered ✅', true);
+                
+                isRegistered = true;
+                document.getElementById('testAuthBtn').disabled = false;
+                
+            } catch (error) {
+                showResult('registrationResult', error.message, false);
+                updateBiometricStatus('registrationStatus', 'Failed ❌', false);
+            }
+        }
+
+        // Authentication test function
+        async function testAuthentication() {
+            const pkpAddress = document.getElementById('pkpAddress').value;
+            
+            try {
+                updateBiometricStatus('authStatus', 'Authenticating...', null);
+                
+                const result = await authenticateWebAuthnForPayment(pkpAddress, {
+                    amount: 0.1,
+                    currency: 'ETH',
+                    recipient: '0xtest...',
+                    description: 'Test authentication'
+                });
+                
+                showResult('authResult', result, true);
+                updateBiometricStatus('authStatus', 'Authenticated ✅', true);
+                
+                currentBiometricToken = result.token;
+                document.getElementById('tokenStatus').textContent = 'Valid ✅';
+                document.getElementById('walletPayBtn').disabled = false;
+                document.getElementById('payReqBtn').disabled = false;
+                
+            } catch (error) {
+                showResult('authResult', error.message, false);
+                updateBiometricStatus('authStatus', 'Failed ❌', false);
+            }
+        }
+
+        // Wallet payment function
+        async function processWalletPayment() {
+            const pkpAddress = document.getElementById('pkpAddress').value;
+            const recipientAddress = document.getElementById('recipientAddress').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const description = document.getElementById('description').value;
+
+            try {
+                updateBiometricStatus('walletStatus', 'Processing...', null);
+                
+                const result = await processWebAuthnWalletPayment({
+                    pkpAddress,
+                    recipientAddress,
+                    amount,
+                    currency: 'ETH',
+                    description,
+                    paymentMethod: 'wallet'
+                });
+                
+                showResult('walletResult', result, result.success);
+                updateBiometricStatus('walletStatus', result.success ? 'Completed ✅' : 'Failed ❌', result.success);
+                
+            } catch (error) {
+                showResult('walletResult', error.message, false);
+                updateBiometricStatus('walletStatus', 'Failed ❌', false);
+            }
+        }
+
+        // Payment Request API function
+        async function processPaymentRequest() {
+            const pkpAddress = document.getElementById('pkpAddress').value;
+            const amount = parseFloat(document.getElementById('payAmount').value);
+            const paymentMethod = document.getElementById('payMethod').value;
+
+            try {
+                updateBiometricStatus('payReqStatus', 'Processing...', null);
+                
+                const result = await processWebAuthnWalletPayment({
+                    pkpAddress,
+                    recipientAddress: 'merchant.account',
+                    amount,
+                    currency: 'USD',
+                    description: 'Premium Subscription',
+                    paymentMethod
+                });
+                
+                showResult('payReqResult', result, result.success);
+                updateBiometricStatus('payReqStatus', result.success ? 'Completed ✅' : 'Failed ❌', result.success);
+                
+            } catch (error) {
+                showResult('payReqResult', error.message, false);
+                updateBiometricStatus('payReqStatus', 'Failed ❌', false);
+            }
+        }
+
+        // Periodic token validation
+        setInterval(async () => {
+            if (currentBiometricToken) {
+                try {
+                    const response = await fetch('/biometric/verify-token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: currentBiometricToken })
+                    });
+                    
+                    const result = await response.json();
+                    if (!result.valid) {
+                        currentBiometricToken = null;
+                        document.getElementById('tokenStatus').textContent = 'Expired ❌';
+                        document.getElementById('walletPayBtn').disabled = true;
+                        document.getElementById('payReqBtn').disabled = true;
+                        updateBiometricStatus('authStatus', 'Expired ❌', false);
+                    }
+                } catch (error) {
+                    console.error('Token validation failed:', error);
+                }
+            }
+        }, 30000); // Check every 30 seconds
+    </script>
+</body>
+</html>
