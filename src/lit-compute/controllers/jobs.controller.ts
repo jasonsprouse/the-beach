@@ -106,7 +106,7 @@ export class JobsController {
     try {
       const status = await this.queueService.getJobStatus(jobId);
 
-      if (!status || Object.keys(status).length === 0) {
+      if (!status) {
         throw new HttpException('Job not found', HttpStatus.NOT_FOUND);
       }
 
