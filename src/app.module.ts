@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { EventsModule } from './events/events.module';
-import { XrModule } from './xr/xr.module';
-import { NPEModule } from './npe/npe.module';
+import { LitComputeModule } from './lit-compute/lit-compute.module';
 
 @Module({
-  imports: [EventsModule, XrModule, NPEModule], // Add EventsModule, XrModule, and NPEModule here
-  controllers: [],
-  providers: [],
+  imports: [EventsModule, LitComputeModule],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
