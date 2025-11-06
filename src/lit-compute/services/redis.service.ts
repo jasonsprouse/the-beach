@@ -15,12 +15,14 @@ export class RedisService implements OnModuleInit {
   private readonly logger = new Logger(RedisService.name);
   private redis: Redis;
   private subscriber: Redis; // Separate client for pub/sub
+  private isRedisAvailable = false;
 
   onModuleInit() {
     const redisUrl = process.env.REDIS_URL || process.env.KV_REST_API_URL;
     
     if (!redisUrl) {
       this.logger.warn('⚠️  Redis URL not configured. Using in-memory fallback for development.');
+      this.isRedisAvailable = false;
       return;
     }
 
@@ -37,14 +39,29 @@ export class RedisService implements OnModuleInit {
 
       this.redis.on('connect', () => {
         this.logger.log('✅ Connected to Redis');
+        this.isRedisAvailable = true;
       });
 
       this.redis.on('error', (error) => {
         this.logger.error('❌ Redis connection error:', error);
+        this.isRedisAvailable = false;
       });
+
+      this.isRedisAvailable = true;
     } catch (error) {
       this.logger.error('Failed to initialize Redis:', error);
+      this.isRedisAvailable = false;
     }
+  }
+
+  /**
+   * Check if Redis is available (helper method for all operations)
+   */
+  private checkRedisAvailable(): boolean {
+    if (!this.isRedisAvailable || !this.redis) {
+      return false;
+    }
+    return true;
   }
 
   // ==================== Session Management ====================
@@ -53,6 +70,10 @@ export class RedisService implements OnModuleInit {
    * Set user session (shared with Y8 App)
    */
   async setSession(userId: string, data: any): Promise<void> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.debug(`Session set skipped (no Redis): ${userId}`);
+      return;
+    }
     const key = `session:${userId}`;
     await this.redis.hset(key, data);
     await this.redis.expire(key, 86400); // 24 hours
@@ -63,6 +84,9 @@ export class RedisService implements OnModuleInit {
    * Get user session
    */
   async getSession(userId: string): Promise<any> {
+    if (!this.checkRedisAvailable()) {
+      return {};
+    }
     const key = `session:${userId}`;
     return await this.redis.hgetall(key);
   }
@@ -71,6 +95,9 @@ export class RedisService implements OnModuleInit {
    * Delete user session
    */
   async deleteSession(userId: string): Promise<void> {
+    if (!this.checkRedisAvailable()) {
+      return;
+    }
     const key = `session:${userId}`;
     await this.redis.del(key);
     this.logger.debug(`Session deleted for user: ${userId}`);
@@ -82,6 +109,10 @@ export class RedisService implements OnModuleInit {
    * Add job to pending queue (sorted by timestamp)
    */
   async enqueueJob(job: any): Promise<void> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.warn(`Job enqueue skipped (no Redis): ${job.id}`);
+      return;
+    }
     const score = Date.now(); // Use timestamp as priority
     await this.redis.zadd('jobs:pending', score, JSON.stringify(job));
     this.logger.log(`Job enqueued: ${job.id}`);
@@ -94,6 +125,11 @@ export class RedisService implements OnModuleInit {
    * Get next pending job (FIFO)
    */
   async dequeueJob(): Promise<any | null> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.debug('dequeueJob skipped (no Redis)');
+      return null;
+    }
+
     const result = await this.redis.zpopmin('jobs:pending', 1);
     if (result && result.length > 0) {
       const jobData = result[0];
@@ -106,6 +142,11 @@ export class RedisService implements OnModuleInit {
    * Get all pending jobs
    */
   async getPendingJobs(limit = 100): Promise<any[]> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.debug('getPendingJobs skipped (no Redis)');
+      return [];
+    }
+
     const results = await this.redis.zrange('jobs:pending', 0, limit - 1);
     return results.map((job) => JSON.parse(job));
   }
@@ -114,6 +155,11 @@ export class RedisService implements OnModuleInit {
    * Assign job to node
    */
   async assignJobToNode(jobId: string, nodeId: string): Promise<void> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.warn(`assignJobToNode skipped (no Redis): ${jobId} -> ${nodeId}`);
+      return;
+    }
+
     await this.redis.sadd(`jobs:active:${nodeId}`, jobId);
     await this.redis.hset(`job:${jobId}:status`, {
       status: 'active',
@@ -135,11 +181,18 @@ export class RedisService implements OnModuleInit {
    * Mark job as completed
    */
   async completeJob(jobId: string, outputCID: string): Promise<void> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.warn(`completeJob skipped (no Redis): ${jobId}`);
+      return;
+    }
+
     const jobStatus = await this.redis.hgetall(`job:${jobId}:status`);
     const nodeId = jobStatus.nodeId;
 
     // Remove from active jobs
-    await this.redis.srem(`jobs:active:${nodeId}`, jobId);
+    if (nodeId) {
+      await this.redis.srem(`jobs:active:${nodeId}`, jobId);
+    }
 
     // Update job status
     await this.redis.hset(`job:${jobId}:status`, {
@@ -166,6 +219,10 @@ export class RedisService implements OnModuleInit {
    * Get job status
    */
   async getJobStatus(jobId: string): Promise<any> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.debug(`getJobStatus skipped (no Redis): ${jobId}`);
+      return {};
+    }
     return await this.redis.hgetall(`job:${jobId}:status`);
   }
 
@@ -173,6 +230,10 @@ export class RedisService implements OnModuleInit {
    * Get jobs assigned to a node
    */
   async getNodeJobs(nodeId: string): Promise<string[]> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.debug(`getNodeJobs skipped (no Redis): ${nodeId}`);
+      return [];
+    }
     return await this.redis.smembers(`jobs:active:${nodeId}`);
   }
 
@@ -189,6 +250,10 @@ export class RedisService implements OnModuleInit {
       reputation?: number;
     },
   ): Promise<void> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.debug(`Heartbeat skipped (no Redis): ${nodeId}`);
+      return;
+    }
     const key = `nodes:${nodeId}:status`;
     await this.redis.hset(key, {
       lastHeartbeat: Date.now(),
@@ -211,6 +276,9 @@ export class RedisService implements OnModuleInit {
    * Get node status
    */
   async getNodeStatus(nodeId: string): Promise<any> {
+    if (!this.checkRedisAvailable()) {
+      return {};
+    }
     return await this.redis.hgetall(`nodes:${nodeId}:status`);
   }
 
@@ -218,6 +286,9 @@ export class RedisService implements OnModuleInit {
    * Get all available nodes
    */
   async getAvailableNodes(): Promise<string[]> {
+    if (!this.checkRedisAvailable()) {
+      return []; // Return empty array in development mode
+    }
     return await this.redis.smembers('nodes:available');
   }
 
@@ -225,6 +296,9 @@ export class RedisService implements OnModuleInit {
    * Remove offline nodes (TTL expired)
    */
   async removeOfflineNode(nodeId: string): Promise<void> {
+    if (!this.checkRedisAvailable()) {
+      return; // No-op in development mode
+    }
     await this.redis.srem('nodes:available', nodeId);
     await this.redis.del(`nodes:${nodeId}:status`);
     this.logger.warn(`Node ${nodeId} removed (offline)`);
@@ -239,6 +313,10 @@ export class RedisService implements OnModuleInit {
     nodeId: string,
     payment: { jobId: string; amount: string },
   ): Promise<void> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.debug(`addPendingPayment skipped (no Redis): ${nodeId}`);
+      return;
+    }
     const key = `payments:pending:${nodeId}`;
     await this.redis.rpush(key, JSON.stringify(payment));
     this.logger.debug(`Payment pending for node ${nodeId}: ${payment.amount}`);
@@ -248,6 +326,10 @@ export class RedisService implements OnModuleInit {
    * Get pending payments for node
    */
   async getPendingPayments(nodeId: string): Promise<any[]> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.debug(`getPendingPayments skipped (no Redis): ${nodeId}`);
+      return [];
+    }
     const key = `payments:pending:${nodeId}`;
     const payments = await this.redis.lrange(key, 0, -1);
     return payments.map((p) => JSON.parse(p));
@@ -257,6 +339,10 @@ export class RedisService implements OnModuleInit {
    * Clear pending payments (after processing)
    */
   async clearPendingPayments(nodeId: string): Promise<void> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.debug(`clearPendingPayments skipped (no Redis): ${nodeId}`);
+      return;
+    }
     const key = `payments:pending:${nodeId}`;
     await this.redis.del(key);
   }
@@ -267,6 +353,10 @@ export class RedisService implements OnModuleInit {
    * Publish job update to WebSocket clients
    */
   async publishJobUpdate(jobId: string, update: any): Promise<void> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.debug(`publishJobUpdate skipped (no Redis): ${jobId}`);
+      return;
+    }
     const channel = `channel:job:${jobId}:updates`;
     await this.redis.publish(channel, JSON.stringify(update));
   }
@@ -275,6 +365,10 @@ export class RedisService implements OnModuleInit {
    * Publish command to specific node
    */
   async publishNodeCommand(nodeId: string, command: any): Promise<void> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.debug(`publishNodeCommand skipped (no Redis): ${nodeId}`);
+      return;
+    }
     const channel = `channel:node:${nodeId}:commands`;
     await this.redis.publish(channel, JSON.stringify(command));
   }
@@ -283,6 +377,10 @@ export class RedisService implements OnModuleInit {
    * Publish global event
    */
   async publishEvent(eventType: string, data: any): Promise<void> {
+    if (!this.checkRedisAvailable()) {
+      this.logger.debug(`publishEvent skipped (no Redis): ${eventType}`);
+      return;
+    }
     const channel = 'channel:global:events';
     await this.redis.publish(
       channel,
@@ -297,6 +395,11 @@ export class RedisService implements OnModuleInit {
     channel: string,
     callback: (message: string) => void,
   ): Promise<void> {
+    if (!this.checkRedisAvailable() || !this.subscriber) {
+      this.logger.warn(`Subscribe skipped (no Redis subscriber): ${channel}`);
+      return;
+    }
+
     await this.subscriber.subscribe(channel);
     this.subscriber.on('message', (ch, message) => {
       if (ch === channel) {
@@ -311,6 +414,9 @@ export class RedisService implements OnModuleInit {
    * Check Redis connection health
    */
   async healthCheck(): Promise<boolean> {
+    if (!this.checkRedisAvailable()) {
+      return false;
+    }
     try {
       await this.redis.ping();
       return true;
@@ -324,6 +430,16 @@ export class RedisService implements OnModuleInit {
    * Get Redis stats
    */
   async getStats(): Promise<any> {
+    if (!this.checkRedisAvailable()) {
+      return {
+        pendingJobs: 0,
+        activeNodes: 0,
+        completedJobs: 0,
+        timestamp: Date.now(),
+        mode: 'in-memory-fallback',
+      };
+    }
+
     const [pendingCount, activeNodes, completedCount] = await Promise.all([
       this.redis.zcard('jobs:pending'),
       this.redis.scard('nodes:available'),
