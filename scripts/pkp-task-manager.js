@@ -260,22 +260,161 @@ async function showDashboard() {
   }
 }
 
+async function setGitBranch(taskId, branch, baseBranch = 'master') {
+  try {
+    log(`\n🌿 Setting Git branch for Task #${taskId}...\n`, 'bright');
+    
+    const response = await axios.post(`${API_BASE}/npe/pkp/tasks/${taskId}/git-context`, {
+      branch,
+      baseBranch,
+    });
+
+    if (response.data.success) {
+      log(`✅ Git branch set successfully!\n`, 'green');
+      log(`Task #${taskId}: ${response.data.data.title}`);
+      log(`  Branch: ${colors.cyan}${branch}${colors.reset}`);
+      log(`  Base Branch: ${baseBranch}`);
+      log(`  Repository: ${response.data.data.repository}\n`);
+    }
+  } catch (error) {
+    log(`\nError: ${error.response?.data?.message || error.message}\n`, 'red');
+  }
+}
+
+async function recordCommit(taskId, commitHash) {
+  try {
+    log(`\n📝 Recording commit for Task #${taskId}...\n`, 'bright');
+    
+    const response = await axios.post(`${API_BASE}/npe/pkp/tasks/${taskId}/commit`, {
+      commitHash,
+    });
+
+    if (response.data.success) {
+      const task = response.data.data;
+      log(`✅ Commit recorded successfully!\n`, 'green');
+      log(`Task #${taskId}: ${task.title}`);
+      log(`  Commit: ${colors.cyan}${commitHash}${colors.reset}`);
+      log(`  Branch: ${task.gitContext.branch}`);
+      log(`  Total Commits: ${task.gitContext.commits.length}\n`);
+    }
+  } catch (error) {
+    log(`\nError: ${error.response?.data?.message || error.message}\n`, 'red');
+  }
+}
+
+async function setPR(taskId, prUrl) {
+  try {
+    log(`\n🔗 Setting PR URL for Task #${taskId}...\n`, 'bright');
+    
+    const response = await axios.post(`${API_BASE}/npe/pkp/tasks/${taskId}/pr`, {
+      prUrl,
+    });
+
+    if (response.data.success) {
+      log(`✅ PR URL set successfully!\n`, 'green');
+      log(`Task #${taskId}: ${response.data.data.title}`);
+      log(`  PR: ${colors.cyan}${prUrl}${colors.reset}\n`);
+    }
+  } catch (error) {
+    log(`\nError: ${error.response?.data?.message || error.message}\n`, 'red');
+  }
+}
+
+async function showTaskGitStatus(taskId) {
+  try {
+    const response = await axios.get(`${API_BASE}/npe/pkp/tasks/${taskId}`);
+    const task = response.data.data;
+
+    log(`\n📊 Git Status for Task #${taskId}\n`, 'bright');
+    log(`Task: ${task.title}`, 'cyan');
+    log(`Status: ${formatStatus(task.status)}`);
+    
+    if (task.gitContext) {
+      log(`\n🌿 Git Context:`, 'bright');
+      log(`  Branch: ${colors.cyan}${task.gitContext.branch}${colors.reset}`);
+      log(`  Base Branch: ${task.gitContext.baseBranch || 'N/A'}`);
+      
+      if (task.gitContext.startCommit) {
+        log(`  Start Commit: ${task.gitContext.startCommit}`);
+      }
+      if (task.gitContext.currentCommit) {
+        log(`  Current Commit: ${colors.green}${task.gitContext.currentCommit}${colors.reset}`);
+      }
+      if (task.gitContext.commits && task.gitContext.commits.length > 0) {
+        log(`  Total Commits: ${task.gitContext.commits.length}`);
+        log(`\n  Recent Commits:`);
+        task.gitContext.commits.slice(-5).forEach((commit, i) => {
+          log(`    ${task.gitContext.commits.length - 4 + i}. ${commit}`);
+        });
+      }
+      if (task.gitContext.pullRequestUrl) {
+        log(`\n  PR: ${colors.cyan}${task.gitContext.pullRequestUrl}${colors.reset}`);
+      }
+    } else {
+      log(`\n⚠️  No Git context set for this task`, 'yellow');
+      log(`\nTo set a branch, run:`);
+      log(`  node scripts/pkp-task-manager.js set-branch ${taskId} <branch-name>\n`);
+    }
+    
+    log('');
+  } catch (error) {
+    log(`\nError: ${error.response?.data?.message || error.message}\n`, 'red');
+  }
+}
+
+async function listTasksByBranch(branch) {
+  try {
+    log(`\n🌿 Tasks on branch: ${colors.cyan}${branch}${colors.reset}\n`, 'bright');
+    
+    const response = await axios.get(`${API_BASE}/npe/pkp/tasks/branch/${encodeURIComponent(branch)}`);
+    const tasks = response.data.data;
+
+    if (tasks.length === 0) {
+      log('No tasks found on this branch', 'yellow');
+      return;
+    }
+
+    tasks.forEach((task) => {
+      log(`\nTask #${task.id}: ${task.title}`, 'cyan');
+      log(`  Status: ${formatStatus(task.status)}`);
+      log(`  Agent: ${task.assignedAgent}`);
+      if (task.gitContext?.commits) {
+        log(`  Commits: ${task.gitContext.commits.length}`);
+      }
+      if (task.gitContext?.pullRequestUrl) {
+        log(`  PR: ${task.gitContext.pullRequestUrl}`, 'green');
+      }
+    });
+
+    log(`\nTotal: ${tasks.length} tasks on branch ${branch}\n`, 'bright');
+  } catch (error) {
+    log(`\nError: ${error.response?.data?.message || error.message}\n`, 'red');
+  }
+}
+
 function showHelp() {
   log('\n📚 PKP Task Manager CLI\n', 'bright');
-  log('Commands:');
+  log('Task Management:');
   log('  list-tasks              List all tasks');
   log('  list-agents             List all agents');
   log('  assign <taskId>         Assign and start a task');
   log('  progress <taskId> <pct> Update task progress');
   log('  complete <taskId>       Mark task as complete');
   log('  dashboard               Show PKP dashboard');
-  log('  help                    Show this help message');
+  log('\nGit Context Management:');
+  log('  set-branch <taskId> <branch> [baseBranch]  Set Git branch for task');
+  log('  record-commit <taskId> <commitHash>        Record a commit');
+  log('  set-pr <taskId> <prUrl>                    Set PR URL');
+  log('  git-status <taskId>                        Show Git status for task');
+  log('  list-by-branch <branch>                    List tasks on a branch');
   log('\nExamples:');
   log('  node scripts/pkp-task-manager.js list-tasks');
   log('  node scripts/pkp-task-manager.js assign 1');
-  log('  node scripts/pkp-task-manager.js progress 1 50');
-  log('  node scripts/pkp-task-manager.js complete 1');
-  log('  node scripts/pkp-task-manager.js dashboard\n');
+  log('  node scripts/pkp-task-manager.js set-branch 1 feature/pkp-playwright');
+  log('  node scripts/pkp-task-manager.js record-commit 1 abc123def');
+  log('  node scripts/pkp-task-manager.js git-status 1');
+  log('  node scripts/pkp-task-manager.js set-pr 1 https://github.com/user/repo/pull/123');
+  log('  node scripts/pkp-task-manager.js list-by-branch feature/pkp-playwright\n');
 }
 
 // Main CLI logic
@@ -321,6 +460,46 @@ async function main() {
       break;
     case 'dashboard':
       await showDashboard();
+      break;
+    case 'set-branch':
+      if (!args[1] || !args[2]) {
+        log('Error: Task ID and branch name required', 'red');
+        log('Usage: node scripts/pkp-task-manager.js set-branch <taskId> <branch> [baseBranch]');
+        return;
+      }
+      await setGitBranch(args[1], args[2], args[3]);
+      break;
+    case 'record-commit':
+      if (!args[1] || !args[2]) {
+        log('Error: Task ID and commit hash required', 'red');
+        log('Usage: node scripts/pkp-task-manager.js record-commit <taskId> <commitHash>');
+        return;
+      }
+      await recordCommit(args[1], args[2]);
+      break;
+    case 'set-pr':
+      if (!args[1] || !args[2]) {
+        log('Error: Task ID and PR URL required', 'red');
+        log('Usage: node scripts/pkp-task-manager.js set-pr <taskId> <prUrl>');
+        return;
+      }
+      await setPR(args[1], args[2]);
+      break;
+    case 'git-status':
+      if (!args[1]) {
+        log('Error: Task ID required', 'red');
+        log('Usage: node scripts/pkp-task-manager.js git-status <taskId>');
+        return;
+      }
+      await showTaskGitStatus(args[1]);
+      break;
+    case 'list-by-branch':
+      if (!args[1]) {
+        log('Error: Branch name required', 'red');
+        log('Usage: node scripts/pkp-task-manager.js list-by-branch <branch>');
+        return;
+      }
+      await listTasksByBranch(args[1]);
       break;
     default:
       log(`Unknown command: ${command}`, 'red');

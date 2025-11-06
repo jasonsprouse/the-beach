@@ -225,4 +225,112 @@ export class PKPController {
       data: this.pkpTaskManager.getDashboard(),
     };
   }
+
+  /**
+   * Update Git context for a task
+   * POST /npe/pkp/tasks/:id/git-context
+   */
+  @Post('tasks/:id/git-context')
+  updateGitContext(
+    @Param('id') id: string,
+    @Body() gitContext: any,
+  ) {
+    try {
+      const taskId = parseInt(id, 10);
+      const task = this.pkpTaskManager.updateGitContext(taskId, gitContext);
+
+      return {
+        success: true,
+        message: 'Git context updated',
+        data: task,
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  /**
+   * Record a commit for a task
+   * POST /npe/pkp/tasks/:id/commit
+   */
+  @Post('tasks/:id/commit')
+  recordCommit(
+    @Param('id') id: string,
+    @Body() body: { commitHash: string },
+  ) {
+    try {
+      const taskId = parseInt(id, 10);
+      const task = this.pkpTaskManager.recordCommit(taskId, body.commitHash);
+
+      return {
+        success: true,
+        message: 'Commit recorded',
+        data: task,
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  /**
+   * Set PR URL for a task
+   * POST /npe/pkp/tasks/:id/pr
+   */
+  @Post('tasks/:id/pr')
+  setPullRequestUrl(
+    @Param('id') id: string,
+    @Body() body: { prUrl: string },
+  ) {
+    try {
+      const taskId = parseInt(id, 10);
+      const task = this.pkpTaskManager.setPullRequestUrl(taskId, body.prUrl);
+
+      return {
+        success: true,
+        message: 'PR URL set',
+        data: task,
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  /**
+   * Get tasks by branch
+   * GET /npe/pkp/tasks/branch/:branch
+   */
+  @Get('tasks/branch/:branch')
+  getTasksByBranch(@Param('branch') branch: string) {
+    const tasks = this.pkpTaskManager.getTasksByBranch(branch);
+
+    return {
+      success: true,
+      data: tasks,
+      count: tasks.length,
+    };
+  }
+
+  /**
+   * Get tasks with Git context
+   * GET /npe/pkp/tasks/with-git-context
+   */
+  @Get('tasks/with-git-context')
+  getTasksWithGitContext() {
+    const tasks = this.pkpTaskManager.getTasksWithGitContext();
+
+    return {
+      success: true,
+      data: tasks,
+      count: tasks.length,
+    };
+  }
 }

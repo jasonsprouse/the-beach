@@ -34,6 +34,19 @@ export enum PKPAgentType {
 }
 
 /**
+ * Git Context for PKP Task
+ */
+export interface PKPGitContext {
+  branch: string;              // Target branch to work on
+  baseBranch?: string;         // Base branch to branch from (default: master/main)
+  startCommit?: string;        // Commit hash where work started
+  currentCommit?: string;      // Current commit hash
+  targetCommit?: string;       // Target commit to reach
+  commits?: string[];          // List of commits made by PKP
+  pullRequestUrl?: string;     // PR URL when work is ready for review
+}
+
+/**
  * PKP Task Interface
  */
 export interface PKPTask {
@@ -52,6 +65,7 @@ export interface PKPTask {
   filesToCreate: string[];
   blockers: string[];
   progressPercent: number;
+  gitContext?: PKPGitContext;  // Git branch and commit tracking
 }
 
 /**
@@ -218,6 +232,10 @@ export class PKPTaskManagerService {
         ],
         blockers: [],
         progressPercent: 0,
+        gitContext: {
+          branch: 'feature/pkp-playwright-tests',
+          baseBranch: 'master',
+        },
       },
       {
         id: 2,
@@ -244,6 +262,10 @@ export class PKPTaskManagerService {
         ],
         blockers: [],
         progressPercent: 0,
+        gitContext: {
+          branch: 'feature/pkp-continuous-testing',
+          baseBranch: 'product/lit-compute-network',
+        },
       },
       {
         id: 3,
@@ -270,6 +292,10 @@ export class PKPTaskManagerService {
         ],
         blockers: [],
         progressPercent: 0,
+        gitContext: {
+          branch: 'feature/pkp-pr-automation',
+          baseBranch: 'product/lit-compute-network',
+        },
       },
       {
         id: 4,
@@ -297,6 +323,10 @@ export class PKPTaskManagerService {
         ],
         blockers: [],
         progressPercent: 0,
+        gitContext: {
+          branch: 'feature/pkp-metrics-dashboard',
+          baseBranch: 'master',
+        },
       },
       {
         id: 5,
@@ -324,6 +354,10 @@ export class PKPTaskManagerService {
         ],
         blockers: [],
         progressPercent: 0,
+        gitContext: {
+          branch: 'feature/pkp-security-scanning',
+          baseBranch: 'product/lit-compute-network',
+        },
       },
       {
         id: 6,
@@ -352,6 +386,10 @@ export class PKPTaskManagerService {
         ],
         blockers: [],
         progressPercent: 0,
+        gitContext: {
+          branch: 'feature/pkp-deployment-pipeline',
+          baseBranch: 'product/lit-compute-network',
+        },
       },
     ];
 
@@ -610,6 +648,101 @@ export class PKPTaskManagerService {
         })
         .slice(0, 5),
     };
+  }
+
+  /**
+   * Update Git context for a task
+   */
+  updateGitContext(
+    taskId: number,
+    gitContext: Partial<PKPGitContext>,
+  ): PKPTask {
+    const task = this.tasks.get(taskId);
+    if (!task) {
+      throw new Error(`Task ${taskId} not found`);
+    }
+
+    task.gitContext = {
+      ...task.gitContext,
+      ...gitContext,
+    } as PKPGitContext;
+
+    this.logger.log(
+      `Updated Git context for task ${taskId}: branch=${task.gitContext.branch}, commit=${task.gitContext.currentCommit}`,
+    );
+
+    return task;
+  }
+
+  /**
+   * Record a commit for a task
+   */
+  recordCommit(taskId: number, commitHash: string): PKPTask {
+    const task = this.tasks.get(taskId);
+    if (!task) {
+      throw new Error(`Task ${taskId} not found`);
+    }
+
+    if (!task.gitContext) {
+      throw new Error(`Task ${taskId} has no Git context`);
+    }
+
+    // Initialize commits array if needed
+    if (!task.gitContext.commits) {
+      task.gitContext.commits = [];
+    }
+
+    task.gitContext.commits.push(commitHash);
+    task.gitContext.currentCommit = commitHash;
+
+    // Set start commit if this is the first commit
+    if (!task.gitContext.startCommit) {
+      task.gitContext.startCommit = commitHash;
+    }
+
+    this.logger.log(
+      `Recorded commit ${commitHash} for task ${taskId} (total: ${task.gitContext.commits.length} commits)`,
+    );
+
+    return task;
+  }
+
+  /**
+   * Set PR URL for a task
+   */
+  setPullRequestUrl(taskId: number, prUrl: string): PKPTask {
+    const task = this.tasks.get(taskId);
+    if (!task) {
+      throw new Error(`Task ${taskId} not found`);
+    }
+
+    if (!task.gitContext) {
+      throw new Error(`Task ${taskId} has no Git context`);
+    }
+
+    task.gitContext.pullRequestUrl = prUrl;
+
+    this.logger.log(`Set PR URL for task ${taskId}: ${prUrl}`);
+
+    return task;
+  }
+
+  /**
+   * Get tasks by branch
+   */
+  getTasksByBranch(branch: string): PKPTask[] {
+    return Array.from(this.tasks.values()).filter(
+      (task) => task.gitContext?.branch === branch,
+    );
+  }
+
+  /**
+   * Get tasks with Git context
+   */
+  getTasksWithGitContext(): PKPTask[] {
+    return Array.from(this.tasks.values()).filter(
+      (task) => task.gitContext !== undefined,
+    );
   }
 
   /**
