@@ -27,6 +27,8 @@
 - 🏖️ **Interactive Elements** - Explore the beach, interact with objects, and teleport using beach umbrellas
 - 🎵 **Ambient Audio** - Integrated SoundCloud player with ocean breeze soundtrack
 - 📱 **Cross-Platform** - Works on desktop, mobile, and VR headsets
+- 🔐 **Lit Compute Network** - NEW! Earn crypto by sharing CPU for encryption operations ([Quick Start](QUICK_START.md) | [Full Guide](LIT_COMPUTE_QUICKSTART.md))
+- 🤖 **Digital AI Agents (NPE)** - Watch autonomous AI agents build software in real-time ([Complete Guide](DIGITAL_AI_AGENTS_GUIDE.md) | [Y8 App Guide](Y8_APP_DIGITAL_AGENTS_GUIDE.md) | [Quick Index](DIGITAL_AGENTS_INDEX.md))
 
 ## 🎯 Quick Start
 
