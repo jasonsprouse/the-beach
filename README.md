@@ -28,6 +28,7 @@
 - 🎵 **Ambient Audio** - Integrated SoundCloud player with ocean breeze soundtrack
 - 📱 **Cross-Platform** - Works on desktop, mobile, and VR headsets
 - 🔐 **Lit Compute Network** - NEW! Earn crypto by sharing CPU for encryption operations ([Learn More](LIT_COMPUTE_QUICKSTART.md))
+- 🤖 **NPE Development Team** - AI-powered development team building the Lit Compute Network ([Team Structure](LIT_COMPUTE_NPE_TEAM.md))
 
 ## 🎯 Quick Start
 
