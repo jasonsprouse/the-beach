@@ -40,12 +40,14 @@ PAGES=(
     "http://localhost:3000"
     "http://localhost:3000/biometric-landing.html"
     "http://localhost:3000/biometric-payment-demo.html"
+    "http://localhost:3000/webauthn-wallet-demo.html"
 )
 
 TITLES=(
     "🏠 Main App (with demo links)"
     "🚀 Marketing Landing Page"
     "💳 Interactive Payment Demo"
+    "📱 WebAuthn Wallet Demo"
 )
 
 for i in "${!PAGES[@]}"; do
