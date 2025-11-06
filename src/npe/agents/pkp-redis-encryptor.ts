@@ -12,7 +12,7 @@
  */
 
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { LitNetwork } from '@lit-protocol/constants';
+import { LIT_NETWORK } from '@lit-protocol/constants';
 import * as ethers from 'ethers';
 
 interface RedisConfig {
@@ -43,7 +43,7 @@ export class PKPRedisConfigEncryptor {
   constructor(pkpPublicKey: string) {
     this.pkpPublicKey = pkpPublicKey;
     this.litNodeClient = new LitNodeClient({
-      litNetwork: LitNetwork.DatilTest, // Use testnet for now
+      litNetwork: 'datil-test', // Use testnet for now
       debug: false,
     });
   }
@@ -78,7 +78,7 @@ export class PKPRedisConfigEncryptor {
       {
         contractAddress: '',
         standardContractType: '',
-        chain: 'ethereum',
+        chain: 'ethereum' as const,
         method: '',
         parameters: [':userAddress'],
         returnValueTest: {
@@ -90,7 +90,7 @@ export class PKPRedisConfigEncryptor {
 
     // Encrypt the message
     const { ciphertext, dataToEncryptHash } = await this.litNodeClient.encrypt({
-      accessControlConditions,
+      accessControlConditions: accessControlConditions as any,
       dataToEncrypt: new TextEncoder().encode(messageToEncrypt),
     });
 
@@ -99,7 +99,7 @@ export class PKPRedisConfigEncryptor {
       dataToEncryptHash,
       accessControlConditions,
       encryptedAt: new Date().toISOString(),
-      network: LitNetwork.DatilTest,
+      network: 'datil-test',
     };
 
     console.log('✅ Redis config encrypted successfully!');
@@ -132,7 +132,7 @@ export class PKPRedisConfigEncryptor {
     });
 
     // Convert back to JSON
-    const decryptedString = new TextDecoder().decode(decryptedData);
+    const decryptedString = new TextDecoder().decode(decryptedData.decryptedData as Uint8Array);
     const config: RedisConfig = JSON.parse(decryptedString);
 
     console.log('✅ Redis config decrypted successfully!');
