@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as objectHash from 'object-hash';
+import objectHash from 'object-hash';
 import bs58 from 'bs58';
 import { createHash } from 'crypto';
 
