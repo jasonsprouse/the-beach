@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { RedisService } from '../services/redis.service';
 import { QueueService } from '../services/queue.service';
+import { IpldService } from '../services/ipld.service';
 
 interface NodeRegistration {
   walletAddress: string;
@@ -30,10 +31,12 @@ interface Heartbeat {
  * Nodes Controller
  * 
  * Endpoints for node operators:
- * - Register node
+ * - Register node with IPLD content addressing
  * - Send heartbeat
  * - Get assigned jobs
  * - Accept/reject jobs
+ * 
+ * Uses IPLD for cryptographically verifiable node identities
  */
 @Controller('lit-compute/nodes')
 export class NodesController {
@@ -42,11 +45,12 @@ export class NodesController {
   constructor(
     private readonly redisService: RedisService,
     private readonly queueService: QueueService,
+    private readonly ipldService: IpldService,
   ) {}
 
   /**
    * POST /lit-compute/nodes/register
-   * Register a new node
+   * Register a new node with IPLD content addressing
    */
   @Post('register')
   async registerNode(@Body() registration: NodeRegistration) {
@@ -61,10 +65,25 @@ export class NodesController {
         );
       }
 
-      // Generate node ID from wallet address
-      const nodeId = this.generateNodeId(walletAddress);
+      // Create IPLD CID for node identity (returns string directly)
+      const nodeCID = await this.ipldService.createNodeCID({
+        walletAddress,
+        publicKey,
+        capabilities,
+        timestamp: Date.now(),
+      });
 
-      // Register in Redis
+      // Use CID as node ID (content-addressable)
+      const nodeId = nodeCID;
+
+      // Create node address using multiaddr format
+      const nodeAddress = this.ipldService.createNodeAddress(
+        process.env.NODE_IP || '127.0.0.1',
+        parseInt(process.env.PORT || '3000'),
+        nodeCID,
+      );
+
+      // Register in Redis with IPLD metadata
       await this.redisService.registerNodeHeartbeat(nodeId, {
         capacity: capabilities.maxConcurrentJobs || 1,
         walletAddress,
@@ -72,14 +91,21 @@ export class NodesController {
       });
 
       this.logger.log(
-        `Node registered: ${nodeId} (${walletAddress.substring(0, 8)}...)`,
+        `Node registered with IPLD CID: ${nodeId.substring(0, 20)}... (${walletAddress.substring(0, 8)}...)`,
       );
 
       return {
         success: true,
         nodeId,
-        message: 'Node registered successfully',
+        nodeCID: nodeCID,
+        nodeAddress,
+        message: 'Node registered successfully with IPLD addressing',
         nextHeartbeat: Date.now() + 60000, // 1 minute
+        ipldInfo: {
+          cid: nodeCID,
+          multiaddr: nodeAddress,
+          verifiable: true,
+        },
       };
     } catch (error) {
       this.logger.error('Node registration failed:', error);
