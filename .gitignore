@@ -42,6 +42,12 @@ lerna-debug.log*
 .env.production.local
 .env.local
 
+# Redis config (NEVER commit plaintext credentials)
+redis-config.json
+redis-config-plaintext.json
+redis-config.decrypted.json
+# redis-config.encrypted.json is SAFE to commit (encrypted by PKP agent)
+
 # temp directory
 .temp
 .tmp
