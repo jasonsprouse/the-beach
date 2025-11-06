@@ -16,7 +16,7 @@ async function bootstrap() {
   if (!app) {
     app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-    // Configure session store
+    // Configure session store - REQUIRED for Vercel
     let sessionStore;
     if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
       console.log('🔧 Configuring Vercel KV session store...');
@@ -31,23 +31,52 @@ async function bootstrap() {
         ttl: 24 * 60 * 60,
       });
       console.log('✅ Vercel KV session store configured');
+    } else {
+      console.warn('⚠️ WARNING: No KV store configured - sessions will NOT persist!');
+      console.warn('⚠️ WebAuthn registration/login will FAIL without persistent sessions');
     }
 
-    // Configure sessions
+    // Configure sessions with strict settings for production
     app.use(
       session({
         store: sessionStore,
         secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
         resave: false,
         saveUninitialized: false,
+        name: 'beach.sid', // Custom session cookie name
+        proxy: true, // Trust Vercel proxy
         cookie: {
-          maxAge: 24 * 60 * 60 * 1000,
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
+          secure: true, // Always true on Vercel (HTTPS)
+          sameSite: 'none', // Required for cross-origin requests
+          domain: undefined, // Let Vercel handle domain
         },
       }),
     );
+
+    // Add comprehensive security and permissions headers
+    app.use((req, res, next) => {
+      // WebAuthn permissions
+      res.setHeader('Permissions-Policy', 
+        'publickey-credentials-create=*, publickey-credentials-get=*'
+      );
+      
+      // CORS headers
+      const origin = req.headers.origin;
+      if (origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+      }
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Headers', 
+        'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie'
+      );
+      res.setHeader('Access-Control-Allow-Methods', 
+        'GET, POST, PUT, DELETE, OPTIONS'
+      );
+      
+      next();
+    });
 
     // Enable CORS for XR development
     app.enableCors({
