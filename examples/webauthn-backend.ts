@@ -7,9 +7,11 @@
 
 import { Controller, Post, Get, Body, Param, Headers, HttpException, HttpStatus } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
-import { ethers } from 'ethers';
+import { JsonRpcProvider, formatEther, parseEther, Wallet } from 'ethers';
 import * as cbor from 'cbor-x';
 import * as crypto from 'crypto';
+import { Buffer } from 'buffer';
+import { Module } from '@nestjs/common';
 
 // =============================================================================
 // 1. WebAuthn Biometric Controller
@@ -350,7 +352,7 @@ export class WebAuthnService {
    * Get all credentials for PKP address
    */
   async getCredentialsByPKP(pkpAddress: string): Promise<any[]> {
-    const results = [];
+    const results: any[] = [];
     for (const [id, credential] of this.credentials) {
       if (credential.pkpAddress === pkpAddress) {
         results.push(credential);
@@ -402,10 +404,10 @@ export class WebAuthnService {
 @Injectable()
 export class PKPWalletService {
   private readonly logger = new Logger(PKPWalletService.name);
-  private readonly provider: ethers.providers.JsonRpcProvider;
+  private readonly provider: JsonRpcProvider;
 
   constructor() {
-    this.provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+    this.provider = new JsonRpcProvider(process.env.RPC_URL);
   }
 
   /**
@@ -427,7 +429,7 @@ export class PKPWalletService {
     try {
       // Get PKP private key (in production, this would be done through Lit Protocol)
       const pkpPrivateKey = await this.getPKPPrivateKey(params.pkpAddress);
-      const wallet = new ethers.Wallet(pkpPrivateKey, this.provider);
+      const wallet = new Wallet(pkpPrivateKey, this.provider);
 
       // Sign transaction
       const signedTransaction = await wallet.signTransaction(params.transactionData);
@@ -446,7 +448,7 @@ export class PKPWalletService {
    */
   async getBalance(pkpAddress: string): Promise<string> {
     const balance = await this.provider.getBalance(pkpAddress);
-    return ethers.utils.formatEther(balance);
+    return formatEther(balance);
   }
 
   /**
@@ -462,8 +464,6 @@ export class PKPWalletService {
 // =============================================================================
 // 5. Module Configuration
 // =============================================================================
-
-import { Module } from '@nestjs/common';
 
 @Module({
   controllers: [BiometricWalletController, PKPWalletController],
@@ -481,12 +481,15 @@ export class WebAuthnWalletModule {}
  */
 @Controller('payments')
 export class EnhancedPaymentController {
+  private readonly provider: JsonRpcProvider;
   
   constructor(
     private readonly webAuthnService: WebAuthnService,
     private readonly pkpWalletService: PKPWalletService,
     private readonly webPaymentService: any // Your existing service
-  ) {}
+  ) {
+    this.provider = new JsonRpcProvider(process.env.RPC_URL);
+  }
 
   @Post('webauthn-purchase')
   async processWebAuthnPurchase(@Body() purchaseData: {
@@ -509,7 +512,7 @@ export class EnhancedPaymentController {
       const transactionData = {
         from: purchaseData.pkpAddress,
         to: process.env.MERCHANT_ADDRESS,
-        value: ethers.utils.parseEther(purchaseData.amount.toString()),
+        value: parseEther(purchaseData.amount.toString()),
         gasLimit: 21000
       };
 
@@ -521,7 +524,7 @@ export class EnhancedPaymentController {
       });
 
       // Broadcast transaction
-      const txResponse = await this.provider.sendTransaction(signedTx);
+      const txResponse = await this.provider.broadcastTransaction(signedTx);
       
       return {
         success: true,
