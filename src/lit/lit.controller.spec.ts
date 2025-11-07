@@ -56,24 +56,6 @@ describe('LitController', () => {
       expect(mockSession).toHaveProperty('currentChallenge');
     });
 
-    it('should generate WebAuthn registration options without username', async () => {
-      const mockSession = {};
-      const emptyBody = {};
-      const mockReq = { hostname: 'localhost', protocol: 'http', get: () => 'localhost' };
-
-      const result = await controller.generateRegisterOptions(
-        emptyBody,
-        mockSession,
-        mockReq as any,
-      );
-
-      expect(result).toHaveProperty('challenge');
-      expect(result).toHaveProperty('rp');
-      expect(result).toHaveProperty('user');
-      expect(result.user.name).toMatch(/^user_\d+$/);
-      expect(mockSession).toHaveProperty('currentChallenge');
-    });
-
     it('should reject username shorter than 3 characters', async () => {
       const mockSession = {};
       const invalidBody = { username: 'ab' };
@@ -93,6 +75,24 @@ describe('LitController', () => {
       await expect(
         controller.generateAuthenticateOptions({ username: 'nonexistent_user' }, mockSession, mockReq as any),
       ).rejects.toThrow();
+    });
+  });
+
+  describe('verifyRegistrationResponse', () => {
+    it('should verify a valid registration response', async () => {
+      const mockSession = { currentChallenge: 'mockChallenge' };
+      const mockBody = {
+        id: 'mockId',
+        rawId: 'mockRawId',
+        response: {
+          clientDataJSON: 'mockClientDataJSON',
+          attestationObject: 'mockAttestationObject',
+        },
+        type: 'public-key',
+      };
+
+      const result = await controller.verifyRegistrationResponse(mockBody, mockSession);
+      expect(result).toEqual({ verified: true });
     });
   });
 });

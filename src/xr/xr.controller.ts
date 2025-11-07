@@ -25,9 +25,8 @@ export class XrController {
 
   @Get()
   getXrEnvironment(@Res() res: Response) {
-    // Serve the main index.html page
-    // This is the landing page for The Beach XR platform
-    return res.sendFile(join(process.cwd(), 'public', 'index.html'));
+    // This is the guest / unauthenticated VR experience
+    return res.sendFile(join(process.cwd(), 'public', 'xr-scene.html'));
   }
 
   @Get('paradise')
@@ -223,8 +222,7 @@ export class XrController {
     @Session() session: UserSession,
   ) {
     console.log(`🐠 Underwater Cave access granted for: ${session.username}`);
-    // For now, redirect to paradise until scene is created
-    return res.sendFile(join(process.cwd(), 'public', 'paradise.html'));
+    return res.sendFile(join(process.cwd(), 'public', 'underwater-cave.html'));
   }
 
   @Get('space-station')
@@ -234,8 +232,7 @@ export class XrController {
     @Session() session: UserSession,
   ) {
     console.log(`🚀 Space Station access granted for: ${session.username}`);
-    // For now, redirect to paradise until scene is created
-    return res.sendFile(join(process.cwd(), 'public', 'paradise.html'));
+    return res.sendFile(join(process.cwd(), 'public', 'space-station.html'));
   }
 
   @Get('desert-oasis')
@@ -245,7 +242,6 @@ export class XrController {
     @Session() session: UserSession,
   ) {
     console.log(`🏜️ Desert Oasis access granted for: ${session.username}`);
-    // For now, redirect to paradise until scene is created
-    return res.sendFile(join(process.cwd(), 'public', 'paradise.html'));
+    return res.sendFile(join(process.cwd(), 'public', 'desert-oasis.html'));
   }
 }

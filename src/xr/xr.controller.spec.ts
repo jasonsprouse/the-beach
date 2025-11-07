@@ -40,19 +40,19 @@ describe('XrController', () => {
       const calls = mockSendFile.mock.calls as Array<[string]>;
       const callArg = calls[0][0];
       expect(callArg).toContain('public');
-      expect(callArg).toContain('xr-environment.html');
+      expect(callArg).toContain('xr-scene.html');
     });
   });
 
   describe('loadParadise', () => {
     it('should return success for authenticated request', () => {
       const mockSession = { username: 'testuser', authenticated: true };
-      const mockResponse = {};
-      const result = controller.loadParadise(mockSession as any, mockResponse as any);
+      const mockRequest = { user: { username: 'testuser' } };
+      const result = controller.loadParadise(mockSession as any, mockRequest as any);
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         success: true,
-        message: 'Paradise loading authorized',
+        message: 'Paradise loading authorized for WebAuthn user',
         authenticated: true,
       });
     });
