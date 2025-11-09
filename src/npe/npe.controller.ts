@@ -434,6 +434,65 @@ export class NPEController {
   }
 
   /**
+   * Get the last completed session
+   * GET /npe/sessions/last-completed
+   */
+  @Get('sessions/last-completed')
+  getLastCompletedSession() {
+    const session = this.gameManager.getLastCompletedSession();
+
+    if (!session) {
+      return {
+        success: false,
+        message: 'No completed sessions found.',
+      };
+    }
+
+    return {
+      success: true,
+      session,
+    };
+  }
+
+  /**
+   * Simulate creating and completing a session for testing
+   * POST /npe/sessions/simulate
+   */
+  @Post('sessions/simulate')
+  async simulateSession() {
+    // 1. Register a dummy agent
+    const agentPKP = {
+      address: `0x${Math.random().toString(16).slice(2, 42).padStart(40, '0')}`,
+      publicKey: `0x04${Math.random().toString(16).slice(2)}`,
+    };
+    const agent = await this.gameManager.registerAgent(
+      agentPKP,
+      'simulation-agent',
+      ['general-purpose'],
+    );
+
+    // 2. Create a session with some context
+    const customer = { id: 'simulated-customer-123' };
+    const service = 'simulated-service';
+    const session = await this.gameManager.createSession(customer, agent, service);
+    session.context = {
+      simulation: true,
+      reason: 'To retrieve the context of the last deleted session for analysis.',
+      timestamp: new Date().toISOString(),
+    };
+
+    // 3. Complete the session
+    await this.gameManager.completeSession(session.id);
+
+    return {
+      success: true,
+      message: 'Simulated session created and completed.',
+      sessionId: session.id,
+      agentId: agent.id,
+    };
+  }
+
+  /**
    * Get service coverage map
    * GET /map/coverage
    */

@@ -1,0 +1,34 @@
+{
+  "app": {
+    "path": "src",
+    "dependencies": ["npe", "lit-compute", "marketplace", "biometric", "payments", "xr", "events"]
+  },
+  "npe": {
+    "path": "src/npe",
+    "dependencies": ["lit-compute"]
+  },
+  "lit-compute": {
+    "path": "src/lit-compute",
+    "dependencies": []
+  },
+  "marketplace": {
+    "path": "src/marketplace",
+    "dependencies": ["payments"]
+  },
+  "biometric": {
+    "path": "src/biometric",
+    "dependencies": []
+  },
+  "payments": {
+    "path": "src/payments",
+    "dependencies": []
+  },
+  "xr": {
+    "path": "src/xr",
+    "dependencies": []
+  },
+  "events": {
+    "path": "src/events",
+    "dependencies": []
+  }
+}

@@ -61,6 +61,7 @@ export interface Session {
   agentId: string;
   service: string;
   startTime: number;
+  endTime?: number;
   status: 'active' | 'completed' | 'abandoned';
   context: Record<string, any>;
   transactions: Transaction[];
@@ -569,6 +570,7 @@ export class GameManagerService {
     }
 
     session.status = 'completed';
+    session.endTime = Date.now();
 
     const agent = this.agents.get(session.agentId);
     if (agent) {
@@ -584,5 +586,22 @@ export class GameManagerService {
    */
   async getAgent(agentId: string): Promise<Agent | null> {
     return this.agents.get(agentId) || null;
+  }
+
+  /**
+   * Get the last completed session
+   */
+  getLastCompletedSession(): Session | null {
+    const completedSessions = Array.from(this.sessions.values()).filter(
+      (s) => s.status === 'completed' && s.endTime,
+    );
+
+    if (completedSessions.length === 0) {
+      return null;
+    }
+
+    return completedSessions.reduce((latest, session) =>
+      session.endTime! > latest.endTime! ? session : latest,
+    );
   }
 }
